@@ -122,10 +122,7 @@ main(int argc, char * argv[]) {
    /* parse rc config file */
    if (config_file != NULL) {
       if ((result = parse_rc_file(config_file)) != 0) {
-         if (result == ERROR_NO_RC_FILE)
-            fprintf(stderr, "error: Can't open %s configuration file\n",
-                  config_file);
-         else
+         if (result != ERROR_NO_RC_FILE)
             fprintf(stderr, "error: portsmanrc configuration file corrupted"
                " in line %d\n", result);
       }
