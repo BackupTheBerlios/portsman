@@ -78,6 +78,8 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
    char itemstr[MAX_COLS];
          
    if (((Category *)item)->type == CATEGORY) { /* print category */
+/* resize sigsev hochrunter, hmm */
+
       Category *cat = (Category *)item;
       sprintf(itemstr, " [ ] %-20.20s\t-%3d/ +%3d/%5d/%5d port(s)",
             cat->name, cat->num_of_deinst_ports,

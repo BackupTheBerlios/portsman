@@ -275,8 +275,17 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
          doupdate();
          wclear(wbrowse);
          getmaxyx(wbrowse, maxy, maxx);
-         /* trick for categories with fewer than maxy items */
-         if (lh->num_of_items < maxy) maxy = lh->num_of_items;
+
+         /* prevents some possible segfaults, if the selector
+            was near bottom of current list and KEY_DOWN
+            will be received */
+         if (lh->num_of_items < maxy)
+            maxy = lh->num_of_items;
+         if (lh->num_of_items < (topidx + maxy))
+            topidx = lh->num_of_items - maxy;
+         if (curridx >= maxy) curridx = maxy - 1;
+
+         /* reinit curses behavior we want */
          noecho();
          curs_set(0); /* hide cursor */
          keypad(wbrowse, TRUE);
