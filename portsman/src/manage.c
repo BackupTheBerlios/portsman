@@ -495,16 +495,10 @@ mark_dependencies(Port *p) {
    Iter bitr = p->lhbdep->head;
    Iter ritr = p->lhrdep->head;
 	Port *prt;
-   
-   /* mark build dependencies */
-   while (bitr != NULL) {
-		prt = (Port *)bitr->item;
-		if ((prt->state == STATE_NOT_SELECTED) ||
-				(prt->state == STATE_DEINSTALL)) {
-			mark_port(prt, STATE_BDEP, 1);
-		}
-		bitr = bitr->next;
-	}
+
+   /* Note: run deps should be marked before build deps,
+      since proceed_action marks all build deps as installed
+      after installation */
 
    /* mark run dependencies */
    while (ritr != NULL) {
@@ -514,5 +508,15 @@ mark_dependencies(Port *p) {
 			mark_port(prt, STATE_RDEP, 1);
 		}
 		ritr = ritr->next;
+	}
+  
+   /* mark build dependencies */
+   while (bitr != NULL) {
+		prt = (Port *)bitr->item;
+		if ((prt->state == STATE_NOT_SELECTED) ||
+				(prt->state == STATE_DEINSTALL)) {
+			mark_port(prt, STATE_BDEP, 1);
+		}
+		bitr = bitr->next;
 	}
 }
