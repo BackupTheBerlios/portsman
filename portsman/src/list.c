@@ -15,8 +15,11 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 /* frees a list of items */
 void free_list(Lhd *lh) {
-   Iter itr = lh->head;
+   Iter itr;
    Node *n = NULL;
+
+   if (lh != NULL)
+      itr = lh->head;
 
    while (itr != NULL) {
       n = itr;

@@ -405,9 +405,10 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                   redraw = REFRESH_WINDOW;
             } else if (((Port *)items[topidx + curridx])->type == PORT) {
                Port *prt = (Port *)items[topidx + curridx];
-               lhitems = parse_file(prt->pathpkgdesc);
-               if (browse_list(lhitems, prt->pathpkgdesc, FALSE, FALSE) > 0)
-                  redraw_dimensions = TRUE;
+               if ((lhitems = parse_file(prt->pathpkgdesc)) != NULL) {
+                  if (browse_list(lhitems, prt->pathpkgdesc, FALSE, FALSE) > 0)
+                     redraw_dimensions = TRUE;
+               }
                /* all lines will be freed by browse_list at the end,
                   but the lhitems still exist, so free it */
                free_list(lhitems);
@@ -423,9 +424,10 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                   /* still an instance of help file */
                   i = -1;
             if (i == 0) {
-               lhitems = parse_file(HELP_FILE);
-               if (browse_list(lhitems, HELP_FILE, FALSE, FALSE) > 0)
-                  redraw_dimensions = TRUE;
+               if ((lhitems = parse_file(HELP_FILE)) != NULL) {
+                  if (browse_list(lhitems, HELP_FILE, FALSE, FALSE) > 0)
+                     redraw_dimensions = TRUE;
+               }
                /* all lines will be freed by browse_list at the end,
                   but the lhitems list still exist, so free it */
                free_list(lhitems);
