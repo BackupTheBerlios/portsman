@@ -514,7 +514,8 @@ mark_dependencies(Port *p) {
    while (bitr != NULL) {
 		prt = (Port *)bitr->item;
 		if ((prt->state == STATE_NOT_SELECTED) ||
-				(prt->state == STATE_DEINSTALL)) {
+				(prt->state == STATE_DEINSTALL) ||
+            (prt->state == STATE_RDEP)) {
 			mark_port(prt, STATE_BDEP, 1);
 		}
 		bitr = bitr->next;
