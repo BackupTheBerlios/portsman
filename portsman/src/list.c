@@ -18,7 +18,9 @@ void free_list(Lhd *lh) {
    Iter itr;
    Node *n = NULL;
 
-   if (lh != NULL)
+   if (lh == NULL)
+      return;
+   else
       itr = lh->head;
 
    while (itr != NULL) {
