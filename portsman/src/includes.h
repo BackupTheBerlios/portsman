@@ -26,6 +26,8 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
+#ifndef _INCLUDES_H
+#define _INCLUDES_H
 #include <curses.h>
 #include <stdio.h>
 #if defined(__linux__)
@@ -46,3 +48,4 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "types.h"
 #include "fns.h"
 #include "globals.h"
+#endif

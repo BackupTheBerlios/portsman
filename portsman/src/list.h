@@ -26,6 +26,8 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
+#ifndef _LIST_H
+#define _LIST_H
 
 /* generic list package of portsman */
 
@@ -45,3 +47,5 @@ typedef struct list_t {
 	struct node_t *head;
    struct node_t *tail;
 } List;
+
+#endif

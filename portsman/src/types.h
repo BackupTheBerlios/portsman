@@ -26,6 +26,8 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
+#ifndef _TYPES_H
+#define _TYPES_H
 #include "list.h"
 #include "tree.h"
 
@@ -102,3 +104,4 @@ typedef struct point_t {
    int y;
    int x;
 } Point;
+#endif

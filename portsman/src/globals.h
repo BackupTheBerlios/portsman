@@ -26,6 +26,8 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
+#ifndef _GLOBALS_H
+#define _GLOBALS_H
 
 /* global variables */
 List *lcats;
@@ -38,3 +40,4 @@ WINDOW *wbrowse;
 WINDOW *wcmd;
 void *exists; /* used to detect doublettes in add_tree_item */
 bool redraw_dimensions;
+#endif
