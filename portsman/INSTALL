@@ -1,0 +1,5 @@
+To install portsman simply type:
+
+   ./autogen.sh
+   ./configure
+   make install clean

@@ -1,0 +1,20 @@
+README
+======
+
+portsman - Ports manager is an ncurses based graphical front-end to manage the FreeBSD ports collection more efficient as by command shells.
+
+There're two man pages portsman(1) and portsmanrc(5). Also have a look into the online help of portsman, which describes shortly (like a howto) each function of portsman.
+
+To compile and install portsman just type:
+   ./configure
+   make install clean
+   
+under FreeBSD.
+
+portsman is not tested under OpenBSD or NetBSD until now, but it's planned to also support those platforms in future. There're also ideas to adapt portsman to gentoo linux or crux linux, but this won't be the part of the author, Anselm R. Garbe. Maybe someone of you is looking forward to do this.
+
+If you want to contribute portsman, please let me know.
+
+      Anselm R. Garbe <anselmg@t-online.de>
+
+Last modification: Sa 18 Jan 2003 16:58:51 CET

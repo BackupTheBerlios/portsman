@@ -1,0 +1,81 @@
+.TH "portsmanrc" "5" "0.1.0" "Anselm R. Garbe" "System utilities"
+.SH "NAME"
+.LP 
+portsmanrc \- portsman configuration file.
+
+.SH "DESCRIPTION"
+.LP 
+You can configure portsman through using a \fI.portsmanrc\fR in your home directory. Portsman will determine automatically this file.
+The \fIportsmanrc\fR file has following syntax:
+
+.SH "SYNTAX"
+.LP 
+.TP 
+\fB#\fR (comment)
+All characters until end of line will be ignored.
+.TP 
+\fB<key> = <value>\fR
+Each line contains at most one \fI<key>=<value>\fR statement. The whole configuration of portsman is a key\-value based configuration. Following \fBkeys\fR are currently supported by portsman (case sensitive):
+.TP 
+\fBtitlebar.fcolor\fR
+defines the foreground color of the titlebar, allowed are all color values
+.TP 
+\fBtitlebar.bcolor\fR
+defines the background color of the titlebar, allowed are all color values
+.TP 
+\fBbrowser.fcolor\fR
+defines the foreground color of the browser
+.TP 
+\fBbrowser.bcolor\fR
+defines the background color of the browser
+.TP 
+\fBstatusbar.fcolor\fR
+defines the foreground color of the statusbar
+.TP 
+\fBstatusbar.bcolor\fR
+defines the background color of the statusbar
+.TP 
+\fBcmdbar.fcolor\fR
+defines the foreground color of the commandbar
+.TP 
+\fBcmdbar.bcolor\fR
+defines the background color of the commandbar
+.TP 
+\fBselector.fcolor\fR
+defines the foreground color of the selector
+.TP 
+\fBselector.bcolor\fR
+defines the background color of the selector
+.TP 
+\fBindexfile\fR
+defines path to index file (default is /usr/ports/INDEX)
+.TP 
+\fBpkgdir\fR
+defines path to the package db directory (default is /var/db/pkg)
+.LP 
+Following \fBvalues\fR are currently supported:
+.TP 
+\fBBLACK\fR color value
+.TP 
+\fBRED\fR color value
+.TP 
+\fBGREEN\fR color value
+.TP 
+\fBYELLOW\fR color value
+.TP 
+\fBBLUE\fR color value
+.TP 
+\fBMAGENTA\fR color value
+.TP 
+\fBCYAN\fR color value
+.TP 
+\fBCYAN\fR color value
+.SH "FILES"
+.LP 
+\fI$HOME/.portsmanrc\fP
+.SH "AUTHORS"
+.LP 
+Anselm R. Garbe <anselmg@t\-online.de>
+.SH "SEE ALSO"
+.LP 
+\fIportsman(1)\fR

@@ -1,0 +1,57 @@
+.TH "portsman" "1" "0.1.0" "Anselm R. Garbe" "System utilities"
+.SH "NAME"
+.LP 
+portsman \- is an ncurses based front end to manage the BSD ports collection.
+.SH "SYNTAX"
+.LP 
+portsman [\fI\-c <portsmanrc file>\fP] [\fI\-h\fP] [\fI\-v\fP] [\fI\-i <INDEX file>\fP] [\fI\-p <package database dir>\fP]
+.SH "DESCRIPTION"
+.LP 
+portsman is a curses based frontend for the FreeBSD ports collection. Its name stands for 'ports manager'. To use portsman you'll need to install the ports collection distribution, it's recommended to install the whole ports collection. portsman uses two information bases to get all information about the ports, first this is the ports INDEX file, mostly located in \fI/usr/ports/INDEX\fR and the package database directory, mostly located in \fI/var/db/pkg/\fR. To work with portsman you must be at least a superuser, because all commands to (de)/(re)install or update a port need root permissions. If you think, that your \fI/usr/ports/INDEX\fR file doesn't equals to your current ports tree, than execute \fImake index\fR under \fI/usr/ports/\fR. Portsman can be configured through it's command line arguments as described in next section or through its configuration file \fI.portsmanrc\fR , see \fIportsmanrc(5)\fR for further details.
+.SH "OPTIONS"
+.LP 
+.TP 
+\fB\-c\fR <\fIportsmanrc file\fP>
+Defines the path to an alternate portsmanrc file (if not located in your home directory).
+.TP 
+\fB\-h\fR
+Output help information and exit.
+.TP 
+\fB\-v\fR
+Output version information and exit.
+.TP 
+\fB\-i\fR <\fIINDEX file\fP>
+Path to the INDEX file of the ports collection (if it's not located under \fI/usr/ports/INDEX\fR).
+.TP 
+\fB\-p\fR <\fIpackage database dir\fP>
+Path to the package database directory (if it's not located under
+\fI/var/db/pkg/\fR).
+.TP 
+.SH "FILES"
+.LP 
+\fI/usr/local/bin/portsman/\fP 
+.br 
+\fI$HOME/.portsmanrc\fP
+.br 
+\fI/usr/local/share/doc/portsman/portsman.help\fP 
+.SH "ENVIRONMENT VARIABLES"
+.LP 
+.TP 
+\fB$HOME\fP
+Specifies the home directory
+.SH "EXAMPLES"
+.LP 
+To run this program the standard way type:
+.LP 
+portsman
+.LP 
+Alternativly you can run it as:
+.LP 
+portsman \-i /usr/ports/INDEX \-p /var/db/pkg/
+.SH "AUTHORS"
+.LP 
+Anselm R. Garbe <anselmg@t\-online.de>
+.SH "SEE ALSO"
+.LP 
+\fIportsmanrc(5)\fR
+\fIhttp://portsman.berlios.de\fR

@@ -1,0 +1,69 @@
+#
+# This is a sample configuration .portsmanrc file for portsman 0.1
+#
+# Currently you can customize the colors of portsman via this
+# configuration file. The format of this file is like many other
+# UNIX utilities.
+#
+# A '#' somwhere at a line means, that everything
+# behind it is a comment and would be ignored.
+#
+# A '<KEY> = <VALUE>' is allowed only ones per line, otherwise
+# you'll get errors. You can use as much spaces as you want before
+# and after =. KEY has to be one of portsmans variables and value
+# has to be a digit or a string. Currently nothing else is allowed.
+#
+# Following keys are supported by portsman:
+#
+# titlebar.fcolor    defines the foreground color of the titlebar,
+#                    allowed are all color values
+# titlebar.bcolor    defines the background color of the titlebar,
+#                    allowed are all color values
+# browser.fcolor     defines the foreground color of the browser
+# browser.bcolor     defines the background color of the browser
+# statusbar.fcolor   defines the foreground color of the statusbar
+# statusbar.bcolor   defines the background color of the statusbar
+# cmdbar.fcolor      defines the foreground color of the commandbar
+# cmdbar.bcolor      defines the background color of the commandbar
+# selector.fcolor    defines the foreground color of the selector
+# selector.bcolor    defines the background color of the selector
+# indexfile          defines path to index file
+# pkgdir             defines path to the package db directory
+#                    (default is /var/db/pkg)
+#
+# Following values are supported by portsman:
+#
+# BLACK              color value
+# RED                color value
+# GREEN              color value
+# YELLOW             color value
+# BLUE               color value
+# MAGENTA            color value
+# CYAN               color value
+# WHITE              color value
+#
+
+# standard values of portsman
+#titlebar.fcolor    = BLACK
+#titlebar.bcolor    = WHITE
+#browser.fcolor     = WHITE
+#browser.bcolor     = BLACK
+#statusbar.fcolor   = BLACK
+#statusbar.bcolor   = WHITE
+#cmdbar.fcolor      = WHITE
+#cmdbar.bcolor      = BLACK
+#selector.fcolor    = WHITE
+#selector.bcolor    = RED
+#indexfile          = /usr/ports/INDEX
+#pkgdir             = /var/db/pkg
+
+titlebar.fcolor    = WHITE
+titlebar.bcolor    = BLUE
+browser.fcolor     = WHITE
+browser.bcolor     = BLACK
+statusbar.fcolor   = WHITE
+statusbar.bcolor   = BLUE
+cmdbar.fcolor      = WHITE
+cmdbar.bcolor      = BLACK
+selector.fcolor    = BLACK
+selector.bcolor    = CYAN

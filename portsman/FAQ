@@ -1,0 +1,18 @@
+FAQ of portsman
+===============
+
+Q: Why does portsman uses ncurses instead of xlib, qt, gtk or wings?
+A: Think of servers without x.
+Q: Why does the meta-category "All ports" shows more installed ports,
+   than the status bar?
+A: Well, this is a little bit confusing, but the number of ports installed
+   in the statusbar equals to that one in /var/db/pkg (or its equivalent).
+   The number of ports installed in the right column of categories counts
+   also all older or newer ports - which are or aren't installed. This
+   means each port with a "<" (older) or ">" (newer) mark. This feature
+   supports you in detecting new or old versions of ports.
+   Why does this matter? Well, all port names which aren't installed but marked
+   as older or newer are equal until the last "-". So the algorithm marks
+   them as installed. If you're not sure, which ports are currently installed,
+   look into "only installed ports" browsing mode.
+   
