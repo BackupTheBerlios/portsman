@@ -1,1 +1,1 @@
-SUBDIRS  =  src doc config index
+SUBDIRS  =  src doc config
