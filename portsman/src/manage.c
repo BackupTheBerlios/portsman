@@ -318,60 +318,71 @@ create_options(Port *p) {
 }
 
 /* searches in an array for next item with strcmp method,
-   returns index of next item, if item could not be found returns -1 */
-int
+   returns index (y) of next item, if item could not be found returns -1
+   and if it's a Line also (x) the col index of s[0] */
+Point
 search(void *items[], int num_of_items, char *s, int start, int direction) {
-   int i = start;
+   Point pt;
+   char *result;
+
+   pt.y = start;
 
    if (num_of_items > 0) {
       /* search from start index to end */
-      for (; (direction == -1) ? i >= 0 : i < num_of_items; i += direction) {
-         if (((Port *)items[i])->type == PORT) {
+      for (; (direction == -1) ? pt.y >= 0 : pt.y < num_of_items; pt.y += direction) {
+         if (((Port *)items[pt.y])->type == PORT) {
             /* search through port name or descr */
-            if ((str_str(((Port *)items[i])->name, s) != NULL) ||
-                  (str_str(((Port *)items[i])->descr, s) != NULL))
-               return i; /* found */
-         } else if (((Category *)items[i])->type == CATEGORY) {
+            if ((str_str(((Port *)items[pt.y])->name, s) != NULL) ||
+                  (str_str(((Port *)items[pt.y])->descr, s) != NULL))
+               return pt; /* found */
+         } else if (((Category *)items[pt.y])->type == CATEGORY) {
             /* search through cat name */
-            if (str_str(((Category *)items[i])->name, s) != NULL) 
-               return i;
-         } else if (((Option *)items[i])->type == OPTION) {
+            if (str_str(((Category *)items[pt.y])->name, s) != NULL) 
+               return pt;
+         } else if (((Option *)items[pt.y])->type == OPTION) {
             /* search through opt name */
-            if (str_str(((Option *)items[i])->name, s) != NULL) 
-               return i;
-         } else if (((Line *)items[i])->type == LINE) {
+            if (str_str(((Option *)items[pt.y])->name, s) != NULL) 
+               return pt;
+         } else if (((Line *)items[pt.y])->type == LINE) {
             /* search through line name */
-            if (str_str(((Line *)items[i])->name, s) != NULL) 
-               return i;
+            if ((result = str_str(((Line *)items[pt.y])->name, s)) != NULL) {
+               char *ch = ((Line *)items[pt.y])->name;
+               pt.x = result - ch;
+               return pt;
+            }
          }
       }
 
       /* wrapped search */
-      for (i = (direction == -1) ? (num_of_items - 1) : 0;
-            (direction == -1) ? i > start : i < start; i += direction) {
-         if (((Port *)items[i])->type == PORT) {
+      for (pt.y = (direction == -1) ? (num_of_items - 1) : 0;
+            (direction == -1) ? pt.y > start : pt.y < start; pt.y += direction) {
+         if (((Port *)items[pt.y])->type == PORT) {
             /* search through port name or descr */
-            if ((str_str(((Port *)items[i])->name, s) != NULL) ||
-                  (str_str(((Port *)items[i])->descr, s) != NULL))
-               return i;
-         } else if (((Category *)items[i])->type == CATEGORY) {
+            if ((str_str(((Port *)items[pt.y])->name, s) != NULL) ||
+                  (str_str(((Port *)items[pt.y])->descr, s) != NULL))
+               return pt;
+         } else if (((Category *)items[pt.y])->type == CATEGORY) {
             /* search through cat name */
-            if (str_str(((Category *)items[i])->name, s) != NULL) 
-               return i;
-         } else if (((Option *)items[i])->type == OPTION) {
+            if (str_str(((Category *)items[pt.y])->name, s) != NULL) 
+               return pt;
+         } else if (((Option *)items[pt.y])->type == OPTION) {
             /* search through opt name */
-            if (str_str(((Option *)items[i])->name, s) != NULL) 
-               return i;
-         } else if (((Line *)items[i])->type == LINE) {
+            if (str_str(((Option *)items[pt.y])->name, s) != NULL) 
+               return pt;
+         } else if (((Line *)items[pt.y])->type == LINE) {
             /* search through line name */
-            if (str_str(((Line *)items[i])->name, s) != NULL) 
-               return i;
+            if ((result = str_str(((Line *)items[pt.y])->name, s)) != NULL) {
+               char *ch = ((Line *)items[pt.y])->name;
+               pt.x = result - ch;
+               return pt;
+            }
          }
       }
    }
 
    /* not found */
-   return -1;
+   pt.y = -1;
+   return pt;
 }
 
 

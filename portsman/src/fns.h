@@ -74,7 +74,7 @@ Category *
 create_proceed_category(); 
 void
 create_options(Port *p); 
-int
+Point
 search(void *items[], int num_of_items, char *s, int start, int direction); 
 void
 unmark_all_dependencies(); 

@@ -239,6 +239,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
    char msg[MAX_COLS];
    Lhd *lhitems;
    Category *cat = NULL;
+   Point pt;
 
    if (lh->num_of_items < 1) /* return immediately, if there aren't
                                   any items */
@@ -300,6 +301,9 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                if ((curridx == i) && (((Line *)items[0])->type != LINE))
                   mvwchgat(wbrowse, curridx, 0, -1,
                         COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
+               else if (expstr != NULL) 
+                  mvwchgat(wbrowse, curridx, pt.x, strlen(expstr),
+                        COLOR_PAIR(CLR_BROWSE + 1) | A_REVERSE, 0, NULL);
             }
          break;
          case REFRESH_ENTRY:
@@ -397,8 +401,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          break;   
          case '/': /* fw search */
             expstr = wprint_inputoutput_str(" forward search key: ");
-            lastidx = nextidx = search(items, lh->num_of_items, expstr, 
-                  topidx + curridx, 1);
+            pt = search(items, lh->num_of_items, expstr, topidx + curridx, 1);
+            lastidx = nextidx = pt.y;
             if (nextidx != -1) { /* found */
                fw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
                redraw = REFRESH_WINDOW;
@@ -411,13 +415,14 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             if (expstr != NULL) {
                wprint_cmdinfo("");
                doupdate();
-               if (topidx + curridx != nextidx)
-                  nextidx = search(items, lh->num_of_items, expstr, 
-                        topidx + curridx, 1);
-               else {
-                  if (nextidx + 1 < lh->num_of_items)
-                     nextidx = search(items, lh->num_of_items, expstr,
-                           nextidx + 1, 1);
+               if (topidx + curridx != nextidx) {
+                  pt = search(items, lh->num_of_items, expstr, topidx + curridx, 1);
+                  nextidx = pt.y;
+               } else {
+                  if (nextidx + 1 < lh->num_of_items) {
+                     pt = search(items, lh->num_of_items, expstr, nextidx + 1, 1);
+                     nextidx = pt.y;
+                  }
                }
 
                if ((nextidx != -1) && (lastidx != nextidx)) { /* found */
@@ -432,8 +437,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          break;
          case '?': /* bw search */
             expstr = wprint_inputoutput_str(" backward search key: ");
-            lastidx = nextidx = search(items, lh->num_of_items, expstr, 
-                  topidx + curridx, -1);
+            pt = search(items, lh->num_of_items, expstr, topidx + curridx, -1);
+            lastidx = nextidx = pt.y;
             if (nextidx != -1) { /* found */
                bw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
                redraw = REFRESH_WINDOW;
@@ -446,13 +451,14 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             if (expstr != NULL) {
                wprint_cmdinfo("");
                doupdate();
-               if (topidx + curridx != nextidx)
-                  nextidx = search(items, lh->num_of_items, expstr, 
-                        topidx + curridx, -1);
-               else {
-                  if (nextidx - 1 >= 0)
-                     nextidx = search(items, lh->num_of_items, expstr,
-                           nextidx - 1, -1);
+               if (topidx + curridx != nextidx) {
+                  pt = search(items, lh->num_of_items, expstr, topidx + curridx, -1);
+                  nextidx = pt.y;
+               } else {
+                  if (nextidx - 1 >= 0) {
+                     pt = search(items, lh->num_of_items, expstr, nextidx - 1, -1);
+                     nextidx = pt.y;
+                  }
                }
                if ((nextidx != -1) && (lastidx != nextidx)) { /* found */
                   bw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);

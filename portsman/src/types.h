@@ -78,3 +78,9 @@ typedef struct config_t {
    short fcolors[5]; /* foreground colors */
    short bcolors[5]; /* background colors */
 } Config;
+
+/* simple (y, x) point, needed for search key highlightning */
+typedef struct point_t {
+   int y;
+   int x;
+} Point;
