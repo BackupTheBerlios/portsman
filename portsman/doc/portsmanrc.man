@@ -1,4 +1,4 @@
-.TH "portsmanrc" "5" "0.1.0" "Anselm R. Garbe" "System utilities"
+.TH "portsmanrc" "5" "0.2" "Anselm R. Garbe" "System utilities"
 .SH "NAME"
 .LP 
 portsmanrc \- portsman configuration file.
@@ -52,6 +52,60 @@ defines path to index file (default is /usr/ports/INDEX)
 .TP 
 \fBpkgdir\fR
 defines path to the package db directory (default is /var/db/pkg)
+.TP 
+\fBmake.cmd\fR
+defines the make command (whitspaces aren't allowed)(default: make)
+.TP 
+\fBmake.target.inst\fR
+defines install target of make cmd (default: install)
+.TP 
+\fBmake.target.deinst\fR
+defines deinstall target of make (default: deinstall)
+.TP 
+\fBmake.target.update\fR
+defines update target of make (default: reinstall)
+.TP 
+\fBmake.option.force\fR
+defines if the force option should be enabled by default (default: FALSE)
+.TP 
+\fBmake.option.force.arg\fR
+defines the argument string (default: \-k)
+.TP 
+\fBmake.option.pkg\fR          
+defines if the package option should be enabled by
+.TP 
+\fBmake.option.pkg.arg\fR      
+defines package target of make (default: package)
+.TP 
+\fBmake.option.clean\fR      
+defines if the clean option should be enabled by default (default: TRUE)
+.TP 
+\fBmake.option.clean.arg\fR    
+defines clean target of make (default: clean)
+.TP 
+\fBmake.option.nochksum\fR     
+defines no checksum verification option (default: FALSE)
+.TP 
+\fBmake.option.nochksum.arg\fR
+(see above)
+.TP 
+\fBmake.option.nodeps\fR
+defines no depends option (default: FALSE)
+.TP 
+\fBmake.option.nodeps.arg\fR
+(see above)
+.TP 
+\fBmake.option.forcepkgreg\fR
+defines force pkg verification option (default: FALSE)
+.TP 
+\fBmake.option.forcepkgreg.arg\fR
+(see above)
+.TP 
+\fBmake.option.nopkgreg\fR
+defines force pkg verification option (default: FALSE)
+.TP 
+\fBmake.option.nopkgreg.arg\fR
+(see above)
 .LP 
 Following \fBvalues\fR are currently supported:
 .TP 
@@ -70,6 +124,17 @@ Following \fBvalues\fR are currently supported:
 \fBCYAN\fR color value
 .TP 
 \fBCYAN\fR color value
+.TP 
+\fBSTRING\fR
+string without inner whitespaces
+.TP 
+\fBTRUE\fR
+bool
+.TP 
+\fBFALSE\fR
+bool
+
+
 .SH "FILES"
 .LP 
 \fI$HOME/.portsmanrc\fP

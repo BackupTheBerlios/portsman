@@ -1,5 +1,5 @@
 #
-# This is a sample configuration .portsmanrc file for portsman 0.1
+# This is a sample configuration .portsmanrc file for portsman 0.2
 #
 # Currently you can customize the colors of portsman via this
 # configuration file. The format of this file is like many other
@@ -30,6 +30,31 @@
 # indexfile          defines path to index file
 # pkgdir             defines path to the package db directory
 #                    (default is /var/db/pkg)
+# make.cmd           defines the make command (whitspaces aren't allowed)
+#                    (default: make)
+# make.target.inst   defines install target of make cmd (default: install)
+# make.target.deinst defines deinstall target of make (default: deinstall)
+# make.target.update defines update target of make (default: reinstall)
+# make.option.force  defines if the force option should be enabled by
+#                    default (default: FALSE)
+# make.option.force.arg    defines the argument string (default: -k)
+# make.option.pkg          defines if the package option should be enabled by
+# make.option.pkg.arg      defines package target of make (default: package)
+# make.option.clean        defines if the clean option should be enabled by
+#                          default (default: TRUE)
+# make.option.clean.arg    defines clean target of make (default: clean)
+# make.option.nochksum     defines no checksum verification option
+#                          (default: FALSE)
+# make.option.nochksum.arg (see above)
+# make.option.nodeps       defines no depends option (default: FALSE)
+# make.option.nodeps.arg   (see above)
+# make.option.forcepkgreg  defines force pkg verification option
+#                          (default: FALSE)
+# make.option.forcepkgreg.arg    (see above)
+# make.option.nopkgreg           defines force pkg verification option
+#                                (default: FALSE)
+# make.option.nopkgreg.arg       (see above)
+# 
 #
 # Following values are supported by portsman:
 #
@@ -42,21 +67,43 @@
 # CYAN               color value
 # WHITE              color value
 #
+# STRING             string without inner whitespaces
+# TRUE               bool
+# FALSE              bool
+#
 
 # standard values of portsman
-#titlebar.fcolor    = BLACK
-#titlebar.bcolor    = WHITE
-#browser.fcolor     = WHITE
-#browser.bcolor     = BLACK
-#statusbar.fcolor   = BLACK
-#statusbar.bcolor   = WHITE
-#cmdbar.fcolor      = WHITE
-#cmdbar.bcolor      = BLACK
-#selector.fcolor    = WHITE
-#selector.bcolor    = RED
-#indexfile          = /usr/ports/INDEX
-#pkgdir             = /var/db/pkg
-
+#titlebar.fcolor              = BLACK
+#titlebar.bcolor              = WHITE
+#browser.fcolor               = WHITE
+#browser.bcolor               = BLACK
+#statusbar.fcolor             = BLACK
+#statusbar.bcolor             = WHITE
+#cmdbar.fcolor                = WHITE
+#cmdbar.bcolor                = BLACK
+#selector.fcolor              = WHITE
+#selector.bcolor              = RED
+#indexfile                    = /usr/ports/INDEX
+#pkgdir                       = /var/db/pkg
+#make.cmd                     = make
+#make.target.inst             = install
+#make.target.deinst           = deinstall
+#make.target.update           = reinstall
+#make.option.force            = FALSE
+#make.option.force.arg        = -k
+#make.option.pkg              = FALSE
+#make.option.pkg.arg          = package
+#make.option.clean            = TRUE
+#make.option.clean.arg        = clean
+#make.option.nochksum         = FALSE
+#make.option.nochksum.arg     = NO_CHECKSUM
+#make.option.nodeps           = FALSE
+#make.option.nodeps.arg       = NO_DEPENDS
+#make.option.forcepkgreg      = FALSE
+#make.option.forcepkgreg.arg  = FORCE_PKG_REGISTER
+#make.option.nopkgreg         = FALSE
+#make.option.nopkgreg.arg     = NO_PKG_REGISTER
+#
 titlebar.fcolor    = WHITE
 titlebar.bcolor    = BLUE
 browser.fcolor     = WHITE

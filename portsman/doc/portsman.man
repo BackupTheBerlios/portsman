@@ -1,4 +1,4 @@
-.TH "portsman" "1" "0.1.0" "Anselm R. Garbe" "System utilities"
+.TH "portsman" "1" "0.2" "Anselm R. Garbe" "System utilities"
 .SH "NAME"
 .LP 
 portsman \- is an ncurses based front end to manage the BSD ports collection.
