@@ -21,7 +21,6 @@ error(char *s) {
 void
 proceed_action(Lhd *lh) {
    extern Lhd *lhcats;
-   extern State state;
    extern Config config;
    extern bool redraw_dimensions;
    Iter itr = lh->head;
