@@ -246,6 +246,7 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
    extern WINDOW *wbrowse;
    extern Lhd *lhprts;
    extern bool redraw_dimensions;
+   extern Config config;
    void *items[lh->num_of_items];
    int press;
    int redraw;
@@ -548,8 +549,11 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
          switch (press) {
             case 'a': /* toggle browse with all categories
                          (with meta categories) */
-               result = (result == BROWSE_WITH_META_CATEGORIES) ?
-                  BROWSE_WITHOUT_META_CATEGORIES : BROWSE_WITH_META_CATEGORIES;
+               if (config.use_metacats)
+                  config.use_metacats = FALSE;
+               else
+                  config.use_metacats = TRUE;
+               result = CATS_TOGGLED;
                press = 'q';
                break;
          }

@@ -214,18 +214,13 @@ main(int argc, char * argv[]) {
    init_windows();
 
    /* open browser */
-   if (config.use_metacats)
-      result = BROWSE_WITH_META_CATEGORIES; /* all categories */
-   else
-      result = BROWSE_WITHOUT_META_CATEGORIES; /* only physical cats */
    do {
-      if (result == BROWSE_WITH_META_CATEGORIES)
+      if (config.use_metacats)
          result = browse_list(lhcats, lhcats->head->item, FALSE, FALSE);
-      else if (result == BROWSE_WITHOUT_META_CATEGORIES)
+      else
          result = browse_list(lhphycats, lhphycats->head->item, FALSE, FALSE);
-   } while ((result == BROWSE_WITH_META_CATEGORIES) ||
-         (result == BROWSE_WITHOUT_META_CATEGORIES));
-
+   } while (result == CATS_TOGGLED);
+   
    /* clean up all windows */
    clean_up_windows();
 
