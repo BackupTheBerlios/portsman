@@ -241,6 +241,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
    Category *cat = NULL;
    Point pt;
    bool search_highlight = FALSE;
+   short type;
 
    if (lh->num_of_items < 1) /* return immediately, if there aren't
                                 any items */
@@ -252,6 +253,10 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
    doupdate();
    wclear(wbrowse);
    getmaxyx(wbrowse, maxy, maxx);
+   /* Line is common minimum struct, this will work for all
+      bigger structs, such as Option, Category, Port */
+   type = ((Line *)items[0])->type;
+   
    /* trick for categories with fewer than maxy items */
    if (lh->num_of_items < maxy) maxy = lh->num_of_items;
    noecho();
@@ -281,15 +286,15 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
       }
 
       /* set title status */
-      if (((Category *)items[0])->type == CATEGORY) {
+      if (type == CATEGORY) {
          set_cat_titlestatus(topidx, topidx + maxy);
-      } else if (((Port *)items[0])->type == PORT) {
+      } else if (type == PORT) {
          /* here parent is needed */
          set_ports_titlestatus((Category *)parent, topidx,
                topidx + maxy, proceed);
-      } else if (((Option *)items[0])->type == OPTION) {
+      } else if (type == OPTION) {
          set_option_titlestatus((Port *)parent, topidx, topidx + maxy);
-      } else if (((Line *)items[0])->type == LINE) {
+      } else if (type == LINE) {
          set_line_titlestatus((char *)parent, topidx, topidx + maxy,
                lh->num_of_items);
       }
@@ -299,7 +304,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          case REFRESH_WINDOW:
             for (i = 0; i < maxy; i++) {
                wprint_item(wbrowse, i, 0, items[topidx + i]);
-               if ((curridx == i) && (((Line *)items[0])->type != LINE))
+               if ((curridx == i) && (type != LINE))
                   mvwchgat(wbrowse, curridx, 0, -1,
                         COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
                else if (search_highlight) 
@@ -308,7 +313,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             }
             break;
          case REFRESH_ENTRY:
-            if (((Line *)items[0])->type != LINE) {
+            if (type != LINE) {
                /* only highlight if it's no line */
                wprint_item(wbrowse, previdx, 0, items[topidx + previdx]);
                mvwchgat(wbrowse, previdx, 0, -1,
@@ -327,7 +332,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
       switch (press) {
          case 'j':
          case KEY_DOWN:
-            if ((curridx < maxy - 1) && (((Line *)items[0])->type != LINE)) {
+            if ((curridx < maxy - 1) && (type != LINE)) {
                curridx++;
                redraw = REFRESH_ENTRY;
             } else if ((topidx + maxy) < lh->num_of_items) {
@@ -338,7 +343,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             break;
          case 'k':
          case KEY_UP:
-            if ((curridx > 0) && (((Line *)items[0])->type != LINE)) {
+            if ((curridx > 0) && (type != LINE)) {
                curridx--;
                redraw = REFRESH_ENTRY;
             } else if (topidx > 0) {
@@ -485,7 +490,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
       }
 
       /* special key handling, if not lines browsing */
-      if (((Line *)items[0])->type != LINE) {
+      if (type != LINE) {
          switch(press) {
             case 'p': /* proceed action */
                if (!proceed) {
@@ -504,7 +509,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                i = 0;
                expch =
                   wprint_inputoutput_ch(" Filter ports by (s)tate or (k)eyword? [s/k] ");
-               if (((Port *)items[0])->type == PORT) 
+               if (type == PORT) 
                   lhitems = lh;
                else
                   lhitems = lhprts;
@@ -695,7 +700,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
       /* end of key press handling */
    } while (press != 'q'); /* (q)uit browser */
 
-   if (((Line *)items[0])->type == LINE) {
+   if (type == LINE) {
       /* free up lines */
       for (i = 0; i < lh->num_of_items; i++) 
          free_line((Line *)items[i]);
