@@ -51,7 +51,9 @@ List *
 parse_options(char *mkfile); 
 int
 parse_rc_file(char *filepath); 
-
+List *
+parse_plist(Port *port, char *plistfile); 
+ 
 /* manage.c */
 void
 mark_ports(List *l, int state); 

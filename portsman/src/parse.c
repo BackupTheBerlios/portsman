@@ -399,6 +399,39 @@ parse_tokenlist(char *toklist, char *delim) {
    return l;
 }
 
+/* parses a plist file and returns a list of all files */
+List *
+parse_plist(Port *port, char *plistfile) {
+   FILE *fd;
+   char line[MAX_TOKEN];
+   char path[MAX_PATH];
+   List *l = (List *)malloc(sizeof(List));
+   Node *n = NULL;
+
+   if ((fd = fopen(plistfile, "r")) == NULL)
+      return NULL; /* error */
+
+   /* init */
+   l->head = NULL;
+   l->num_of_items = 0;
+
+   while (fgets(line, MAX_TOKEN, fd) != NULL) {
+      if ((line[0] != '\0') && (line[0] != ' ')
+            && (line[0] != '@') && (line[0] != '%')) {
+         /* valid path */
+         Plist *pl = (Plist *)malloc(sizeof(Plist));
+         line[strlen(line) - 1] = '\0';
+         sprintf(path, "%s/%s", port->instpfx, line);
+         pl->name = strdup(path);
+         pl->exist = (access(path, F_OK) == 0) ? TRUE : FALSE; 
+         n = add_list_item_after(l, n, pl);
+      }
+   }
+   fclose(fd);
+
+   return l;
+}
+
 /* parses compile options of a port through scan for all
    .if defined or .if !defined in port's Makefile */
 List *

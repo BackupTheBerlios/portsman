@@ -58,6 +58,12 @@ typedef struct state_t {
    int num_of_marked_ports;
 } State;
 
+/* plist state type */
+typedef struct plist_t {
+   char *name;
+   bool exist;
+} Plist;
+
 /* portsman configuration type */
 typedef struct config_t {
    char *index_file;

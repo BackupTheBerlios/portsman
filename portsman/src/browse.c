@@ -195,7 +195,10 @@ browse_port_summary(Port *port) {
    Node *cnode = port->lcats->head;
 	Node *bnode = port->lbdep->head;
 	Node *rnode = port->lrdep->head;
+   Node *fnode;
+   List *fl;
    char msg[80];
+   char plistfile[MAX_PATH];
 
    /* init */
    wprint_cmdinfo("");
@@ -240,6 +243,19 @@ browse_port_summary(Port *port) {
       }
       sprintf(msg, "Homepage           : %-.50s", port->url);
       if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+
+      /* init plistfile */
+      sprintf(plistfile, "%s/pkg-plist", port->path);
+      fl = parse_plist(port, plistfile);
+      fnode = fl->head;
+      while (fnode != NULL) {
+         Plist *p = (Plist *)fnode->item;
+         sprintf(msg, "file of port       : %-30.30s (%-.20s)",
+               p->name, (p->exist == TRUE) ? "installed" : "not installed");
+         if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+         fnode = fnode->next;
+      }
+      free_list(fl);
       wgetch(wbrowse);
       wclear(wbrowse);
    }
