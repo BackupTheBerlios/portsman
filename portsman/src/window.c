@@ -77,13 +77,13 @@ wprint_statusbar(char *s) {
 /* prints items of list browser */
 void
 wprint_item(WINDOW *w, int y, int x, void *item) {
-   char itemstr[MAX_COLS];
+   char itemstr[w->_maxy];
          
    if (((Category *)item)->type == CATEGORY) { /* print category */
-/* resize sigsev hochrunter, hmm */
-
       Category *cat = (Category *)item;
-      sprintf(itemstr, " [ ] %-20.20s\t-%3d/ +%3d/%5d/%5d port(s)",
+      int len = w->_maxy - 40;
+      sprintf(itemstr, " [ ] %-*.*s    -%3d/ +%3d/%5d/%5d port(s)",
+            len, len,
             cat->name, cat->num_of_deinst_ports,
             cat->num_of_marked_ports,
             cat->num_of_inst_ports,

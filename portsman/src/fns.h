@@ -57,6 +57,8 @@ Lhd *
 parse_file(char *filepath); 
  
 /* manage.c */
+char *
+trim_str(char *d, char *s, int n); 
 Lhd *
 get_online_help();
 void
