@@ -122,6 +122,9 @@ create_categories(int num_of_inst_ports) {
    /* last build up list of all physical categories */
    n = NULL;
    citr = lhcats->head;
+   n = add_list_item_after(lhphycats, n, (Category *)citr->item); /* All */
+   citr = citr->next;
+   n = add_list_item_after(lhphycats, n, (Category *)citr->item); /* Installed */
    while (citr != NULL) {
       newcat = (Category *)citr->item;
       if (newcat->meta == FALSE) /* found physical category */
