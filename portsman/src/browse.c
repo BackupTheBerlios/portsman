@@ -489,6 +489,16 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                }
             }
             break;
+         case 't': /* show terminal screen */
+            /* leaving curses ... */
+            def_prog_mode(); /* save current tty modes */
+            endwin();        /* restore original tty modes */
+            fpurge(stdin);
+            getchar();
+            /* ... coming back to curses */
+            refresh();
+            redraw_dimensions = TRUE;
+            break;
       }
 
       /* special key handling, if not lines browsing */

@@ -144,6 +144,8 @@ create_filter_category(Lhd *lhfilter, char *name,
               case STATE_INSTALLED:
               case STATE_INSTALLED_NEWER:
               case STATE_INSTALLED_OLDER:
+              case STATE_BDEP:
+              case STATE_RDEP:
                  (cat->num_of_inst_ports)++;
                  break;
            }
@@ -241,6 +243,7 @@ create_proceed_category() {
 /* creates all possible options to this port */
 void
 create_options(Port *p) {
+   extern Config config;
    Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
    Lhd *lhopts = NULL;
    Option *opt;
@@ -257,51 +260,51 @@ create_options(Port *p) {
    /* first of all, add standard option and make targets */
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
-   opt->name = "ignore all errors while compilation of port (make -k)";
-   opt->cmd = "-k";
-   opt->state = STATE_NOT_SELECTED;
+   opt->name = "ignore all errors while compilation of port";
+   opt->arg = config.make_option_arg[MK_OPTION_FORCE];
+   opt->state = config.make_option[MK_OPTION_FORCE];
    n = add_list_item_after(lh, n, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "generate a package of the port after install/update";
-   opt->cmd = "package";
-   opt->state = STATE_NOT_SELECTED;
+   opt->arg = config.make_option_arg[MK_OPTION_PKG];
+   opt->state = config.make_option[MK_OPTION_PKG];
    n = add_list_item_after(lh, n, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "clean after install/update";
-   opt->cmd = "clean";
-   opt->state = STATE_SELECTED;
+   opt->arg = config.make_option_arg[MK_OPTION_CLEAN];
+   opt->state = config.make_option[MK_OPTION_CLEAN];
    n = add_list_item_after(lh, n, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "NO_CHECKSUM (don't verify checksum of source)";
-   opt->cmd = "NO_CHECKSUM=yes";
-   opt->state = STATE_NOT_SELECTED;
+   opt->arg = config.make_option_arg[MK_OPTION_NOCHKSUM];
+   opt->state = config.make_option[MK_OPTION_NOCHKSUM];
    n = add_list_item_after(lh, n, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "NO_DEPENDS (don't verify build dependencies)";
-   opt->cmd = "NO_DEPENDS=yes";
-   opt->state = STATE_NOT_SELECTED;
+   opt->arg = config.make_option_arg[MK_OPTION_NODEPS];
+   opt->state = config.make_option[MK_OPTION_NODEPS];
    n = add_list_item_after(lh, n, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "FORCE_PKG_REGISTER (register port, also if it still exists)";
-   opt->cmd = "FORCE_PKG_REGISTER=yes";
-   opt->state = STATE_NOT_SELECTED;
+   opt->arg = config.make_option_arg[MK_OPTION_FORCEPKGREG];
+   opt->state = config.make_option[MK_OPTION_FORCEPKGREG];
    n = add_list_item_after(lh, n, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "NO_PKG_REGISTER (don't register port, after compilation)";
-   opt->cmd = "NO_PKG_REGISTER=yes";
-   opt->state = STATE_NOT_SELECTED;
+   opt->arg = config.make_option_arg[MK_OPTION_NOPKGREG];
+   opt->state = config.make_option[MK_OPTION_NOPKGREG];
    n = add_list_item_after(lh, n, opt);
 
    /* additional port specific options */
@@ -410,6 +413,56 @@ unmark_all_dependencies() {
             (((Port *)itr->item)->state == STATE_UPDATE))
          mark_dependencies((Port *)itr->item);
       itr = itr->next;
+   }
+}
+
+/* refreshes state of all categories (numbers of marked/inst/deinst ports */
+void
+refresh_cat_states() {
+   extern State state;
+   extern Lhd *lhcats;
+   Iter pitr;
+   Iter citr = lhcats->head;
+   int num_of_deinst_ports;
+   int num_of_inst_ports;
+   int num_of_marked_ports;
+   Port *p;
+
+   while (citr != NULL) {
+      pitr = ((Category *)citr->item)->lhprts->head;
+      num_of_deinst_ports = 0;
+      num_of_inst_ports = 0;
+      num_of_marked_ports = 0;
+      while (pitr != NULL) {
+         p = (Port *)pitr->item;
+         switch (p->state) {
+            case STATE_INSTALLED:
+            case STATE_INSTALLED_OLDER:
+            case STATE_INSTALLED_NEWER:
+               num_of_inst_ports++;
+               break;
+            case STATE_INSTALL:
+            case STATE_UPDATE:
+            case STATE_BDEP:
+            case STATE_RDEP:
+               num_of_marked_ports++;
+               break;
+            case STATE_DEINSTALL:
+               num_of_deinst_ports++;
+               break; 
+         }
+         pitr = pitr->next;
+      }
+      ((Category *)citr->item)->num_of_deinst_ports = num_of_deinst_ports;
+      ((Category *)citr->item)->num_of_inst_ports = num_of_inst_ports;
+      ((Category *)citr->item)->num_of_marked_ports = num_of_marked_ports;
+
+      if (citr == lhcats->head) {/* state , maybe depricated */
+         state.num_of_deinst_ports = num_of_deinst_ports;
+         state.num_of_inst_ports = num_of_inst_ports;
+         state.num_of_marked_ports = num_of_marked_ports;
+      }
+      citr = citr->next;
    }
 }
 

@@ -45,7 +45,7 @@ typedef struct category_t {
 typedef struct option_t {
    short type;
    char *name;
-   char *cmd;
+   char *arg;
    short state;
 } Option;
 
@@ -73,10 +73,14 @@ typedef struct plist_t {
 
 /* portsman configuration type */
 typedef struct config_t {
-   char *index_file;
-   char *inst_pkg_dir;
    short fcolors[5]; /* foreground colors */
    short bcolors[5]; /* background colors */
+   char *index_file;
+   char *inst_pkg_dir;
+   char *make_cmd;
+   char *make_target[3];
+   short make_option[7];
+   char *make_option_arg[7];
 } Config;
 
 /* simple (y, x) point, needed for search key highlightning */

@@ -22,6 +22,8 @@ void
 proceed_action(Lhd *lh) {
    extern Lhd *lhcats;
    extern State state;
+   extern Config config;
+   extern bool redraw_dimensions;
    Iter itr = lh->head;
    Iter citr; /* cat iterator */
    Iter oitr; /* option iterator */
@@ -46,13 +48,16 @@ proceed_action(Lhd *lh) {
 
          switch (p->state) {
             case STATE_INSTALL:
-               sprintf(execstr, "%s", CMD_INSTALL);
+               sprintf(execstr, "%s %s", config.make_cmd,
+                     config.make_target[MK_TARGET_INST]);
               break;
             case STATE_UPDATE:
-               sprintf(execstr, "%s", CMD_UPDATE);
+               sprintf(execstr, "%s %s", config.make_cmd,
+                     config.make_target[MK_TARGET_UPDATE]);
                break;   
             case STATE_DEINSTALL:
-               sprintf(execstr, "%s", CMD_DEINSTALL);
+               sprintf(execstr, "%s %s", config.make_cmd,
+                     config.make_target[MK_TARGET_DEINST]);
                break;   
          }
 
@@ -60,7 +65,7 @@ proceed_action(Lhd *lh) {
          while (oitr != NULL) {
             Option *opt = (Option *)oitr->item;
             if (opt->state == STATE_SELECTED) {
-               sprintf(option, " %s", opt->cmd);
+               sprintf(option, " %s", opt->arg);
                strcat(execstr, option);
             }
             oitr = oitr->next;
@@ -83,35 +88,15 @@ proceed_action(Lhd *lh) {
                   case STATE_INSTALL:
                   case STATE_UPDATE:
                      p->state = STATE_INSTALLED;
-                     state.num_of_marked_ports--;
-                     state.num_of_inst_ports++;
-                     (((Category *)lhcats->head->item)->num_of_marked_ports)--;
-                     (((Category *)lhcats->head->item)->num_of_inst_ports)++;
-                     citr = p->lhcats->head;
-                     while (citr != NULL) {
-                        (((Category *)citr->item)->num_of_marked_ports)--;
-                        (((Category *)citr->item)->num_of_inst_ports)++;
-                        citr = citr->next;
-                     }
-                     /* mark also all build dependencies as installed */
                      ditr = p->lhbdep->head;
                      while (ditr != NULL) {
-                        ((Port *)ditr->item)->state = STATE_INSTALLED;
+                        if (((Port *)ditr->item)->state != STATE_INSTALLED) 
+                           ((Port *)ditr->item)->state = STATE_INSTALLED;
                         ditr = ditr->next;
                      }
                      break;
                   case STATE_DEINSTALL:
                      p->state = STATE_NOT_SELECTED;
-                     state.num_of_inst_ports--;
-                     state.num_of_deinst_ports--;
-                     (((Category *)lhcats->head->item)->num_of_inst_ports)--;
-                     (((Category *)lhcats->head->item)->num_of_deinst_ports)--;
-                     citr = p->lhcats->head;
-                     while (citr != NULL) {
-                        (((Category *)citr->item)->num_of_inst_ports)--;
-                        (((Category *)citr->item)->num_of_deinst_ports)--;
-                        citr = citr->next;
-                     }
                      break;
                }
                break;
@@ -120,9 +105,10 @@ proceed_action(Lhd *lh) {
       itr = itr->next;
    }
    chdir(wdir);
+   refresh_cat_states(); 
 
    /* ... coming back to curses */
    refresh();
-   curs_set(0);
+   redraw_dimensions = TRUE;
 
 }

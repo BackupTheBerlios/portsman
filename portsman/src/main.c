@@ -79,6 +79,24 @@ main(int argc, char * argv[]) {
    config.bcolors[CLR_STATUS] = COLOR_CYAN;
    config.fcolors[CLR_CMD] = COLOR_WHITE;
    config.bcolors[CLR_CMD] = COLOR_BLUE;
+   config.make_cmd = "make";
+   config.make_target[MK_TARGET_INST] = "install";
+   config.make_target[MK_TARGET_DEINST] = "deinstall";
+   config.make_target[MK_TARGET_UPDATE] = "reinstall";
+   config.make_option[MK_OPTION_FORCE] = STATE_NOT_SELECTED;
+   config.make_option[MK_OPTION_PKG] = STATE_NOT_SELECTED;
+   config.make_option[MK_OPTION_CLEAN] = STATE_SELECTED;
+   config.make_option[MK_OPTION_NOCHKSUM] = STATE_NOT_SELECTED;
+   config.make_option[MK_OPTION_NODEPS] = STATE_NOT_SELECTED;
+   config.make_option[MK_OPTION_FORCEPKGREG] = STATE_NOT_SELECTED;
+   config.make_option[MK_OPTION_NOPKGREG] = STATE_NOT_SELECTED;
+   config.make_option_arg[MK_OPTION_FORCE] = "-k";
+   config.make_option_arg[MK_OPTION_PKG] = "package";
+   config.make_option_arg[MK_OPTION_CLEAN] = "clean";
+   config.make_option_arg[MK_OPTION_NOCHKSUM] = "NO_CHECKSUM=yes";
+   config.make_option_arg[MK_OPTION_NODEPS] = "NO_DEPENDS=yes";
+   config.make_option_arg[MK_OPTION_FORCEPKGREG] = "FORCE_PKG_REGISTER=yes";
+   config.make_option_arg[MK_OPTION_NOPKGREG] = "NO_PKG_REGISTER=yes";
 
    /* command line args */
    while ((c = getopt(argc, argv, "vi:p:c:")) != -1)

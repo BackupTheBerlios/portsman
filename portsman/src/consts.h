@@ -45,9 +45,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define CATEGORY 1
 #define OPTION 2
 #define LINE 3
-#define CMD_INSTALL "make install"
-#define CMD_DEINSTALL "make deinstall"
-#define CMD_UPDATE "make reinstall"
 #define CLR_TITLE 0
 #define CLR_BROWSE 1
 #define CLR_SELECTOR 2
@@ -55,3 +52,13 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define CLR_CMD 4
 #define FREEBSD "FreeBSD"
 #define HELP_FILE "/usr/local/share/doc/portsman/portsman.help"
+#define MK_TARGET_INST 0
+#define MK_TARGET_DEINST 1
+#define MK_TARGET_UPDATE 2
+#define MK_OPTION_FORCE 0
+#define MK_OPTION_PKG 1
+#define MK_OPTION_CLEAN 2
+#define MK_OPTION_NOCHKSUM 3
+#define MK_OPTION_NODEPS 4
+#define MK_OPTION_FORCEPKGREG 5
+#define MK_OPTION_NOPKGREG 6

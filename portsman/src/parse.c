@@ -460,13 +460,13 @@ parse_options(char *mkfile) {
          sprintf(line, "%-.50s (port specific compile option)", option);
          opt->name = strdup(line);
          sprintf(line, "%s=yes", option);
-         opt->cmd = strdup(line);
+         opt->arg = strdup(line);
          exists = NULL;
          t = add_tree_item(t, opt, cmp_name);
          if (exists != NULL) { /* option does exist */
             /* clean up */
             free(opt->name);
-            free(opt->cmd);
+            free(opt->arg);
             free(opt);
          }
       }
@@ -502,6 +502,16 @@ str_to_color(char *clrstr) {
       return ERROR_CORRUPT_RC_FILE; /* error */
 }
 
+short
+str_to_state(char *boolstr) {
+   if (strcmp(boolstr, "TRUE") == 0)
+      return STATE_SELECTED;
+   else if (strcmp(boolstr, "FALSE") == 0)
+      return STATE_NOT_SELECTED;
+   else
+      return ERROR_CORRUPT_RC_FILE;
+}
+
 /* parses portsmanrc file and resets config if needed */
 int
 parse_rc_file(char *filepath) {
@@ -511,10 +521,11 @@ parse_rc_file(char *filepath) {
    bool readyValue = FALSE;
    bool comment = FALSE;
    char tok[MAX_TOKEN];
+   char arg[MAX_TOKEN];
    char *key;
    char *val;
    int i = 0, c = 0;
-   short clr = 0;
+   short sh = 0;
    
    if ((fd = fopen(filepath, "r")) == NULL)
       return ERROR_NO_RC_FILE; /* not present */
@@ -555,81 +566,159 @@ parse_rc_file(char *filepath) {
          val = tok;
 
          if (strcmp(key, "titlebar.fcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.fcolors[CLR_TITLE] = clr;
+               config.fcolors[CLR_TITLE] = sh;
             }
          } else if (strcmp(key, "titlebar.bcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.bcolors[CLR_TITLE] = clr;
+               config.bcolors[CLR_TITLE] = sh;
             }
          } else if (strcmp(key, "browser.fcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.fcolors[CLR_BROWSE] = clr;
+               config.fcolors[CLR_BROWSE] = sh;
             }
          } else if (strcmp(key, "browser.bcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.bcolors[CLR_BROWSE] = clr;
+               config.bcolors[CLR_BROWSE] = sh;
             }
          } else if (strcmp(key, "statusbar.fcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.fcolors[CLR_STATUS] = clr;
+               config.fcolors[CLR_STATUS] = sh;
             }
          } else if (strcmp(key, "statusbar.bcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.bcolors[CLR_STATUS] = clr;
+               config.bcolors[CLR_STATUS] = sh;
             }
          } else if (strcmp(key, "cmdbar.fcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.fcolors[CLR_CMD] = clr;
+               config.fcolors[CLR_CMD] = sh;
             }
          } else if (strcmp(key, "cmdbar.bcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.bcolors[CLR_CMD] = clr;
+               config.bcolors[CLR_CMD] = sh;
             }
          } else if (strcmp(key, "selector.fcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.fcolors[CLR_SELECTOR] = clr;
+               config.fcolors[CLR_SELECTOR] = sh;
             }
          } else if (strcmp(key, "selector.bcolor") == 0) {
-            clr = str_to_color(val);
-            if (clr == ERROR_CORRUPT_RC_FILE) {
+            sh = str_to_color(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
                return (ERROR_CORRUPT_RC_FILE); /* error */
             } else {
-               config.bcolors[CLR_SELECTOR] = clr;
+               config.bcolors[CLR_SELECTOR] = sh;
             }
          } else if (strcmp(key, "indexfile") == 0) {
             config.index_file = strdup(val);
          } else if (strcmp(key, "pkgdir") == 0) {
             config.inst_pkg_dir = strdup(val);
+         } else if (strcmp(key, "make.cmd") == 0) {
+            config.make_cmd = strdup(val);
+         } else if (strcmp(key, "make.target.inst") == 0) {
+            config.make_target[MK_TARGET_INST] = strdup(val);
+         } else if (strcmp(key, "make.target.deinst") == 0) {
+            config.make_target[MK_TARGET_DEINST] = strdup(val);
+         } else if (strcmp(key, "make.target.update") == 0) {
+            config.make_target[MK_TARGET_UPDATE] = strdup(val);
+         } else if (strcmp(key, "make.option.force") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (ERROR_CORRUPT_RC_FILE); /* error */
+            } else {
+               config.make_option[MK_OPTION_FORCE] = sh;
+            }
+         } else if (strcmp(key, "make.option.pkg") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (ERROR_CORRUPT_RC_FILE); /* error */
+            } else {
+               config.make_option[MK_OPTION_PKG] = sh;
+            }
+         } else if (strcmp(key, "make.option.clean") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (ERROR_CORRUPT_RC_FILE); /* error */
+            } else {
+               config.make_option[MK_OPTION_CLEAN] = sh;
+            }
+         } else if (strcmp(key, "make.option.nochksum") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (ERROR_CORRUPT_RC_FILE); /* error */
+            } else {
+               config.make_option[MK_OPTION_NOCHKSUM] = sh;
+            }
+         } else if (strcmp(key, "make.option.nodeps") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (ERROR_CORRUPT_RC_FILE); /* error */
+            } else {
+               config.make_option[MK_OPTION_NODEPS] = sh;
+            }
+         } else if (strcmp(key, "make.option.forcepkgreg") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (ERROR_CORRUPT_RC_FILE); /* error */
+            } else {
+               config.make_option[MK_OPTION_FORCEPKGREG] = sh;
+            }
+         } else if (strcmp(key, "make.option.nopkgreg") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (ERROR_CORRUPT_RC_FILE); /* error */
+            } else {
+               config.make_option[MK_OPTION_NOPKGREG] = sh;
+            }
+         } else if (strcmp(key, "make.option.force.arg") == 0) {
+            sprintf(arg, "%s=yes", val);
+            config.make_option_arg[MK_OPTION_FORCE] = strdup(arg);
+         } else if (strcmp(key, "make.option.pkg.arg") == 0) {
+            sprintf(arg, "%s=yes", val);
+            config.make_option_arg[MK_OPTION_PKG] = strdup(arg);
+         } else if (strcmp(key, "make.option.clean.arg") == 0) {
+            sprintf(arg, "%s=yes", val);
+            config.make_option_arg[MK_OPTION_CLEAN] = strdup(arg);
+         } else if (strcmp(key, "make.option.nochksum.arg") == 0) {
+            sprintf(arg, "%s=yes", val);
+            config.make_option_arg[MK_OPTION_NOCHKSUM] = strdup(arg);
+         } else if (strcmp(key, "make.option.nodeps.arg") == 0) {
+            sprintf(arg, "%s=yes", val);
+            config.make_option_arg[MK_OPTION_NODEPS] = strdup(arg);
+         } else if (strcmp(key, "make.option.forcepkgreg.arg") == 0) {
+            sprintf(arg, "%s=yes", val);
+            config.make_option_arg[MK_OPTION_FORCEPKGREG] = strdup(arg);
+         } else if (strcmp(key, "make.option.nopkgreg.arg") == 0) {
+            sprintf(arg, "%s=yes", val);
+            config.make_option_arg[MK_OPTION_NOPKGREG] = strdup(arg);
          }
-
+            
          free(key);
          i = 0;
          readyValue = FALSE;

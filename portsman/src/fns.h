@@ -82,7 +82,9 @@ void
 mark_dependencies(Port *p); 
 void
 mark_port(Port *p, int state, int incrementor); 
-
+void
+refresh_cat_states(); 
+ 
 /* window.c */
 void
 resizeHandler(int sig);
