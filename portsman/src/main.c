@@ -140,7 +140,7 @@ main(int argc, char * argv[]) {
    config.make_option_arg[MK_OPTION_FORCEPKGREG] = "FORCE_PKG_REGISTER=yes";
    config.make_option_arg[MK_OPTION_NOPKGREG] = "NO_PKG_REGISTER=yes";
    init_rsynchosts();
-   config.rsync_cmd = "rsync";
+   config.rsync_cmd = "rsync -uvz";
 
    /* command line args */
    while ((c = getopt(argc, argv, "vPr:d:i:p:c:")) != -1)
@@ -186,6 +186,7 @@ main(int argc, char * argv[]) {
    config.inst_pkg_dir = inst_pkg_dir;
    config.ports_dir = ports_dir;
 
+   fprintf(stdout, "Checking state of %s...\n", config.index_file);
    if (!is_index_uptodate(config.ports_dir, TRUE)) {
       /* download, start user interaction etc. */
       fprintf(stdout, "%s is not as up to date as your ports collection:\n",

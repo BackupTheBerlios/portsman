@@ -83,26 +83,28 @@ is_index_uptodate(char *path, bool top) {
    struct stat sb;
    List *ldirs;
    static time_t tidx;
+   char pth[MAX_PATH];
 
    if ((dfd = opendir(path)) == NULL) return TRUE; /* no valid path,
                                                       ignore */
-
    if (top) { /* top instance of recursions */
-      if (stat(config.index_file, &sb) == 0);
+      if (stat(config.index_file, &sb) == 0)
          tidx = sb.st_mtimespec.tv_sec;
    }
    
    /* while there're entries in the directory */
    while ((dp = readdir(dfd)) != NULL) {
       if ((dp->d_name)[0] != '.') { /* ignore "." and ".." */
-         stat(dp->d_name, &sb);
+         sprintf(pth, "%s/%s", path, dp->d_name);
+         stat(pth, &sb);
          if (S_ISDIR(sb.st_mode)) { /* found subdir */
-            if (!is_index_uptodate(dp->d_name, FALSE)) {
+            if (!is_index_uptodate(pth, FALSE)) {
                closedir(dfd);
                return FALSE; /* index is not up to date */
             }
          } else if (strcmp(dp->d_name, MK_FILE) == 0) {
-            if (sb.st_mtimespec.tv_sec > tidx) { /* found newer Makefile */ 
+            if (difftime(sb.st_mtimespec.tv_sec, tidx) > 0) {
+               /* found newer Makefile */ 
                closedir(dfd);
                return FALSE;
             }
