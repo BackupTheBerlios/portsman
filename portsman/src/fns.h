@@ -45,6 +45,9 @@ add_tree_item(TNode *t, void *item,
       int (*comp)(const void *, const void *));
 
 /* list.c */
+bool
+has_item(List *l, void *item, 
+      int (*comp)(const void *, const void *));
 void
 free_list(List *l);
 Node *
@@ -132,6 +135,8 @@ int
 browse_list(List *l, void *parent, bool proceed, bool artificia); 
 
 /* system.c */
+void
+make_index(); 
 bool
 is_index_uptodate(char *path, bool top); 
 void

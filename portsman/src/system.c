@@ -27,6 +27,41 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 #include "includes.h"
+
+/* synchronizes INDEX through using rsync */
+void
+sync_index() {
+   extern Config config;
+   char wdir[MAX_PATH];
+   int result = 0;
+
+   fprintf(stdout,
+         "\nGoing to (re)make your INDEX, this could take up to 30 minutes...\n");
+   getcwd(wdir, MAX_PATH);
+   chdir(config.ports_dir);
+   result = system("make index");
+   if (result != 0)
+      fprintf(stderr, "\nerror: Something goes wrong while making INDEX.\n");
+   chdir(wdir);
+}
+
+/* executes INDEX generation on this system */
+void
+make_index() {
+   extern Config config;
+   char wdir[MAX_PATH];
+   int result = 0;
+
+   fprintf(stdout,
+         "\nGoing to (re)make your INDEX, this could take up to 30 minutes...\n");
+   getcwd(wdir, MAX_PATH);
+   chdir(config.ports_dir);
+   result = system("make index");
+   if (result != 0)
+      fprintf(stderr, "\nerror: Something goes wrong while making INDEX.\n");
+   chdir(wdir);
+}
+
 /* checks if there're newer Makefiles, than the used index,
    returns TRUE, if INDEX is cutting edge to the cvsupped
    ports collection, FALSE otherwise */

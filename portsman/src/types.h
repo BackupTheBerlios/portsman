@@ -93,6 +93,8 @@ typedef struct config_t {
    char *make_target[3];
    short make_option[7];
    char *make_option_arg[7];
+   char *rsync_cmd;
+   struct list_t *lrsynchosts;
 } Config;
 
 /* simple (y, x) point, needed for search key highlightning */

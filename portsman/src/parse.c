@@ -225,6 +225,10 @@ parse_index()
             readyToken = 1; /* ready token */
             break;
          case '\n': /* end of port */
+#if defined(__FreeBSD__)
+            if (pipes != PORT_URL) /* seems to be some strange INDEX */ 
+               return ERROR_CORRUPT_INDEX;
+#endif
             readyToken = 1; /* tail token of port ready */
             break;
          default:
@@ -494,11 +498,26 @@ parse_options(char *mkfile) {
    return l;
 }
 
+/* trims all whitespaces off a string */
+void
+trim_str(char *str) {
+   char *d = str;
+   char *s = str;
+
+   while (*s != '\0') {
+      if (*s != ' ')
+         *d++ = *s;
+      s++;
+   }
+   *d = '\0';
+}
+
 /* returns the color of an associated string,
    -1 if color could not be indicated,
    this is a helper function for parse_rc_file */
 short
 str_to_color(char *clrstr) {
+   trim_str(clrstr);
    if (strcmp(clrstr, "BLACK") == 0)
       return COLOR_BLACK;
    else if (strcmp(clrstr, "RED") == 0)
@@ -521,6 +540,7 @@ str_to_color(char *clrstr) {
 
 short
 str_to_state(char *boolstr) {
+   trim_str(boolstr);
    if (strcmp(boolstr, "TRUE") == 0)
       return STATE_SELECTED;
    else if (strcmp(boolstr, "FALSE") == 0)
@@ -539,6 +559,7 @@ parse_rc_file(char *filepath) {
    FILE *fd;
    extern Config config;
    bool readyKey = FALSE;
+   bool validKey = FALSE;
    bool readyValue = FALSE;
    bool comment = FALSE;
    char tok[MAX_TOKEN];
@@ -555,26 +576,35 @@ parse_rc_file(char *filepath) {
       c = fgetc(fd); /* get next char */
       switch (c) {
          case '\t': 
-         case ' ': /* ignore all white spaces & tabs*/
             break;
          case '#':
             comment = TRUE; /* until eol */
-            if (i > 0) /* ready value */
+            if (validKey && (i > 0)) /* ready value */
                readyValue = TRUE;
             break;
          case '\n': /* eol */
             line++;
             comment = FALSE;
             /* ready value */
-            if (i > 0)  /* ready value */
+            if (validKey && (i > 0))  /* ready value */
                readyValue = TRUE;
+            else {
+               validKey = FALSE;
+               readyKey = FALSE;
+            }
             break;
          case '=':
-            readyKey = TRUE;
+            if (!comment) {
+               if (i > 0)
+                  readyKey = TRUE;
+               else
+                  return line;
+            }
             break;
          default: /* else it's a alphanum char */
             if (!comment) 
-               tok[i++] = (char)c;
+               if ((c != ' ') || ((c == ' ') && validKey))
+                  tok[i++] = (char)c;
             break;
       }
 
@@ -583,6 +613,7 @@ parse_rc_file(char *filepath) {
          key = strdup(tok);
          i = 0;
          readyKey = FALSE;
+         validKey = TRUE;
       } else if (readyValue) {
          tok[i] = '\0'; /* terminate value token */
          val = tok;
@@ -749,14 +780,20 @@ parse_rc_file(char *filepath) {
          } else if (strcmp(key, "make.option.nopkgreg.arg") == 0) {
             sprintf(arg, "%s=yes", val);
             config.make_option_arg[MK_OPTION_NOPKGREG] = strdup(arg);
+         } else if (strcmp(key, "rsync.cmd") == 0) {
+            config.rsync_cmd = strdup(val);
+         } else if (strcmp(key, "rsync.hostname") == 0) {
+            if (!has_item(config.lrsynchosts, val, cmp_str))
+               add_list_item(config.lrsynchosts, strdup(val));
          } else {
             return line; /* also error: unknown key */
          }
-            
+
+         readyValue = FALSE;
+         validKey = FALSE;
          free(key);
          i = 0;
-         readyValue = FALSE;
-      }
+     }
 
    }
    fclose(fd);

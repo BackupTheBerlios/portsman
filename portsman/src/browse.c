@@ -345,12 +345,13 @@ browse_list(List *l, void *parent, bool proceed, bool artificial) {
          case REFRESH_WINDOW:
             for (i = 0; i < maxy; i++) {
                wprint_item(wbrowse, i, 0, items[topidx + i]);
-               if ((curridx == i) && (type != LINE))
+               if ((curridx == i) && (type != LINE)) {
                   mvwchgat(wbrowse, curridx, 0, -1,
                         COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
-               else if ((search_highlight == TRUE)  && (type == LINE))
+               } else if ((search_highlight == TRUE)  && (type == LINE)) {
                   mvwchgat(wbrowse, curridx, pt.x, strlen(expstr),
                         COLOR_PAIR(CLR_BROWSE + 1) | A_REVERSE, 0, NULL);
+               }
             }
             break;
          case REFRESH_ENTRY:

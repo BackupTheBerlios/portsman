@@ -38,12 +38,15 @@ version() {
 void
 usage() {
    fprintf(stderr, "usage: portsman [-c <portsmanrc file>] [-h] [-v] [-P]\n" 
-          "                [-d <ports dir> | -i <INDEX file>] [-p <PKG dir>]\n\n" 
+          "                [-r <rsync hostname>] [-d <ports dir> |\n"
+          "                 -i <INDEX file>] [-p <PKG dir>]\n\n" 
           "       -c      path to user defined configfile\n"
           "       -h      prints this help\n" 
           "       -v      prints out the version of portsman\n"
           "       -P      uses only physical existing categories, no\n"
           "               meta categories (except \"All\" and \"Installed\")\n"
+          "       -r      defines additional rsync hostname which is used to\n"
+          "               synchronize your used INDEX file\n" 
 #if defined(__FreeBSD__) || defined(__OpenBSD__)
           "       -d      path of ports collection\n" 
 #elif defined(__NetBSD__)
@@ -54,6 +57,17 @@ usage() {
           "       -p      path to package database dir\n" 
           "               (default: %s)\n\n",
          INDEX_FILE, INSTALLED_PKG_DIR); 
+}
+
+/* init rsync server config */
+void init_rsynchosts() {
+   extern Config config;
+   config.lrsynchosts = (List *)malloc(sizeof(List));
+   config.lrsynchosts->head = config.lrsynchosts->tail = NULL;
+   config.lrsynchosts->num_of_items = 0;
+
+   add_list_item(config.lrsynchosts, RSYNC_SERVER_1);
+   add_list_item(config.lrsynchosts, RSYNC_SERVER_2);
 }
 
 /* main function of portsman */
@@ -123,9 +137,10 @@ main(int argc, char * argv[]) {
    config.make_option_arg[MK_OPTION_NODEPS] = "NO_DEPENDS=yes";
    config.make_option_arg[MK_OPTION_FORCEPKGREG] = "FORCE_PKG_REGISTER=yes";
    config.make_option_arg[MK_OPTION_NOPKGREG] = "NO_PKG_REGISTER=yes";
+   init_rsynchosts();
 
    /* command line args */
-   while ((c = getopt(argc, argv, "vPd:i:p:c:")) != -1)
+   while ((c = getopt(argc, argv, "vPr:d:i:p:c:")) != -1)
       switch(c) {
          case 'v':
             version();
@@ -133,6 +148,9 @@ main(int argc, char * argv[]) {
             break;
          case 'P':
             config.use_metacats = FALSE;
+            break;
+         case 'r':
+            add_list_item(config.lrsynchosts, strdup(optarg));
             break;
          case 'd':
             ports_dir = strdup(optarg);
@@ -167,8 +185,15 @@ main(int argc, char * argv[]) {
 
    if (!is_index_uptodate(config.ports_dir, TRUE)) {
       /* download, start user interaction etc. */
-      fprintf(stderr, "error: %s is not as up to date as your ports"
-            " collection\n", config.index_file);
+      fprintf(stdout, "%s is not as up to date as your ports collection:\n",
+            config.index_file);
+      fprintf(stdout, "Choose (s)ynchronize, (m)ake index or (i)gnore: "); 
+      fflush(stdin);
+      c = getc(stdin);
+      if (c == 's')
+         ;
+      else if (c == 'm')
+         make_index();
    }
  
    /* init */
@@ -191,6 +216,10 @@ main(int argc, char * argv[]) {
    result = parse_index();
    if (result == ERROR_OPEN_INDEX) {
       fprintf(stderr, "error: Can't open INDEX file: %s\n", config.index_file);
+      exit(1);
+   } else if (result == ERROR_CORRUPT_INDEX) {
+      fprintf(stderr, "error: INDEX file seems to be corrupted or is of "
+            "an unknown format.\n");
       exit(1);
    }
    /* resize signal handler */

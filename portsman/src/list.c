@@ -58,6 +58,21 @@ void create_array_from_list(List *l, void *items[]) {
    }
 }
 
+/* returns true, if the item with value already exist */
+bool
+has_item(List *l, void *item, 
+      int (*comp)(const void *, const void *)) {
+   Iter itr = l->head;
+
+   while (itr != NULL) {
+      if ((*comp)(itr->item, item) == 0)
+         return TRUE;
+      itr = itr->next;
+   }
+
+   return FALSE;
+}
+
 /* adds an item to the list of l,
    returns the new node, this function is more efficient than
    ordered_add_item, because it does not use comparisions */

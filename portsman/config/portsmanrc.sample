@@ -57,6 +57,9 @@
 # make.option.nopkgreg           defines force pkg verification option
 #                                (default: FALSE)
 # make.option.nopkgreg.arg       (see above)
+# rsync.cmd          defines command of rsync (default: rsync -avz)
+# rsync.hostname     defines an hostname of some rsync server to synch
+#                    the current (dayly updated) INDEX                     
 # 
 #
 # Following values are supported by portsman:
@@ -108,6 +111,9 @@
 #make.option.forcepkgreg.arg  = FORCE_PKG_REGISTER
 #make.option.nopkgreg         = FALSE
 #make.option.nopkgreg.arg     = NO_PKG_REGISTER
+#rsync.cmd                    = rsync -avz
+#rsync.hostname               = hypeo.homeip.net
+#rsync.hostname               = anselm.ath.cx
 #
 titlebar.fcolor    = WHITE
 titlebar.bcolor    = BLUE
