@@ -90,7 +90,7 @@ const char *online_help[] =
 "                       or deselects all marked ports if possible", 
 "", 
 "     [P]               toggles to category browsing with only physical", 
-"                       categories (under you ports directory)", 
+"                       categories (under your ports directory)", 
 "                       (except: All and Installed categories)", 
 "", 
 "     [A]               toggles to category browsing with all physical", 
