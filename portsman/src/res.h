@@ -111,8 +111,8 @@ const char *online_help[] =
 "", 
 "     right column or status bar example:", 
 "     <M>  -  1 / +  3 /   12 / 6765 ", 
-"                       This means: <M> means meta category,"
-"                                   <P> means physical category,"
+"                       This means: <M> means meta category,",
+"                                   <P> means physical category,",
 "                                    1 port marked for deinstallation,", 
 "                                    3 ports marked for installation or", 
 "                                    update,", 
