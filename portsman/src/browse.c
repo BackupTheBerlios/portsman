@@ -152,7 +152,7 @@ browse_file(char *path) {
 
    /* return if file couldn't be opened */
    if ((fd = fopen(path, "r")) == NULL) return (-1);
-   sprintf(buf, " [%s]", path);
+   sprintf(buf, " [%-.60s]", path);
    wprint_titlebar(buf);
          
    while (feof(fd) == 0) {
