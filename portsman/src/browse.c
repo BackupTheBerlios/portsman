@@ -191,6 +191,15 @@ browse_port_summary(Port *p) {
          n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
       }
+      itr = p->lhdep->head;
+      while (itr != NULL) {
+         prt = (Port *)itr->item;
+         sprintf(msg, "Depend. for : %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
+               prt->name, len / 3, (prt->state >= STATE_INSTALLED) ? "installed":
+               "not installed");
+         n = add_list_item_after(lhitems, n, create_line(msg));
+         itr = itr->next;
+      }
       itr = p->lhbdep->head;
       while (itr != NULL) {
          prt = (Port *)itr->item;

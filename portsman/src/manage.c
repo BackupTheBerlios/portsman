@@ -128,14 +128,21 @@ create_port(char *name, TNode *t) {
    p->type = PORT;
    p->lhcats = (Lhd *)malloc(sizeof(Lhd));
    p->lhcats->head = NULL;
+   p->lhcats->tail = NULL;
    p->lhcats->num_of_items = 0;
    p->lhopts = NULL;
    p->lhbdep = (Lhd *)malloc(sizeof(Lhd));
    p->lhbdep->head = NULL;
+   p->lhbdep->tail = NULL;
    p->lhbdep->num_of_items = 0;
    p->lhrdep = (Lhd *)malloc(sizeof(Lhd));
    p->lhrdep->head = NULL;
+   p->lhrdep->tail = NULL;
    p->lhrdep->num_of_items = 0;
+   p->lhdep = (Lhd *)malloc(sizeof(Lhd));
+   p->lhdep->head = NULL;
+   p->lhdep->tail = NULL;
+   p->lhdep->num_of_items = 0;
    p->name = strdup(name);
    p->state = get_state(p->name, t);
 

@@ -44,6 +44,8 @@ typedef struct port_t {
    struct lhd_t *lhopts; /* list of port options */
    struct lhd_t *lhbdep; /* list of runtime deps */
    struct lhd_t *lhrdep; /* list of build deps */
+   struct lhd_t *lhdep; /* list of ports, which have this port
+                           ad dependency */
 } Port;
 
 /* type for port categories */

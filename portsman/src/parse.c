@@ -51,7 +51,7 @@ add_port_to_category(Category *cat, Port *p) {
       (p->state == STATE_INSTALLED_OLDER) ||
       (p->state == STATE_INSTALLED_NEWER))
       (cat->num_of_inst_ports)++;
-   add_list_item(cat->lhprts, p);
+   cat->lhprts->tail = add_list_item_after(cat->lhprts, cat->lhprts->tail, p);
 }
 
 /* creates all categories through the given ports list */
@@ -122,13 +122,16 @@ create_categories(int num_of_inst_ports) {
    /* last build up list of all physical categories */
    n = NULL;
    citr = lhcats->head;
-   n = add_list_item_after(lhphycats, n, (Category *)citr->item); /* All */
+   lhphycats->tail = add_list_item_after(lhphycats, lhphycats->tail,
+         (Category *)citr->item); /* All */
    citr = citr->next;
-   n = add_list_item_after(lhphycats, n, (Category *)citr->item); /* Installed */
+   lhphycats->tail = add_list_item_after(lhphycats, lhphycats->tail,
+         (Category *)citr->item); /* Installed */
    while (citr != NULL) {
       newcat = (Category *)citr->item;
       if (newcat->meta == FALSE) /* found physical category */
-         n = add_list_item_after(lhphycats, n, newcat);
+         lhphycats->tail  = add_list_item_after(lhphycats, lhphycats->tail,
+               newcat);
       citr = citr->next;
    }
 }
@@ -241,7 +244,8 @@ parse_index()
          if ((c == ' ') || (c == '|')) {
             if (i > 0) { /* maybe there're ports without a category */
                tok[i] = '\0'; /* terminate current cat token */
-               add_list_item(p->lhcats, add_category(tok, lhpdir));
+               p->lhcats->tail = add_list_item_after(p->lhcats,
+                     p->lhcats->tail, add_category(tok, lhpdir));
                i = 0; /* reset i */
             }
          } else { /* inside a token */
@@ -262,10 +266,18 @@ parse_index()
                   if (dprt->state >= STATE_INSTALLED)
                      num_of_inst_ports++;
                }
-               if (pipes == PORT_BUILD_DEPENDENCY)
-                  add_list_item(p->lhbdep, dprt);
-               else if (pipes == PORT_RUN_DEPENDENCY)
-                  add_list_item(p->lhrdep, dprt);
+               if (pipes == PORT_BUILD_DEPENDENCY) {
+                  p->lhbdep->tail = add_list_item_after(p->lhbdep,
+                        p->lhbdep->tail, dprt);
+               } else if (pipes == PORT_RUN_DEPENDENCY) {
+                  p->lhrdep->tail = add_list_item_after(p->lhrdep,
+                        p->lhrdep->tail, dprt);
+               }
+               /* add also p to dprt->lhdep, so that dprt knows
+                  the port for which dprt is a dependency, this
+                  helps seeking for unused ports */
+               dprt->lhdep->tail = add_list_item_after(dprt->lhdep,
+                     dprt->lhdep->tail,  p);
                i = 0; /* reset i */
             }
          } else { /* inside a token */
@@ -356,15 +368,15 @@ parse_tokenlist(char *toklist, char *delim) {
    char *tok;
    char *tlist = strdup(toklist);
    Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
-   Node *n = NULL;
 
    /* init */
    lh->head = NULL;
+   lh->tail = NULL;
    lh->num_of_items = 0;
 
    tok = strtok(tlist, delim);
    while (tok != NULL) {
-      n = add_list_item_after(lh, n, strdup(tok));
+      lh->tail = add_list_item_after(lh, lh->tail, strdup(tok));
       tok = strtok(NULL, delim);
    }
    free(tlist);
@@ -380,7 +392,6 @@ parse_file(char *filepath) {
    char line[MAX_COLS];
    Lhd *lh;
    Line *l;
-   Node *n = NULL;
 
    if ((fd = fopen(filepath, "r")) == NULL)
       return NULL; /* error */
@@ -388,10 +399,11 @@ parse_file(char *filepath) {
    /* init */
    lh = (Lhd *)malloc(sizeof(Lhd));
    lh->head = NULL;
+   lh->tail = NULL;
    lh->num_of_items = 0;
 
    while (fgets(line, MAX_COLS, fd) != NULL) 
-      n = add_list_item_after(lh, n, create_line(line));
+      lh->tail = add_list_item_after(lh, lh->tail, create_line(line));
 
    fclose(fd);
  
@@ -405,7 +417,6 @@ parse_plist(Port *p, char *plistfile) {
    char line[MAX_TOKEN];
    char path[MAX_PATH];
    Lhd *lh;
-   Node *n = NULL;
 
    if ((fd = fopen(plistfile, "r")) == NULL)
       return NULL; /* error */
@@ -413,6 +424,7 @@ parse_plist(Port *p, char *plistfile) {
    /* init */
    lh = (Lhd *)malloc(sizeof(Lhd));
    lh->head = NULL;
+   lh->tail = NULL;
    lh->num_of_items = 0;
 
    while (fgets(line, MAX_TOKEN, fd) != NULL) {
@@ -424,7 +436,7 @@ parse_plist(Port *p, char *plistfile) {
          sprintf(path, "%s/%s", p->instpfx, line);
          pl->name = strdup(path);
          pl->exist = (access(path, F_OK) == 0) ? TRUE : FALSE; 
-         n = add_list_item_after(lh, n, pl);
+         lh->tail = add_list_item_after(lh, lh->tail, pl);
       }
    }
    fclose(fd);

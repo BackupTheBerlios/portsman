@@ -43,4 +43,5 @@ typedef Node* Iter;
 typedef struct lhd_t {
    int num_of_items;
 	struct node_t *head;
+   struct node_t *tail;
 } Lhd;
