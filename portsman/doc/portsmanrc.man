@@ -17,6 +17,9 @@ All characters until end of line will be ignored.
 \fB<key> = <value>\fR
 Each line contains at most one \fI<key>=<value>\fR statement. The whole configuration of portsman is a key\-value based configuration. Following \fBkeys\fR are currently supported by portsman (case sensitive):
 .TP 
+\fBuse.metacats\fR
+defines, if TRUE, that portsman should use also meta categories, or not if FALSE (default: TRUE)
+.TP 
 \fBtitlebar.fcolor\fR
 defines the foreground color of the titlebar, allowed are all color values
 .TP 

@@ -580,7 +580,15 @@ parse_rc_file(char *filepath) {
          tok[i] = '\0'; /* terminate value token */
          val = tok;
 
-         if (strcmp(key, "titlebar.fcolor") == 0) {
+         if (strcmp(key, "use.metacats") == 0) {
+            sh = str_to_state(val);
+            if (sh == ERROR_CORRUPT_RC_FILE) {
+               return (line); /* error */
+            } else {
+               config.use_metacats = (sh == STATE_SELECTED) ?
+                  TRUE : FALSE;
+            }
+         } else if (strcmp(key, "titlebar.fcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
                return (line); /* error */

@@ -83,6 +83,7 @@ typedef struct plist_t {
 typedef struct config_t {
    short fcolors[5]; /* foreground colors */
    short bcolors[5]; /* background colors */
+   bool use_metacats;
    char *index_file;
    char *inst_pkg_dir;
    char *ports_dir;

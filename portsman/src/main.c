@@ -37,11 +37,13 @@ version() {
 /* prints usage of portsman to stderr */
 void
 usage() {
-   fprintf(stderr, "usage: portsman [-c <portsmanrc file>] [-h] [-v]\n" 
-          "                [-d <ports dir>|-i <INDEX file>] [-p <PKG dir>]\n\n" 
+   fprintf(stderr, "usage: portsman [-c <portsmanrc file>] [-h] [-v] [-P]\n" 
+          "                [-d <ports dir> | -i <INDEX file>] [-p <PKG dir>]\n\n" 
           "       -c      path to user defined configfile\n"
           "       -h      prints this help\n" 
           "       -v      prints out the version of portsman\n"
+          "       -P      uses only physical existing categories, no\n"
+          "               meta categories (except \"All\" and \"Installed\")\n"
 #if defined(__FreeBSD__) || defined(__OpenBSD__)
           "       -d      path of ports collection\n" 
 #elif defined(__NetBSD__)
@@ -92,6 +94,7 @@ main(int argc, char * argv[]) {
    index_file = INDEX_FILE;
    inst_pkg_dir = INSTALLED_PKG_DIR;
    ports_dir = PORTS_DIR;
+   config.use_metacats = TRUE;
    config.fcolors[CLR_TITLE] = COLOR_BLACK;
    config.bcolors[CLR_TITLE] = COLOR_CYAN;
    config.fcolors[CLR_BROWSE] = COLOR_WHITE;
@@ -122,11 +125,14 @@ main(int argc, char * argv[]) {
    config.make_option_arg[MK_OPTION_NOPKGREG] = "NO_PKG_REGISTER=yes";
 
    /* command line args */
-   while ((c = getopt(argc, argv, "vi:p:c:")) != -1)
+   while ((c = getopt(argc, argv, "vPd:i:p:c:")) != -1)
       switch(c) {
          case 'v':
             version();
             exit(0);
+            break;
+         case 'P':
+            config.use_metacats = FALSE;
             break;
          case 'd':
             ports_dir = strdup(optarg);
@@ -208,7 +214,10 @@ main(int argc, char * argv[]) {
    init_windows();
 
    /* open browser */
-   result = BROWSE_WITH_META_CATEGORIES; /* all categories */
+   if (config.use_metacats)
+      result = BROWSE_WITH_META_CATEGORIES; /* all categories */
+   else
+      result = BROWSE_WITHOUT_META_CATEGORIES; /* only physical cats */
    do {
       if (result == BROWSE_WITH_META_CATEGORIES)
          result = browse_list(lhcats, lhcats->head->item, FALSE, FALSE);
