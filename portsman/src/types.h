@@ -50,6 +50,7 @@ typedef struct port_t {
 typedef struct category_t {
    short type; /* provide runtime check for void pointer */
    char *name;
+   bool meta; /* differentiation of physical and meta categories */
    int num_of_ports;
    int num_of_inst_ports;
    int num_of_marked_ports;
@@ -84,6 +85,7 @@ typedef struct config_t {
    short bcolors[5]; /* background colors */
    char *index_file;
    char *inst_pkg_dir;
+   char *ports_dir;
    char *make_cmd;
    char *make_target[3];
    short make_option[7];

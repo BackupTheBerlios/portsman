@@ -30,6 +30,7 @@
 # indexfile          defines path to index file
 # pkgdir             defines path to the package db directory
 #                    (default is /var/db/pkg)
+# portsdir           defines path to the dir of the ports collection
 # make.cmd           defines the make command (whitspaces aren't allowed)
 #                    (default: make)
 # make.target.inst   defines install target of make cmd (default: install)
@@ -85,6 +86,7 @@
 #selector.bcolor              = RED
 #indexfile                    = /usr/ports/INDEX
 #pkgdir                       = /var/db/pkg
+#portsdir                     = /usr/ports
 #make.cmd                     = make
 #make.target.inst             = install
 #make.target.deinst           = deinstall

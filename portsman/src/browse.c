@@ -543,9 +543,23 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
             break;
       }
 
+      /* special category handling, if meta-category browsing was toggled */
+      if (type == CATEGORY) {
+         switch (press) {
+            case 'A': /* browse with all categories (with meta categories) */
+               result = BROWSE_WITH_META_CATEGORIES;
+               press = 'q';
+               break;
+            case 'P': /* browse only with physical categories */
+               result = BROWSE_WITHOUT_META_CATEGORIES;
+               press = 'q';
+               break;
+         }
+      }
+
       /* special key handling, if not lines browsing */
       if (type != LINE) {
-         switch(press) {
+         switch (press) {
             case 'p': /* proceed action */
                if (!proceed) {
                   if ((((Category *)parent)->num_of_marked_ports > 0) ||

@@ -59,24 +59,53 @@ void
 create_categories(int num_of_inst_ports) {
    extern Lhd *lhprts;
    extern Lhd *lhcats;
+   extern Lhd *lhphycats;
    Iter pitr = lhprts->head;
    Iter citr = lhcats->head;
    Node *n;
+   Port *p;
    Category *newcat = (Category *)malloc(sizeof(Category));
 
+   /* initialize meta category "Installed" */
+   newcat->type = CATEGORY;
+   newcat->name = "Installed";
+   newcat->meta = TRUE;
+   newcat->num_of_marked_ports = 0;
+   newcat->num_of_deinst_ports = 0;
+   newcat->lhprts = (Lhd *)malloc(sizeof(Lhd));
+   newcat->lhprts->num_of_items = 0;
+   newcat->lhprts->head = NULL;
+
+
    while (pitr != NULL) {
-      citr = ((Port *)pitr->item)->lhcats->head;
+      p = (Port *)pitr->item;
+      citr = p->lhcats->head;
       while (citr != NULL) {
-         add_port_to_category((Category *)citr->item, (Port *)pitr->item);
+         add_port_to_category((Category *)citr->item, p);
          citr = citr->next;
       }
+      if (p->state >= STATE_INSTALLED) /* meta cat "Installed" */
+         add_port_to_category(newcat, p);
       pitr = pitr->next;
    }
 
-   /* last but not least we add meta category */
+   /* reinitialize meta cat "Installed" */
+   newcat->num_of_ports =
+      newcat->num_of_inst_ports = newcat->lhprts->num_of_items;
+ 
+   /* linking meta category "Installed" */
+   n = (Node *)malloc(sizeof(Node));
+   n->item = newcat;
+   n->next = lhcats->head;
+   lhcats->head = n;
+   lhcats->num_of_items++;
+
+   /* last but not least we add meta category "All" */
    /* this trick speeds up this parser about four times */
+   newcat = (Category *)malloc(sizeof(Category));
    newcat->type = CATEGORY;
    newcat->name = "All"; 
+   newcat->meta = TRUE;
    newcat->num_of_ports = lhprts->num_of_items;
    newcat->num_of_inst_ports = num_of_inst_ports;
    newcat->num_of_marked_ports = 0;
@@ -89,6 +118,16 @@ create_categories(int num_of_inst_ports) {
    n->next = lhcats->head;
    lhcats->head = n;
    lhcats->num_of_items++;
+
+   /* last build up list of all physical categories */
+   n = NULL;
+   citr = lhcats->head;
+   while (citr != NULL) {
+      newcat = (Category *)citr->item;
+      if (newcat->meta == FALSE) /* found physical category */
+         n = add_list_item_after(lhphycats, n, newcat);
+      citr = citr->next;
+   }
 }
 
 
@@ -96,9 +135,8 @@ create_categories(int num_of_inst_ports) {
    returns pointer of the new or existing category with name
    "name" */
 Category *
-add_category(char *name) {
+add_category(char *name, Lhd *lhpdir) {
    extern TNode *tcat;
-   extern Lhd *lhcats;
    extern void *exists;
    Category *newcat = NULL;
 
@@ -115,6 +153,15 @@ add_category(char *name) {
       /* use existing pointer for return */
       newcat = (Category *)((TNode *)exists)->item;
    } else { /* category does not exist yet */
+      /* check, if this category is a meta category or not */
+      Iter itr = lhpdir->head;
+      while (itr != NULL) {
+         if (strcmp((char *)itr->item, name) == 0)
+            /* physically existing */
+            break;
+         itr = itr->next;
+      }
+      newcat->meta = (itr == NULL) ? TRUE : FALSE;
       newcat->num_of_ports = 0;
       newcat->num_of_inst_ports = 0;
       newcat->num_of_marked_ports = 0;
@@ -146,18 +193,23 @@ parse_index()
    extern TNode *tcat;
    TNode *tdirs;
    TNode *tprt = NULL;
+   Lhd *lhpdir = (Lhd *)malloc(sizeof(Lhd));
    Port *p, *dprt;
    int num_of_inst_ports = 0;
 
    /* init */
    p = NULL;
    tcat = NULL;
+   lhpdir->num_of_items = 0;
+   lhpdir->head = NULL;
 
    if ((fd = fopen(config.index_file, "r")) == NULL)
       return ERROR_OPEN_INDEX; /* error */
 
    /* parse installed pkgs */
    tdirs = parse_dir(config.inst_pkg_dir);
+   /* parse ports dir and create list */
+   create_inorder_list(lhpdir, parse_dir(config.ports_dir));
 
    i = 0;
    readyToken = 0; /* token not ready */
@@ -186,7 +238,7 @@ parse_index()
          if ((c == ' ') || (c == '|')) {
             if (i > 0) { /* maybe there're ports without a category */
                tok[i] = '\0'; /* terminate current cat token */
-               add_list_item(p->lhcats, add_category(tok));
+               add_list_item(p->lhcats, add_category(tok, lhpdir));
                i = 0; /* reset i */
             }
          } else { /* inside a token */
@@ -599,6 +651,8 @@ parse_rc_file(char *filepath) {
             config.index_file = strdup(val);
          } else if (strcmp(key, "pkgdir") == 0) {
             config.inst_pkg_dir = strdup(val);
+         } else if (strcmp(key, "portsdir") == 0) {
+            config.ports_dir = strdup(val);
          } else if (strcmp(key, "make.cmd") == 0) {
             config.make_cmd = strdup(val);
          } else if (strcmp(key, "make.target.inst") == 0) {

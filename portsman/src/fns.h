@@ -58,7 +58,7 @@ create_array_from_list(Lhd *lh, void *items[]);
 int
 parse_index();
 Category *
-add_category(char *name); 
+add_category(char *name, Lhd *lhpdir); 
 Lhd *
 parse_tokenlist(char *toklist, char *delim);
 TNode *

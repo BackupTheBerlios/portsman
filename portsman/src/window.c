@@ -98,11 +98,13 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
          
    if (((Category *)item)->type == CATEGORY) { /* print category */
       Category *cat = (Category *)item;
-      sprintf(itemstr, " [ ] %-30.30s -%3d/ +%3d/%5d/%5d port(s)",
+      sprintf(itemstr, " [ ] %-25.25s < >  -%3d/ +%3d/%5d/%5d port(s)",
             cat->name, cat->num_of_deinst_ports,
             cat->num_of_marked_ports,
             cat->num_of_inst_ports,
             cat->num_of_ports);
+      if (cat->meta) itemstr[32] = 'M';
+      else itemstr[32] = 'P';
       if ((cat->num_of_marked_ports != 0) &&
             (cat->num_of_deinst_ports != 0))
          itemstr[2] = '*';

@@ -29,6 +29,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* global variables */
 Lhd *lhcats;
+Lhd *lhphycats;
 Lhd *lhprts;
 Config config;
 WINDOW *wtop;

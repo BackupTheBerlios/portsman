@@ -32,6 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define MAX_COLS 80
 #define INSTALLED_PKG_DIR "/var/db/pkg"
 #define INDEX_FILE "/usr/ports/INDEX"
+#define PORTS_DIR "/usr/ports"
 #define CONFIG_FILE ".portsmanrc"
 #define REFRESH_WINDOW 0
 #define REFRESH_ENTRY 1
@@ -74,3 +75,5 @@ POSSIBILITY OF SUCH DAMAGE.
 #define MK_OPTION_FORCEPKGREG 5
 #define MK_OPTION_NOPKGREG 6
 #define HELP "help"
+#define BROWSE_WITH_META_CATEGORIES 100
+#define BROWSE_WITHOUT_META_CATEGORIES 200

@@ -274,6 +274,7 @@ create_filter_category(Lhd *lhfilter, char *name,
       features */
    cat->type = CATEGORY;
    cat->name = strdup(name); 
+   cat->meta = TRUE;
    cat->num_of_ports = lh->num_of_items;
    cat->lhprts = lh;
       
@@ -322,6 +323,7 @@ create_proceed_category() {
       features */
    cat->type = CATEGORY;
    cat->name = "(de)installation/upgrade"; 
+   cat->meta = TRUE;
    cat->num_of_ports = lh->num_of_items;
    cat->num_of_inst_ports = 0;
    cat->num_of_marked_ports = num_of_marked_ports;

@@ -38,10 +38,15 @@ version() {
 void
 usage() {
    fprintf(stderr, "usage: portsman [-c <portsmanrc file>] [-h] [-v]\n" 
-          "                [-i <INDEX file>] [-p <PKG dir>]\n\n" 
+          "                [-d <ports dir>|-i <INDEX file>] [-p <PKG dir>]\n\n" 
           "       -c      path to user defined configfile\n"
           "       -h      prints this help\n" 
           "       -v      prints out the version of portsman\n"
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
+          "       -d      path of ports collection\n" 
+#elif defined(__NetBSD__)
+          "       -d      path of pkgsrc collection\n"
+#endif
           "       -i      path to the ports collection INDEX file\n" 
           "               (default: %s)\n"
           "       -p      path to package database dir\n" 
@@ -53,11 +58,13 @@ usage() {
 int
 main(int argc, char * argv[]) {
    extern Lhd *lhcats;
+   extern Lhd *lhphycats;
    extern Lhd *lhprts;
    extern Config config;
    extern bool redraw_dimensions;
    extern char *optarg;
    char *home_dir;
+   char *ports_dir;
    char *index_file;
    char *inst_pkg_dir;
    char *config_file;
@@ -84,6 +91,7 @@ main(int argc, char * argv[]) {
    }
    index_file = INDEX_FILE;
    inst_pkg_dir = INSTALLED_PKG_DIR;
+   ports_dir = PORTS_DIR;
    config.fcolors[CLR_TITLE] = COLOR_BLACK;
    config.bcolors[CLR_TITLE] = COLOR_CYAN;
    config.fcolors[CLR_BROWSE] = COLOR_WHITE;
@@ -120,6 +128,9 @@ main(int argc, char * argv[]) {
             version();
             exit(0);
             break;
+         case 'd':
+            ports_dir = strdup(optarg);
+            break;
          case 'i': /* INDEX file */
             index_file = strdup(optarg);
             break;
@@ -146,11 +157,15 @@ main(int argc, char * argv[]) {
  
    config.index_file = index_file;
    config.inst_pkg_dir = inst_pkg_dir;
+   config.ports_dir = ports_dir;
 
    /* init */
    lhcats = (Lhd *)malloc(sizeof(Lhd));
    lhcats->head = NULL;
    lhcats->num_of_items = 0;
+   lhphycats = (Lhd *)malloc(sizeof(Lhd));
+   lhphycats->head = NULL;
+   lhphycats->num_of_items = 0;
    lhprts = (Lhd *)malloc(sizeof(Lhd));
    lhprts->head = NULL;
    lhprts->num_of_items = 0;
@@ -193,7 +208,14 @@ main(int argc, char * argv[]) {
    init_windows();
 
    /* open browser */
-   browse_list(lhcats, lhcats->head->item, FALSE, FALSE);
+   result = BROWSE_WITH_META_CATEGORIES; /* all categories */
+   do {
+      if (result == BROWSE_WITH_META_CATEGORIES)
+         result = browse_list(lhcats, lhcats->head->item, FALSE, FALSE);
+      else if (result == BROWSE_WITHOUT_META_CATEGORIES)
+         result = browse_list(lhphycats, lhphycats->head->item, FALSE, FALSE);
+   } while ((result == BROWSE_WITH_META_CATEGORIES) ||
+         (result == BROWSE_WITHOUT_META_CATEGORIES));
 
    /* clean up all windows */
    clean_up_windows();
