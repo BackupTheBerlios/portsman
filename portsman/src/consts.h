@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define INDEX_FILE "/usr/ports/INDEX.portsman"
 #define PORTS_DIR "/usr/ports"
 #define CONFIG_FILE ".portsmanrc"
+#define MK_FILE "Makefile"
 #define REFRESH_WINDOW 0
 #define REFRESH_ENTRY 1
 #define STATE 0

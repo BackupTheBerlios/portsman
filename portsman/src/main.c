@@ -165,6 +165,12 @@ main(int argc, char * argv[]) {
    config.inst_pkg_dir = inst_pkg_dir;
    config.ports_dir = ports_dir;
 
+   if (!is_index_uptodate(config.ports_dir, TRUE)) {
+      /* download, start user interaction etc. */
+      fprintf(stderr, "error: %s is not as up to date as your ports"
+            " collection\n", config.index_file);
+   }
+ 
    /* init */
    lcats = (List *)malloc(sizeof(List));
    lcats->head = NULL;
