@@ -138,10 +138,10 @@ create_port(char *name, TNode *t) {
    p->lrdep->head = NULL;
    p->lrdep->tail = NULL;
    p->lrdep->num_of_items = 0;
-   p->listep = (List *)malloc(sizeof(List));
-   p->listep->head = NULL;
-   p->listep->tail = NULL;
-   p->listep->num_of_items = 0;
+   p->ldep = (List *)malloc(sizeof(List));
+   p->ldep->head = NULL;
+   p->ldep->tail = NULL;
+   p->ldep->num_of_items = 0;
    p->name = strdup(name);
    p->state = get_state(p->name, t);
 

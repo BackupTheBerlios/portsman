@@ -191,7 +191,7 @@ browse_port_summary(Port *p) {
          add_list_item(litems, create_line(msg));
          itr = itr->next;
       }
-      itr = p->listep->head;
+      itr = p->ldep->head;
       while (itr != NULL) {
          prt = (Port *)itr->item;
          sprintf(msg, "Depend. for : %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,

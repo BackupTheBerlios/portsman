@@ -44,7 +44,7 @@ typedef struct port_t {
    struct list_t *lopts; /* list of port options */
    struct list_t *lbdep; /* list of runtime deps */
    struct list_t *lrdep; /* list of build deps */
-   struct list_t *listep; /* list of ports, which have this port
+   struct list_t *ldep; /* list of ports, which have this port
                            ad dependency */
 } Port;
 

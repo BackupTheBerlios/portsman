@@ -269,10 +269,10 @@ parse_index()
                } else if (pipes == PORT_RUN_DEPENDENCY) {
                   add_list_item(p->lrdep, dprt);
                }
-               /* add also p to dprt->listep, so that dprt knows
+               /* add also p to dprt->ldep, so that dprt knows
                   the port for which dprt is a dependency, this
                   helps seeking for unused ports */
-               add_list_item(dprt->listep, p);
+               add_list_item(dprt->ldep, p);
                i = 0; /* reset i */
             }
          } else { /* inside a token */
