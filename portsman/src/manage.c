@@ -274,7 +274,86 @@ create_filter_category(List *lfilter, char *name,
          }
          itr = itr->next;
       }
+   } else if (type == DEPENDENCY) {
+      /* list of all installed ports is always second category of linst */
+      Iter ditr;
+      int inst;
+
+      while (itr != NULL) {
+         p = (Port *)itr->item;
+         if (p->state >= STATE_INSTALLED) {
+            ditr = p->ldep->head;
+            inst = 0;
+            if (ditr != NULL) { /* don't care about standalone ports */
+               while (ditr != NULL) {
+                  if (((Port *)ditr->item)->state >= STATE_INSTALLED) {
+                     inst++;
+                     break; /* not a port we're seeking for, there are
+                               installed dependencies */
+                  }
+                  ditr = ditr->next;
+               }   
+               if (inst == 0) {
+                  /* found a relevant port, which is installed,
+                     and which is a dependency for no installed
+                     ports, maybe it is redundant, so filter */
+                  add_list_item(l, p);
+
+                  /* p must be installed */
+                  (cat->num_of_inst_ports)++;
+               }
+            }
+         }
+         itr = itr->next;
+      }
+   } else if (type == REMOVAL) {
+      List *lplist;
+      Iter pitr;
+      char plistfile[MAX_PATH];
+      bool brk = FALSE;
+
+      while (itr != NULL) {
+         p = (Port *)itr->item;
+         if (p->state < STATE_INSTALLED) {
+            sprintf(plistfile, "%s/pkg-plist", p->path);
+            if ((lplist = parse_plist(p, plistfile)) != NULL) {
+               pitr = lplist->head;
+               while (pitr != NULL) {
+                  Plist *pl = (Plist *)pitr->item;
+                  if (pl->exist == TRUE) {
+                     add_list_item(l, p);
+                     switch (p->state) {
+                        case STATE_INSTALL:
+                        case STATE_UPDATE:
+                           (cat->num_of_marked_ports)++;
+                           break;
+                        case STATE_DEINSTALL:
+                           (cat->num_of_deinst_ports)++;
+                           break;
+                        case STATE_INSTALLED:
+                        case STATE_INSTALLED_NEWER:
+                        case STATE_INSTALLED_OLDER:
+                           (cat->num_of_inst_ports)++;
+                           break;
+                     }
+                     brk = TRUE; /* found, so break */
+                  }
+                  /* clean up */
+                  free(pl->name);
+                  free(pl);
+                  if (brk == TRUE) {
+                     brk = FALSE;
+                     break; /* break now, after cleaning up */
+                  }
+                  pitr = pitr->next;
+               }
+               free_list(lplist);
+            }
+         }
+         itr = itr->next;
+      }
    }
+
 
    /* creates a fake category to rape browse_list for filter browser
       features */

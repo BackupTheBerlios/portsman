@@ -589,7 +589,8 @@ browse_list(List *l, void *parent, bool proceed, bool artificial) {
             case 'f': /* filter */
                i = 0;
                expch =
-                  wprint_inputoutput_ch(" Filter ports by (s)tate or (k)eyword? [s/k] ");
+                  wprint_inputoutput_ch(" Filter ports by (s)tate,"
+                       " (r)emoval, (d)ependency or (k)eyword? [s/r/d/k] ");
                if (type == PORT) 
                   litems = l;
                else
@@ -647,6 +648,17 @@ browse_list(List *l, void *parent, bool proceed, bool artificial) {
                   expstr = wprint_inputoutput_str(" keyword: ");
                   sprintf(msg, "filter of ports with keyword '%-.20s'", expstr);
                   cat = create_filter_category(litems, msg, STRING, expstr);
+               } else if (expch == 'd') {
+                  sprintf(msg, "filter of ports which are dependencies for "
+                        "no installed ports", expstr);
+                  cat = create_filter_category(litems, msg, DEPENDENCY, NULL);
+               } else if (expch == 'r') {
+                  wprint_cmdinfo(" Please wait while seeking for (possibly)"
+                       " not cleanly removed ports...");
+                  doupdate();
+                  sprintf(msg, "filter of (possibly) not cleanly removed ports",
+                        expstr);
+                  cat = create_filter_category(litems, msg, REMOVAL, NULL);
                } else
                   i = -1;
                if (i != 0) {
@@ -669,7 +681,7 @@ browse_list(List *l, void *parent, bool proceed, bool artificial) {
                   if (artificial == TRUE)
                      refresh_cat_state((Category *)parent);
                   redraw = REFRESH_WINDOW;
-               }
+               } 
                break;
          }
       } else { /* line browsing */

@@ -36,8 +36,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_FILE ".portsmanrc"
 #define REFRESH_WINDOW 0
 #define REFRESH_ENTRY 1
-#define STRING 1
 #define STATE 0
+#define STRING 1
+#define DEPENDENCY 2
+#define REMOVAL 3
 #define STATE_NOT_SELECTED 0
 #define STATE_NOT_INSTALLED 0 /* plist */
 #define STATE_INSTALL 1
