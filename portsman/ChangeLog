@@ -1,1 +1,13 @@
+0.2:
+   + extended command line arguments
+   + improved portsmanrc options
+   + made INDEX parser more robust for corrupted INDEX files
+   + added files of port information to port summary
+   + integrated online help
+   + toggling between only-physically existing categories and
+     also meta categories
+   + new metacategory "Installed"
+   + filter of possibly not cleanly removed ports
+   + filter possibly unused ports
+   + INDEX synchronization using rsync
    + rearranged source directory structure
