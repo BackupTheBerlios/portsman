@@ -307,7 +307,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                wprint_item(wbrowse, i, 0, items[topidx + i]);
                if ((curridx == i) && (type != LINE))
                   mvwchgat(wbrowse, curridx, 0, -1,
-                        COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
+                        COLOR_PAIR(CLR_SELECTOR + 1) | A_BOLD, 0, NULL);
                else if ((search_highlight == TRUE)  && (type == LINE))
                   mvwchgat(wbrowse, curridx, pt.x, strlen(expstr),
                         COLOR_PAIR(CLR_BROWSE + 1) | A_REVERSE, 0, NULL);
@@ -321,7 +321,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                      COLOR_PAIR(CLR_BROWSE + 1), 0, NULL);
                wprint_item(wbrowse, curridx, 0, items[topidx + curridx]);
                mvwchgat(wbrowse, curridx, 0, -1,
-                     COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
+                     COLOR_PAIR(CLR_SELECTOR + 1) | A_BOLD, 0, NULL);
             }
             break;
       }
