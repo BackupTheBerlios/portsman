@@ -102,7 +102,7 @@ is_index_uptodate(char *path, bool top) {
                return FALSE; /* index is not up to date */
             }
          } else if (strcmp(dp->d_name, MK_FILE) == 0) {
-            if (sb.st_mtimespec.tv_sec < tidx) { /* found newer Makefile */ 
+            if (sb.st_mtimespec.tv_sec > tidx) { /* found newer Makefile */ 
                closedir(dfd);
                return FALSE;
             }
