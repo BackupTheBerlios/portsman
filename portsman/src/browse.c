@@ -546,12 +546,10 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
       /* special category handling, if meta-category browsing was toggled */
       if (type == CATEGORY) {
          switch (press) {
-            case 'A': /* browse with all categories (with meta categories) */
-               result = BROWSE_WITH_META_CATEGORIES;
-               press = 'q';
-               break;
-            case 'P': /* browse only with physical categories */
-               result = BROWSE_WITHOUT_META_CATEGORIES;
+            case 'a': /* toggle browse with all categories
+                         (with meta categories) */
+               result = (result == BROWSE_WITH_META_CATEGORIES) ?
+                  BROWSE_WITHOUT_META_CATEGORIES : BROWSE_WITH_META_CATEGORIES;
                press = 'q';
                break;
          }
