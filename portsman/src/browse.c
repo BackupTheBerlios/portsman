@@ -609,8 +609,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                }
             break;
             case 'u': /* update */
-               if ((p->state == STATE_INSTALLED)
-                     || (p->state == STATE_INSTALLED_OLDER)) {
+               if (p->state >= STATE_INSTALLED) {
                   mark_port(p, STATE_UPDATE, 1);
                   mark_dependencies(p);
                   redraw = REFRESH_WINDOW;

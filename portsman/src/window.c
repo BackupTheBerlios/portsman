@@ -164,7 +164,6 @@ void
 resizeHandler(int sig) {
    extern WINDOW *wtop;
    extern WINDOW *wbottom;
-   extern WINDOW *wmain;
    extern WINDOW *wbrowse;
    extern WINDOW *wcmd;
    extern bool redraw_dimensions;
@@ -179,10 +178,6 @@ resizeHandler(int sig) {
    /* resize terminal */
    resizeterm(maxy, maxx);
    
-   clearok(wmain, TRUE);
-   wresize(wmain, maxy, maxx);
-   wnoutrefresh(wmain);
-
    clearok(wtop, TRUE);
    wresize(wtop, 1, maxx);
    wnoutrefresh(wtop);
@@ -215,28 +210,23 @@ void
 init_windows() {
    extern WINDOW *wtop;
    extern WINDOW *wbottom;
-   extern WINDOW *wmain;
    extern WINDOW *wbrowse;
    extern WINDOW *wcmd;
    int maxy, maxx;
 
-   /* main window */
-   wmain = newwin(0, 0, 0, 0); /* whole screen */
-   wbkgd(wmain, A_NORMAL);
-   getmaxyx(wmain, maxy, maxx);
+   /* init */
+   maxy = LINES;
+   maxx = COLS;
 
    /* title bar */
-   //wtop = subwin(wmain, 1, maxx, 0, 0);
    wtop = newwin(1, maxx, 0, 0);
    wbkgd(wtop, COLOR_PAIR(CLR_TITLE + 1));
 
    /* status bar */
-   //wbottom = subwin(wmain, 1, maxx, maxy - 2, 0);
    wbottom = newwin(1, maxx, maxy - 2, 0);
    wbkgd(wbottom, COLOR_PAIR(CLR_STATUS + 1));
    
    /* browser window */
-   //wbrowse = subwin(wmain, maxy - 3, maxx, 1, 0);
    wbrowse = newwin(maxy - 3, maxx, 1, 0);
    wbkgd(wbrowse, COLOR_PAIR(CLR_BROWSE + 1));
 
@@ -249,7 +239,6 @@ void
 clean_up_windows() {
    extern WINDOW *wtop;
    extern WINDOW *wbottom;
-   extern WINDOW *wmain;
    extern WINDOW *wbrowse;
    extern WINDOW *wcmd;
 
@@ -258,5 +247,4 @@ clean_up_windows() {
    delwin(wbottom);
    delwin(wtop);
    delwin(wcmd);
-   delwin(wmain);
 }

@@ -18,7 +18,6 @@ State state;
 Config config;
 WINDOW *wtop;
 WINDOW *wbottom;
-WINDOW *wmain;
 WINDOW *wbrowse;
 WINDOW *wcmd;
 void *exists; /* used to detect doublettes in add_tree_item */
