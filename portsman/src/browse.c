@@ -632,8 +632,32 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                break;
          }
       } else { /* line browsing */
-         if (press == KEY_LEFT)
-            press = 'q';
+         switch (press) {
+            case '\n': /* compare with pagers, same as KEY_DOWN, see above,
+                           TODO: modularize it! */
+               if ((curridx < maxy - 1) && (type != LINE)) {
+                  curridx++;
+                  redraw = REFRESH_ENTRY;
+               } else if ((topidx + maxy) < lh->num_of_items) {
+                  topidx++;
+                  redraw = REFRESH_WINDOW;
+               }
+               search_highlight = FALSE;
+               break;
+            case ' ': /* same as KEY_NPAGE, TODO: modularize it! */
+               if ((topidx + (2 * maxy)) < lh->num_of_items)
+                  topidx += maxy;  
+               else {
+                  topidx = lh->num_of_items - maxy;
+                  curridx = maxy - 1;
+               }
+               redraw = REFRESH_WINDOW;
+               search_highlight = FALSE;
+               break;
+            case KEY_LEFT:
+               press = 'q';
+               break;
+         }
       } 
 
       /* special key press handling for ports browsing */
