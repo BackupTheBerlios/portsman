@@ -93,6 +93,12 @@ proceed_action(Lhd *lh) {
                            ((Port *)ditr->item)->state = STATE_INSTALLED;
                         ditr = ditr->next;
                      }
+                     ditr = p->lhrdep->head;
+                     while (ditr != NULL) {
+                        if (((Port *)ditr->item)->state != STATE_INSTALLED) 
+                           ((Port *)ditr->item)->state = STATE_INSTALLED;
+                        ditr = ditr->next;
+                     }
                      break;
                   case STATE_DEINSTALL:
                      p->state = STATE_NOT_SELECTED;
