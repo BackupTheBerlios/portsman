@@ -35,17 +35,19 @@ set_option_titlestatus(Port *p, int top, int bottom) {
 
 void
 set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
-   char buf[MAX_COLS];
+   extern WINDOW *wbottom;
+   char buf[wbottom->_maxx];
+   int len = (wbottom->_maxx / 3) - 23;
    sprintf(buf, " [%s]", cat->name);
    wprint_titlebar(buf, TRUE);
    if (!proceed)
-      sprintf(buf, " (%5d-%5d /%5d) port(s)   -%3d/ +%3d/%5d/%5d port(s)",
-            top, bottom, cat->num_of_ports,
+      sprintf(buf, " (%5d-%5d /%5d) %-*.*s -%3d/ +%3d/%5d/%5d port(s)",
+            top, bottom, cat->num_of_ports, len, len, "port(s)",
             cat->num_of_deinst_ports, cat->num_of_marked_ports,
             cat->num_of_inst_ports, cat->num_of_ports);
    else
-      sprintf(buf, " (%5d-%5d) item(s)          -%3d/ +%3d/%5d/%5d item(s)",
-            top, bottom,
+      sprintf(buf, " (%5d-%5d)        %-*.*s -%3d/ +%3d/%5d/%5d item(s)",
+            top, bottom, len, len, "item(s)",
             cat->num_of_deinst_ports, cat->num_of_marked_ports,
             cat->num_of_inst_ports, cat->num_of_ports);
    wprint_statusbar(buf);
@@ -54,12 +56,14 @@ set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
 
 void
 set_cat_titlestatus(Category *cat, int top, int bottom, int num_of_cats) {
-   char buf[MAX_COLS];
+   extern WINDOW *wbottom;
+   char buf[wbottom->_maxx];
+   int len = (wbottom->_maxx / 3) - 16;
    wprint_titlebar(" [categories]", TRUE);
-   sprintf(buf, " (%3d-%3d/%3d) categories       -%3d/ +%3d/%5d/%5d ports",
-         top, bottom, num_of_cats, cat->num_of_deinst_ports,
-         cat->num_of_marked_ports, cat->num_of_inst_ports,
-         cat->num_of_ports);
+   sprintf(buf, " (%3d-%3d/%3d) %-*.*s -%3d/ +%3d/%5d/%5d ports",
+         top, bottom, num_of_cats, len, len, "categories",
+         cat->num_of_deinst_ports, cat->num_of_marked_ports,
+         cat->num_of_inst_ports, cat->num_of_ports);
    wprint_statusbar(buf);
    doupdate();
 }
@@ -145,29 +149,31 @@ browse_proceed() {
 void
 browse_port_summary(Port *p) {
    extern bool redraw_dimensions;
+   extern WINDOW *wbrowse;
    Iter itr = p->lhcats->head;
    Lhd *lhplist;
    Lhd *lhitems = (Lhd *)malloc(sizeof(Lhd));
    Port *prt;
    Node *n = NULL;
-   char msg[MAX_COLS];
+   char msg[wbrowse->_maxx];
    char plistfile[MAX_PATH];
+   int len = wbrowse->_maxx - 15;
 
    /* init */
    lhitems->head = NULL;
    lhitems->num_of_items = 0;
 
    if (p != NULL) {
-      sprintf(msg, "Path to port: %-.60s", p->path);
+      sprintf(msg, "Path to port: %-.*s", len, p->path);
       n = add_list_item_after(lhitems, n, create_line(msg));
-      sprintf(msg, "Inst. prefix: %-.60s", p->instpfx);
+      sprintf(msg, "Inst. prefix: %-.*s", len, p->instpfx);
       n = add_list_item_after(lhitems, n, create_line(msg));
-      sprintf(msg, "Description : %-.60s", p->descr);
+      sprintf(msg, "Description : %-.*s", len, p->descr);
       n = add_list_item_after(lhitems, n, create_line(msg));
-      sprintf(msg, "Maintainer  : %-.60s", p->maintainer);
+      sprintf(msg, "Maintainer  : %-.*s", len, p->maintainer);
       n = add_list_item_after(lhitems, n, create_line(msg));
       while (itr != NULL) {
-         sprintf(msg, "Category    : %-.50s",
+         sprintf(msg, "Category    : %-.*s", len,
                ((Category *)itr->item)->name);
          n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
@@ -175,8 +181,8 @@ browse_port_summary(Port *p) {
       itr = p->lhbdep->head;
       while (itr != NULL) {
          prt = (Port *)itr->item;
-         sprintf(msg, "Build depend: %-40.40s (%-.20s)",
-               prt->name, (prt->state >= STATE_INSTALLED) ? "installed":
+         sprintf(msg, "Build depend: %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
+               prt->name, len / 3, (prt->state >= STATE_INSTALLED) ? "installed":
                "not installed");
          n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
@@ -184,13 +190,13 @@ browse_port_summary(Port *p) {
       itr = p->lhrdep->head;
       while (itr != NULL) {
          prt = (Port *)itr->item;
-         sprintf(msg, "Run depend  : %-40.40s (%-.20s)",
-               prt->name, (prt->state >= STATE_INSTALLED) ? "installed":
+         sprintf(msg, "Run depend  : %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
+               prt->name, len / 3, (prt->state >= STATE_INSTALLED) ? "installed":
                "not installed");
          n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
       }
-      sprintf(msg, "Homepage    : %-.60s", p->url);
+      sprintf(msg, "Homepage    : %-.*s", len, p->url);
       n = add_list_item_after(lhitems, n, create_line(msg));
 
       /* init plistfile */
@@ -199,8 +205,8 @@ browse_port_summary(Port *p) {
          itr = lhplist->head;
          while (itr != NULL) {
             Plist *pl = (Plist *)itr->item;
-            sprintf(msg, "file of port: %-40.40s (%-.20s)",
-                  pl->name, (pl->exist == TRUE) ? "installed" : "not installed");
+            sprintf(msg, "file of port: %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
+                  pl->name, len / 3, (pl->exist == TRUE) ? "installed" : "not installed");
             /* clean up */
             free(pl->name);
             free(pl);

@@ -77,12 +77,13 @@ wprint_statusbar(char *s) {
 /* prints items of list browser */
 void
 wprint_item(WINDOW *w, int y, int x, void *item) {
-   char itemstr[w->_maxy];
+   char itemstr[w->_maxx];
+   int len;
          
    if (((Category *)item)->type == CATEGORY) { /* print category */
       Category *cat = (Category *)item;
-      int len = w->_maxy - 40;
-      sprintf(itemstr, " [ ] %-*.*s    -%3d/ +%3d/%5d/%5d port(s)",
+      len = (w->_maxx / 3) - 6;
+      sprintf(itemstr, " [ ] %-*.*s -%3d/ +%3d/%5d/%5d port(s)",
             len, len,
             cat->name, cat->num_of_deinst_ports,
             cat->num_of_marked_ports,
@@ -98,7 +99,8 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
 
    } else if (((Port *)item)->type == PORT) { /* print port */
       Port *p = (Port *)item;
-      sprintf(itemstr, " [ ] %-20.20s\t%-.47s", p->name, p->descr);
+      len = (w->_maxx / 3) - 5;
+      sprintf(itemstr, " [ ] %-*.*s% -.*s", len, len, p->name, (2 * len), p->descr);
       switch (p->state) {
          case STATE_INSTALL:
             itemstr[2] = 'i'; /* install */
@@ -127,10 +129,12 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
       }
    } else if (((Option *)item)->type == OPTION) { /* compile option */
       Option *opt = (Option *)item;
-      sprintf(itemstr, "  < > %-.70s", opt->name);
+      len = w->_maxx - 10;
+      sprintf(itemstr, "  < > %-.*s", len, opt->name);
       if (opt->state == STATE_SELECTED) itemstr[3] = 'X';
    } else if (((Line *)item)->type == LINE) { /* simple line */
-      sprintf(itemstr, "%-.79s", ((Line *)item)->name);
+      len = w->_maxx - 1;
+      sprintf(itemstr, "%-.*s", len, ((Line *)item)->name);
    }
 
    mvwprintw(w, y, x, itemstr);
