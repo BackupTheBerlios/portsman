@@ -44,7 +44,7 @@ set_option_titlestatus(Port *p, int top, int bottom) {
    sprintf(buf, " [compile options of %-.40s]", p->name);
    wprint_titlebar(buf, TRUE);
    sprintf(buf, " (%3d-%3d /%3d) options", top, bottom,
-         p->lhopts->num_of_items);
+         p->lopts->num_of_items);
    wprint_statusbar(buf);
    doupdate();
 }
@@ -144,17 +144,17 @@ browse_proceed() {
 
    cat = create_proceed_category();
 
-   if (browse_list(cat->lhprts, cat, TRUE, TRUE) > 0)
+   if (browse_list(cat->lprts, cat, TRUE, TRUE) > 0)
       redraw_dimensions = TRUE;
 
    input = wprint_inputoutput_ch("Proceed with (de)installation/upgrade of above ports? [y/n] ");
    if (input == 'y') {
-      proceed_action(cat->lhprts);
+      proceed_action(cat->lprts);
    }
    wprint_cmdinfo("");
    doupdate();
 
-   free_list(cat->lhprts);
+   free_list(cat->lprts);
    free(cat);
 }
 
@@ -163,68 +163,68 @@ void
 browse_port_summary(Port *p) {
    extern bool redraw_dimensions;
    extern WINDOW *wbrowse;
-   Iter itr = p->lhcats->head;
-   Lhd *lhplist;
-   Lhd *lhitems = (Lhd *)malloc(sizeof(Lhd));
+   Iter itr = p->lcats->head;
+   List *lplist;
+   List *litems = (List *)malloc(sizeof(List));
    Port *prt;
-   Node *n = NULL;
    char msg[wbrowse->_maxx];
    char plistfile[MAX_PATH];
    int len = wbrowse->_maxx - 15;
 
    /* init */
-   lhitems->head = NULL;
-   lhitems->num_of_items = 0;
+   litems->head = NULL;
+   litems->tail = NULL;
+   litems->num_of_items = 0;
 
    if (p != NULL) {
       sprintf(msg, "Path to port: %-.*s", len, p->path);
-      n = add_list_item_after(lhitems, n, create_line(msg));
+      add_list_item(litems, create_line(msg));
       sprintf(msg, "Inst. prefix: %-.*s", len, p->instpfx);
-      n = add_list_item_after(lhitems, n, create_line(msg));
+      add_list_item(litems, create_line(msg));
       sprintf(msg, "Description : %-.*s", len, p->descr);
-      n = add_list_item_after(lhitems, n, create_line(msg));
+      add_list_item(litems, create_line(msg));
       sprintf(msg, "Maintainer  : %-.*s", len, p->maintainer);
-      n = add_list_item_after(lhitems, n, create_line(msg));
+      add_list_item(litems, create_line(msg));
       while (itr != NULL) {
          sprintf(msg, "Category    : %-.*s", len,
                ((Category *)itr->item)->name);
-         n = add_list_item_after(lhitems, n, create_line(msg));
+         add_list_item(litems, create_line(msg));
          itr = itr->next;
       }
-      itr = p->lhdep->head;
+      itr = p->listep->head;
       while (itr != NULL) {
          prt = (Port *)itr->item;
          sprintf(msg, "Depend. for : %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
                prt->name, len / 3, (prt->state >= STATE_INSTALLED) ? "installed":
                "not installed");
-         n = add_list_item_after(lhitems, n, create_line(msg));
+         add_list_item(litems, create_line(msg));
          itr = itr->next;
       }
-      itr = p->lhbdep->head;
+      itr = p->lbdep->head;
       while (itr != NULL) {
          prt = (Port *)itr->item;
          sprintf(msg, "Build depend: %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
                prt->name, len / 3, (prt->state >= STATE_INSTALLED) ? "installed":
                "not installed");
-         n = add_list_item_after(lhitems, n, create_line(msg));
+         add_list_item(litems, create_line(msg));
          itr = itr->next;
       }
-      itr = p->lhrdep->head;
+      itr = p->lrdep->head;
       while (itr != NULL) {
          prt = (Port *)itr->item;
          sprintf(msg, "Run depend  : %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
                prt->name, len / 3, (prt->state >= STATE_INSTALLED) ? "installed":
                "not installed");
-         n = add_list_item_after(lhitems, n, create_line(msg));
+         add_list_item(litems, create_line(msg));
          itr = itr->next;
       }
       sprintf(msg, "Homepage    : %-.*s", len, p->url);
-      n = add_list_item_after(lhitems, n, create_line(msg));
+      add_list_item(litems, create_line(msg));
 
       /* init plistfile */
       sprintf(plistfile, "%s/pkg-plist", p->path);
-      if ((lhplist = parse_plist(p, plistfile)) != NULL) {
-         itr = lhplist->head;
+      if ((lplist = parse_plist(p, plistfile)) != NULL) {
+         itr = lplist->head;
          while (itr != NULL) {
             Plist *pl = (Plist *)itr->item;
             sprintf(msg, "file of port: %-*.*s (%-.*s)", len * 2 / 3, len * 2 / 3,
@@ -232,17 +232,17 @@ browse_port_summary(Port *p) {
             /* clean up */
             free(pl->name);
             free(pl);
-            n = add_list_item_after(lhitems, n, create_line(msg));
+            add_list_item(litems, create_line(msg));
             itr = itr->next;
          }
-         free_list(lhplist);
+         free_list(lplist);
       }
 
-      if (browse_list(lhitems, p->name, FALSE, FALSE) > 0)
+      if (browse_list(litems, p->name, FALSE, FALSE) > 0)
          redraw_dimensions = TRUE;
       /* all lines will be freed by browse_list at the end,
-         but the lhitems list still exist, so free it */
-      free_list(lhitems);
+         but the litems list still exist, so free it */
+      free_list(litems);
    }
 }
 
@@ -251,12 +251,12 @@ browse_port_summary(Port *p) {
    (artificial is only used by categories), is only an artificial 
    one, which was created by proceed or filter! */
 int
-browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
+browse_list(List *l, void *parent, bool proceed, bool artificial) {
    extern WINDOW *wbrowse;
-   extern Lhd *lhprts;
+   extern List *lprts;
    extern bool redraw_dimensions;
    extern Config config;
-   void *items[lh->num_of_items];
+   void *items[l->num_of_items];
    int press;
    int redraw;
    int maxy, maxx;
@@ -268,18 +268,18 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
    int result = 0;
    char *expstr = NULL;
    char msg[MAX_COLS];
-   Lhd *lhitems;
+   List *litems;
    Category *cat = NULL;
    Point pt;
    bool search_highlight = FALSE;
    short type;
 
-   if (lh->num_of_items < 1) /* return immediately, if there aren't
+   if (l->num_of_items < 1) /* return immediately, if there aren't
                                 any items */
       return (-1); 
 
    /* initialization */
-   create_array_from_list(lh, items); 
+   create_array_from_list(l, items); 
    wprint_cmdinfo("");
    doupdate();
    wclear(wbrowse);
@@ -289,7 +289,7 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
    type = ((Line *)items[0])->type;
    
    /* trick for categories with fewer than maxy items */
-   if (lh->num_of_items < maxy) maxy = lh->num_of_items;
+   if (l->num_of_items < maxy) maxy = l->num_of_items;
    noecho();
    curs_set(0); /* hide cursor */
    keypad(wbrowse, TRUE);
@@ -307,10 +307,10 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
          /* prevents some possible segfaults, if the selector
             was near bottom of current list and KEY_DOWN
             will be received */
-         if (lh->num_of_items < maxy)
-            maxy = lh->num_of_items;
-         if (lh->num_of_items < (topidx + maxy))
-            topidx = lh->num_of_items - maxy;
+         if (l->num_of_items < maxy)
+            maxy = l->num_of_items;
+         if (l->num_of_items < (topidx + maxy))
+            topidx = l->num_of_items - maxy;
          if (curridx >= maxy) curridx = maxy - 1;
 
          /* reinit curses behavior we want */
@@ -328,7 +328,7 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
       /* set title status */
       if (type == CATEGORY) {
          set_cat_titlestatus((Category *)parent, topidx, topidx + maxy,
-               lh->num_of_items);
+               l->num_of_items);
       } else if (type == PORT) {
          /* here parent is needed */
          set_ports_titlestatus((Category *)parent, topidx,
@@ -337,7 +337,7 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
          set_option_titlestatus((Port *)parent, topidx, topidx + maxy);
       } else if (type == LINE) {
          set_line_titlestatus((char *)parent, topidx, topidx + maxy,
-               lh->num_of_items);
+               l->num_of_items);
       }
 
       /* begin of redraw part */
@@ -376,7 +376,7 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
             if ((curridx < maxy - 1) && (type != LINE)) {
                curridx++;
                redraw = REFRESH_ENTRY;
-            } else if ((topidx + maxy) < lh->num_of_items) {
+            } else if ((topidx + maxy) < l->num_of_items) {
                topidx++;
                redraw = REFRESH_WINDOW;
             }
@@ -399,16 +399,16 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
             search_highlight = FALSE;
             break;
          case 'G': /* bottom */
-            topidx = lh->num_of_items - maxy; 
+            topidx = l->num_of_items - maxy; 
             curridx = maxy - 1;   
             redraw = REFRESH_WINDOW;
             search_highlight = FALSE;
             break;
          case KEY_NPAGE: /* pg_down */
-            if ((topidx + (2 * maxy)) < lh->num_of_items)
+            if ((topidx + (2 * maxy)) < l->num_of_items)
                topidx += maxy;  
             else {
-               topidx = lh->num_of_items - maxy;
+               topidx = l->num_of_items - maxy;
                curridx = maxy - 1;
             }
             redraw = REFRESH_WINDOW;
@@ -426,20 +426,20 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
          case KEY_RIGHT:
          case '\n': /* ENTER */
             if (((Category *)items[topidx + curridx])->type == CATEGORY) {
-               if (browse_list(((Category *)items[topidx + curridx])->lhprts,
+               if (browse_list(((Category *)items[topidx + curridx])->lprts,
                         items[topidx + curridx], FALSE, FALSE) > 0)
                   redraw_dimensions = TRUE;
                else
                   redraw = REFRESH_WINDOW;
             } else if (((Port *)items[topidx + curridx])->type == PORT) {
                Port *prt = (Port *)items[topidx + curridx];
-               if ((lhitems = parse_file(prt->pathpkgdesc)) != NULL) {
-                  if (browse_list(lhitems, prt->pathpkgdesc, FALSE, FALSE) > 0)
+               if ((litems = parse_file(prt->pathpkgdesc)) != NULL) {
+                  if (browse_list(litems, prt->pathpkgdesc, FALSE, FALSE) > 0)
                      redraw_dimensions = TRUE;
                }
                /* all lines will be freed by browse_list at the end,
-                  but the lhitems still exist, so free it */
-               free_list(lhitems);
+                  but the litems still exist, so free it */
+               free_list(litems);
                redraw = REFRESH_WINDOW;
             }
             break; 
@@ -452,22 +452,22 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                   /* still an instance of help file */
                   i = -1;
             if (i == 0) {
-               lhitems = get_online_help();
-               if (browse_list(lhitems, HELP, FALSE, FALSE) > 0)
+               litems = get_online_help();
+               if (browse_list(litems, HELP, FALSE, FALSE) > 0)
                   redraw_dimensions = TRUE;
                /* all lines will be freed by browse_list at the end,
-                  but the lhitems list still exist, so free it */
-               free_list(lhitems);
+                  but the litems list still exist, so free it */
+               free_list(litems);
                redraw = REFRESH_WINDOW;
                search_highlight = FALSE;
             }
             break;   
          case '/': /* fw search */
             expstr = wprint_inputoutput_str(" forward search key: ");
-            pt = search(items, lh->num_of_items, expstr, topidx + curridx, 1);
+            pt = search(items, l->num_of_items, expstr, topidx + curridx, 1);
             lastidx = nextidx = pt.y;
             if (nextidx != -1) { /* found */
-               fw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
+               fw_search(l->num_of_items, nextidx, maxy, &topidx, &curridx);
                redraw = REFRESH_WINDOW;
                search_highlight = TRUE;
             } else {
@@ -480,17 +480,17 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                wprint_cmdinfo("");
                doupdate();
                if (topidx + curridx != nextidx) {
-                  pt = search(items, lh->num_of_items, expstr, topidx + curridx, 1);
+                  pt = search(items, l->num_of_items, expstr, topidx + curridx, 1);
                   nextidx = pt.y;
                } else {
-                  if (nextidx + 1 < lh->num_of_items) {
-                     pt = search(items, lh->num_of_items, expstr, nextidx + 1, 1);
+                  if (nextidx + 1 < l->num_of_items) {
+                     pt = search(items, l->num_of_items, expstr, nextidx + 1, 1);
                      nextidx = pt.y;
                   }
                }
 
                if ((nextidx != -1) && (lastidx != nextidx)) { /* found */
-                  fw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
+                  fw_search(l->num_of_items, nextidx, maxy, &topidx, &curridx);
                   lastidx = nextidx;
                   redraw = REFRESH_WINDOW;
                   search_highlight = TRUE;
@@ -502,10 +502,10 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
             break;
          case '?': /* bw search */
             expstr = wprint_inputoutput_str(" backward search key: ");
-            pt = search(items, lh->num_of_items, expstr, topidx + curridx, -1);
+            pt = search(items, l->num_of_items, expstr, topidx + curridx, -1);
             lastidx = nextidx = pt.y;
             if (nextidx != -1) { /* found */
-               bw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
+               bw_search(l->num_of_items, nextidx, maxy, &topidx, &curridx);
                redraw = REFRESH_WINDOW;
                search_highlight = TRUE;
             } else {
@@ -518,16 +518,16 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                wprint_cmdinfo("");
                doupdate();
                if (topidx + curridx != nextidx) {
-                  pt = search(items, lh->num_of_items, expstr, topidx + curridx, -1);
+                  pt = search(items, l->num_of_items, expstr, topidx + curridx, -1);
                   nextidx = pt.y;
                } else {
                   if (nextidx - 1 >= 0) {
-                     pt = search(items, lh->num_of_items, expstr, nextidx - 1, -1);
+                     pt = search(items, l->num_of_items, expstr, nextidx - 1, -1);
                      nextidx = pt.y;
                   }
                }
                if ((nextidx != -1) && (lastidx != nextidx)) { /* found */
-                  bw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
+                  bw_search(l->num_of_items, nextidx, maxy, &topidx, &curridx);
                   lastidx = nextidx;
                   redraw = REFRESH_WINDOW;
                   search_highlight = TRUE;
@@ -591,9 +591,9 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                expch =
                   wprint_inputoutput_ch(" Filter ports by (s)tate or (k)eyword? [s/k] ");
                if (type == PORT) 
-                  lhitems = lh;
+                  litems = l;
                else
-                  lhitems = lhprts;
+                  litems = lprts;
                if (expch == 's') {
                   int state;
                   expch = wprint_inputoutput_ch(" Which state? [</>/=/B/R/i/u/d] ");
@@ -601,42 +601,42 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                   switch (expch) {
                      case '<':
                         state = STATE_INSTALLED_OLDER;
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of older (possibly) installed port(s)", STATE, &state);
                         break;   
                      case '>':
                         state = STATE_INSTALLED_NEWER;
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of newer (possibly) installed port(s)", STATE, &state);
                         break;
                      case '=':
                         state = STATE_INSTALLED;   
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of installed port(s)", STATE, &state);
                         break;
                      case 'B':
                         state = STATE_BDEP;   
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of build dependencies", STATE, &state);
                         break;
                      case 'R':
                         state = STATE_RDEP;   
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of run dependencies", STATE, &state);
                         break;
                      case 'i':
                         state = STATE_INSTALL;   
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of marked ports for installation", STATE, &state);
                         break;
                      case 'u':
                         state = STATE_UPDATE;   
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of marked ports for update", STATE, &state);
                         break;
                      case 'd':
                         state = STATE_DEINSTALL;   
-                        cat = create_filter_category(lhitems,
+                        cat = create_filter_category(litems,
                               "filter of marked ports for deinstallation", STATE, &state);
                         break;
                      default: /* error, don't know */
@@ -646,16 +646,16 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                } else if (expch == 'k') {
                   expstr = wprint_inputoutput_str(" keyword: ");
                   sprintf(msg, "filter of ports with keyword '%-.20s'", expstr);
-                  cat = create_filter_category(lhitems, msg, STRING, expstr);
+                  cat = create_filter_category(litems, msg, STRING, expstr);
                } else
                   i = -1;
                if (i != 0) {
                   wprint_cmdinfo(" No valid filter");
                   doupdate();
                } else { /* everything valid */
-                  i = browse_list(cat->lhprts, cat, FALSE, TRUE);
+                  i = browse_list(cat->lprts, cat, FALSE, TRUE);
                   free(cat->name);
-                  free_list(cat->lhprts);
+                  free_list(cat->lprts);
                   free(cat);
  
                   if (i < 0) 
@@ -679,17 +679,17 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                if ((curridx < maxy - 1) && (type != LINE)) {
                   curridx++;
                   redraw = REFRESH_ENTRY;
-               } else if ((topidx + maxy) < lh->num_of_items) {
+               } else if ((topidx + maxy) < l->num_of_items) {
                   topidx++;
                   redraw = REFRESH_WINDOW;
                }
                search_highlight = FALSE;
                break;
             case ' ': /* same as KEY_NPAGE, TODO: modularize it! */
-               if ((topidx + (2 * maxy)) < lh->num_of_items)
+               if ((topidx + (2 * maxy)) < l->num_of_items)
                   topidx += maxy;  
                else {
-                  topidx = lh->num_of_items - maxy;
+                  topidx = l->num_of_items - maxy;
                   curridx = maxy - 1;
                }
                redraw = REFRESH_WINDOW;
@@ -760,9 +760,9 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
             case 'o': /* port compile options */
                if (!proceed) {
                   if ((p->state == STATE_INSTALL) || (p->state == STATE_UPDATE)) {
-                     if (p->lhopts == NULL)
+                     if (p->lopts == NULL)
                         create_options(p);
-                     if (browse_list(p->lhopts, p, FALSE, FALSE) > 0)
+                     if (browse_list(p->lopts, p, FALSE, FALSE) > 0)
                         redraw_dimensions = TRUE;
                      else
                         redraw = REFRESH_WINDOW;
@@ -776,16 +776,16 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
                expch = wprint_inputoutput_ch(" Mark all ports (if possible) with state [i/u/d/SPACE]: ");
                switch (expch) {
                   case 'i':
-                     mark_ports(lh, STATE_INSTALL);
+                     mark_ports(l, STATE_INSTALL);
                      break;
                   case 'u':
-                     mark_ports(lh, STATE_UPDATE);
+                     mark_ports(l, STATE_UPDATE);
                      break;
                   case 'd':
-                     mark_ports(lh, STATE_DEINSTALL);
+                     mark_ports(l, STATE_DEINSTALL);
                      break;
                   case ' ':
-                     mark_ports(lh, STATE_NOT_SELECTED);
+                     mark_ports(l, STATE_NOT_SELECTED);
                      break;	
                   default:
                      i = -1;
@@ -822,7 +822,7 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
 
    if (type == LINE) {
       /* free up lines */
-      for (i = 0; i < lh->num_of_items; i++) 
+      for (i = 0; i < l->num_of_items; i++) 
          free_line((Line *)items[i]);
    }
 

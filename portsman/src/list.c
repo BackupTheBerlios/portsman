@@ -30,14 +30,14 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "includes.h"
 
 /* frees a list of items */
-void free_list(Lhd *lh) {
+void free_list(List *l) {
    Iter itr;
    Node *n = NULL;
 
-   if (lh == NULL)
+   if (l == NULL)
       return;
    else
-      itr = lh->head;
+      itr = l->head;
 
    while (itr != NULL) {
       n = itr;
@@ -46,49 +46,36 @@ void free_list(Lhd *lh) {
    }
 }
 
-/* creates items array from list of lh,
-   Note: lh has to be allocated and initialized */
-void create_array_from_list(Lhd *lh, void *items[]) {
-   Iter itr = lh->head;
+/* creates items array from list of l,
+   Note: l has to be allocated and initialized */
+void create_array_from_list(List *l, void *items[]) {
+   Iter itr = l->head;
    int i;
 
-   for (i = 0; i < lh->num_of_items; i++) {
+   for (i = 0; i < l->num_of_items; i++) {
       items[i] = itr->item;
       itr = itr->next;
    }
 }
 
-/* adds an item to list of lh after node n,
-   Note: lh has to be allocated and initialized  */
-Node *add_list_item_after(Lhd *lh, Node *n, void *item) {
+/* adds an item to the list of l,
+   returns the new node, this function is more efficient than
+   ordered_add_item, because it does not use comparisions */
+Node *add_list_item(List *l, void *item) {
    Node *new = (Node *)malloc(sizeof(Node));
+
+   /* init */
    new->item = item;
    new->next = NULL;
-   (lh->num_of_items)++; 
+   l->num_of_items++; 
  
-   if ((lh->head == NULL) || (n == NULL)) { /* fresh list */
-      lh->head = new;
+   /* if l == NULL then it's a new list */
+   if (l->head == NULL) {
+      l->head = l->tail = new;
    } else {
-      n->next = new;
+      l->tail->next = new;
+      l->tail = l->tail->next;
    }
 
    return new;
-}
-
-/* adds an item to the list of lh,
-   returns the new node, this function is more efficient than
-   ordered_add_item, because it does not use comparisions */
-Node *add_list_item(Lhd *lh, void *item) {
-   Iter itr = NULL;
-   Node *n = NULL;
-
-   /* if l == NULL then it's a new list */
-   if (lh->head != NULL) {
-      itr = lh->head;
-   }
-   while (itr != NULL) {
-      n = itr;
-      itr = itr->next;
-   }
-   return add_list_item_after(lh, n, item);
 }

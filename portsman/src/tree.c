@@ -38,18 +38,17 @@ void free_tree(TNode *t) {
    free(t);
 }
 
-/* creates inorder list of lh of (sub)tree t,
-   Note: Lhd lh has to be allocated and initialized */
-void create_inorder_list(Lhd *lh, TNode *t) {
-   static Node *n;
+/* creates inorder list of l of (sub)tree t,
+   Note: List l has to be allocated and initialized */
+void create_inorder_list(List *l, TNode *t) {
 
    if (t == NULL) return;
    /* left child */
-   create_inorder_list(lh, t->left);
+   create_inorder_list(l, t->left);
    /* new list item */
-   n = add_list_item_after(lh, n, t->item);
+   add_list_item(l, t->item);
    /* right child */
-   create_inorder_list(lh, t->right);
+   create_inorder_list(l, t->right);
    /* clean up */
    free(t);
 }

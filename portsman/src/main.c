@@ -59,9 +59,9 @@ usage() {
 /* main function of portsman */
 int
 main(int argc, char * argv[]) {
-   extern Lhd *lhcats;
-   extern Lhd *lhphycats;
-   extern Lhd *lhprts;
+   extern List *lcats;
+   extern List *lphycats;
+   extern List *lprts;
    extern Config config;
    extern bool redraw_dimensions;
    extern char *optarg;
@@ -166,15 +166,18 @@ main(int argc, char * argv[]) {
    config.ports_dir = ports_dir;
 
    /* init */
-   lhcats = (Lhd *)malloc(sizeof(Lhd));
-   lhcats->head = NULL;
-   lhcats->num_of_items = 0;
-   lhphycats = (Lhd *)malloc(sizeof(Lhd));
-   lhphycats->head = NULL;
-   lhphycats->num_of_items = 0;
-   lhprts = (Lhd *)malloc(sizeof(Lhd));
-   lhprts->head = NULL;
-   lhprts->num_of_items = 0;
+   lcats = (List *)malloc(sizeof(List));
+   lcats->head = NULL;
+   lcats->tail = NULL;
+   lcats->num_of_items = 0;
+   lphycats = (List *)malloc(sizeof(List));
+   lphycats->head = NULL;
+   lphycats->tail = NULL;
+   lphycats->num_of_items = 0;
+   lprts = (List *)malloc(sizeof(List));
+   lprts->head = NULL;
+   lprts->tail = NULL;
+   lprts->num_of_items = 0;
    redraw_dimensions = FALSE;
 
 	fprintf(stdout, "Please stand by while portsman is coming up...\n");
@@ -216,9 +219,9 @@ main(int argc, char * argv[]) {
    /* open browser */
    do {
       if (config.use_metacats)
-         result = browse_list(lhcats, lhcats->head->item, FALSE, FALSE);
+         result = browse_list(lcats, lcats->head->item, FALSE, FALSE);
       else
-         result = browse_list(lhphycats, lhphycats->head->item, FALSE, FALSE);
+         result = browse_list(lphycats, lphycats->head->item, FALSE, FALSE);
    } while (result == CATS_TOGGLED);
    
    /* clean up all windows */

@@ -40,8 +40,8 @@ typedef Node* Iter;
 
 /* list head type for lists, contains also
    information about number of items of the list */
-typedef struct lhd_t {
+typedef struct list_t {
    int num_of_items;
 	struct node_t *head;
    struct node_t *tail;
-} Lhd;
+} List;

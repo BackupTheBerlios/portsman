@@ -51,17 +51,17 @@ add_port_to_category(Category *cat, Port *p) {
       (p->state == STATE_INSTALLED_OLDER) ||
       (p->state == STATE_INSTALLED_NEWER))
       (cat->num_of_inst_ports)++;
-   cat->lhprts->tail = add_list_item_after(cat->lhprts, cat->lhprts->tail, p);
+   add_list_item(cat->lprts, p);
 }
 
 /* creates all categories through the given ports list */
 void
 create_categories(int num_of_inst_ports) {
-   extern Lhd *lhprts;
-   extern Lhd *lhcats;
-   extern Lhd *lhphycats;
-   Iter pitr = lhprts->head;
-   Iter citr = lhcats->head;
+   extern List *lprts;
+   extern List *lcats;
+   extern List *lphycats;
+   Iter pitr = lprts->head;
+   Iter citr = lcats->head;
    Node *n;
    Port *p;
    Category *newcat = (Category *)malloc(sizeof(Category));
@@ -72,14 +72,15 @@ create_categories(int num_of_inst_ports) {
    newcat->meta = TRUE;
    newcat->num_of_marked_ports = 0;
    newcat->num_of_deinst_ports = 0;
-   newcat->lhprts = (Lhd *)malloc(sizeof(Lhd));
-   newcat->lhprts->num_of_items = 0;
-   newcat->lhprts->head = NULL;
+   newcat->lprts = (List *)malloc(sizeof(List));
+   newcat->lprts->num_of_items = 0;
+   newcat->lprts->head = NULL;
+   newcat->lprts->tail = NULL;
 
 
    while (pitr != NULL) {
       p = (Port *)pitr->item;
-      citr = p->lhcats->head;
+      citr = p->lcats->head;
       while (citr != NULL) {
          add_port_to_category((Category *)citr->item, p);
          citr = citr->next;
@@ -91,14 +92,14 @@ create_categories(int num_of_inst_ports) {
 
    /* reinitialize meta cat "Installed" */
    newcat->num_of_ports =
-      newcat->num_of_inst_ports = newcat->lhprts->num_of_items;
+      newcat->num_of_inst_ports = newcat->lprts->num_of_items;
  
    /* linking meta category "Installed" */
    n = (Node *)malloc(sizeof(Node));
    n->item = newcat;
-   n->next = lhcats->head;
-   lhcats->head = n;
-   lhcats->num_of_items++;
+   n->next = lcats->head;
+   lcats->head = n;
+   lcats->num_of_items++;
 
    /* last but not least we add meta category "All" */
    /* this trick speeds up this parser about four times */
@@ -106,32 +107,28 @@ create_categories(int num_of_inst_ports) {
    newcat->type = CATEGORY;
    newcat->name = "All"; 
    newcat->meta = TRUE;
-   newcat->num_of_ports = lhprts->num_of_items;
+   newcat->num_of_ports = lprts->num_of_items;
    newcat->num_of_inst_ports = num_of_inst_ports;
    newcat->num_of_marked_ports = 0;
    newcat->num_of_deinst_ports = 0;
-   newcat->lhprts = lhprts;
+   newcat->lprts = lprts;
 
    /* linking everything together */
    n = (Node *)malloc(sizeof(Node));
    n->item = newcat;
-   n->next = lhcats->head;
-   lhcats->head = n;
-   lhcats->num_of_items++;
+   n->next = lcats->head;
+   lcats->head = n;
+   lcats->num_of_items++;
 
    /* last build up list of all physical categories */
-   n = NULL;
-   citr = lhcats->head;
-   lhphycats->tail = add_list_item_after(lhphycats, lhphycats->tail,
-         (Category *)citr->item); /* All */
+   citr = lcats->head;
+   add_list_item(lphycats, (Category *)citr->item); /* All */
    citr = citr->next;
-   lhphycats->tail = add_list_item_after(lhphycats, lhphycats->tail,
-         (Category *)citr->item); /* Installed */
+   add_list_item(lphycats, (Category *)citr->item); /* Installed */
    while (citr != NULL) {
       newcat = (Category *)citr->item;
       if (newcat->meta == FALSE) /* found physical category */
-         lhphycats->tail  = add_list_item_after(lhphycats, lhphycats->tail,
-               newcat);
+         add_list_item(lphycats, newcat);
       citr = citr->next;
    }
 }
@@ -141,7 +138,7 @@ create_categories(int num_of_inst_ports) {
    returns pointer of the new or existing category with name
    "name" */
 Category *
-add_category(char *name, Lhd *lhpdir) {
+add_category(char *name, List *lpdir) {
    extern TNode *tcat;
    extern void *exists;
    Category *newcat = NULL;
@@ -160,7 +157,7 @@ add_category(char *name, Lhd *lhpdir) {
       newcat = (Category *)((TNode *)exists)->item;
    } else { /* category does not exist yet */
       /* check, if this category is a meta category or not */
-      Iter itr = lhpdir->head;
+      Iter itr = lpdir->head;
       while (itr != NULL) {
          if (strcmp((char *)itr->item, name) == 0)
             /* physically existing */
@@ -173,9 +170,10 @@ add_category(char *name, Lhd *lhpdir) {
       newcat->num_of_marked_ports = 0;
       newcat->num_of_inst_ports = 0;
       newcat->num_of_deinst_ports = 0;
-      newcat->lhprts = (Lhd *)malloc(sizeof(Lhd));
-      newcat->lhprts->num_of_items = 0;
-      newcat->lhprts->head = NULL;
+      newcat->lprts = (List *)malloc(sizeof(List));
+      newcat->lprts->num_of_items = 0;
+      newcat->lprts->head = NULL;
+      newcat->lprts->tail = NULL;
    }
 
    return newcat;
@@ -193,21 +191,22 @@ parse_index()
    int pipes = 0;
    char tok[MAX_TOKEN];
    extern Config config;
-   extern Lhd *lhprts;
-   extern Lhd *lhcats;
+   extern List *lprts;
+   extern List *lcats;
    extern void *exists;
    extern TNode *tcat;
    TNode *tdirs;
    TNode *tprt = NULL;
-   Lhd *lhpdir = (Lhd *)malloc(sizeof(Lhd));
+   List *lpdir = (List *)malloc(sizeof(List));
    Port *p, *dprt;
    int num_of_inst_ports = 0;
 
    /* init */
    p = NULL;
    tcat = NULL;
-   lhpdir->num_of_items = 0;
-   lhpdir->head = NULL;
+   lpdir->num_of_items = 0;
+   lpdir->head = NULL;
+   lpdir->tail = NULL;
 
    if ((fd = fopen(config.index_file, "r")) == NULL)
       return ERROR_OPEN_INDEX; /* error */
@@ -215,7 +214,7 @@ parse_index()
    /* parse installed pkgs */
    tdirs = parse_dir(config.inst_pkg_dir);
    /* parse ports dir and create list */
-   create_inorder_list(lhpdir, parse_dir(config.ports_dir));
+   create_inorder_list(lpdir, parse_dir(config.ports_dir));
 
    i = 0;
    readyToken = 0; /* token not ready */
@@ -244,8 +243,7 @@ parse_index()
          if ((c == ' ') || (c == '|')) {
             if (i > 0) { /* maybe there're ports without a category */
                tok[i] = '\0'; /* terminate current cat token */
-               p->lhcats->tail = add_list_item_after(p->lhcats,
-                     p->lhcats->tail, add_category(tok, lhpdir));
+               add_list_item(p->lcats, add_category(tok, lpdir));
                i = 0; /* reset i */
             }
          } else { /* inside a token */
@@ -267,17 +265,14 @@ parse_index()
                      num_of_inst_ports++;
                }
                if (pipes == PORT_BUILD_DEPENDENCY) {
-                  p->lhbdep->tail = add_list_item_after(p->lhbdep,
-                        p->lhbdep->tail, dprt);
+                  add_list_item(p->lbdep, dprt);
                } else if (pipes == PORT_RUN_DEPENDENCY) {
-                  p->lhrdep->tail = add_list_item_after(p->lhrdep,
-                        p->lhrdep->tail, dprt);
+                  add_list_item(p->lrdep, dprt);
                }
-               /* add also p to dprt->lhdep, so that dprt knows
+               /* add also p to dprt->listep, so that dprt knows
                   the port for which dprt is a dependency, this
                   helps seeking for unused ports */
-               dprt->lhdep->tail = add_list_item_after(dprt->lhdep,
-                     dprt->lhdep->tail,  p);
+               add_list_item(dprt->listep, p);
                i = 0; /* reset i */
             }
          } else { /* inside a token */
@@ -327,8 +322,8 @@ parse_index()
    }
    fclose(fd); /* close INDEX file */
 
-   create_inorder_list(lhcats, tcat);
-   create_inorder_list(lhprts, tprt);
+   create_inorder_list(lcats, tcat);
+   create_inorder_list(lprts, tprt);
    create_categories(num_of_inst_ports);
    free_tree(tdirs);
 
@@ -363,69 +358,68 @@ parse_dir(char *path) {
 }
 
 /* parses tokens, returns list pointer of token list */ 
-Lhd *
+List *
 parse_tokenlist(char *toklist, char *delim) {
    char *tok;
    char *tlist = strdup(toklist);
-   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   List *l = (List *)malloc(sizeof(List));
 
    /* init */
-   lh->head = NULL;
-   lh->tail = NULL;
-   lh->num_of_items = 0;
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
 
    tok = strtok(tlist, delim);
    while (tok != NULL) {
-      lh->tail = add_list_item_after(lh, lh->tail, strdup(tok));
+      add_list_item(l, strdup(tok));
       tok = strtok(NULL, delim);
    }
    free(tlist);
 
-   return lh;
+   return l;
 }
 
 /* parses a file and returns a list, where each item is
    a line of the file */
-Lhd *
+List *
 parse_file(char *filepath) {
    FILE *fd;
    char line[MAX_COLS];
-   Lhd *lh;
-   Line *l;
+   List *l;
 
    if ((fd = fopen(filepath, "r")) == NULL)
       return NULL; /* error */
 
    /* init */
-   lh = (Lhd *)malloc(sizeof(Lhd));
-   lh->head = NULL;
-   lh->tail = NULL;
-   lh->num_of_items = 0;
+   l = (List *)malloc(sizeof(List));
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
 
    while (fgets(line, MAX_COLS, fd) != NULL) 
-      lh->tail = add_list_item_after(lh, lh->tail, create_line(line));
+      add_list_item(l, create_line(line));
 
    fclose(fd);
  
-   return lh;
+   return l;
 }
 
 /* parses a plist file and returns a list of all files */
-Lhd *
+List *
 parse_plist(Port *p, char *plistfile) {
    FILE *fd;
    char line[MAX_TOKEN];
    char path[MAX_PATH];
-   Lhd *lh;
+   List *l;
 
    if ((fd = fopen(plistfile, "r")) == NULL)
       return NULL; /* error */
 
    /* init */
-   lh = (Lhd *)malloc(sizeof(Lhd));
-   lh->head = NULL;
-   lh->tail = NULL;
-   lh->num_of_items = 0;
+   l = (List *)malloc(sizeof(List));
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
 
    while (fgets(line, MAX_TOKEN, fd) != NULL) {
       if ((line[0] != '\0') && (line[0] != ' ')
@@ -436,24 +430,24 @@ parse_plist(Port *p, char *plistfile) {
          sprintf(path, "%s/%s", p->instpfx, line);
          pl->name = strdup(path);
          pl->exist = (access(path, F_OK) == 0) ? TRUE : FALSE; 
-         lh->tail = add_list_item_after(lh, lh->tail, pl);
+         add_list_item(l, pl);
       }
    }
    fclose(fd);
 
-   return lh;
+   return l;
 }
 
 /* parses compile options of a port through scan for all
    .if defined or .if !defined in port's Makefile */
-Lhd *
+List *
 parse_options(char *mkfile) {
    FILE *fd;
    char line[MAX_TOKEN];
    char option[MAX_PATH];
    char *start;
    char *end;
-   Lhd *lh;
+   List *l;
    TNode *t = NULL;
    extern void *exists;
    int i;
@@ -462,9 +456,10 @@ parse_options(char *mkfile) {
       return NULL; /* error */
 
    /* init */
-   lh = (Lhd *)malloc(sizeof(Lhd));
-   lh->head = NULL;
-   lh->num_of_items = 0;
+   l = (List *)malloc(sizeof(List));
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
 
    while (fgets(line, MAX_TOKEN, fd) != NULL) {
       if ((strstr(line, ".if") != NULL) &&
@@ -495,8 +490,8 @@ parse_options(char *mkfile) {
    }
    fclose(fd);
 
-   create_inorder_list(lh, t);
-   return lh;
+   create_inorder_list(l, t);
+   return l;
 }
 
 /* returns the color of an associated string,

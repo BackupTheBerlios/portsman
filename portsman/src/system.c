@@ -35,11 +35,11 @@ error(char *s) {
 }
 
 void
-proceed_action(Lhd *lh) {
-   extern Lhd *lhcats;
+proceed_action(List *l) {
+   extern List *lcats;
    extern Config config;
    extern bool redraw_dimensions;
-   Iter itr = lh->head;
+   Iter itr = l->head;
    Iter citr; /* cat iterator */
    Iter oitr; /* option iterator */
    Iter ditr; /* dependency iterator */
@@ -58,8 +58,8 @@ proceed_action(Lhd *lh) {
    while ((itr != NULL) && (result == 0)) {
       if (((Port *)itr->item)->type == PORT) {
          p = (Port *)itr->item;
-         if (p->lhopts != NULL)
-            oitr = p->lhopts->head; 
+         if (p->lopts != NULL)
+            oitr = p->lopts->head; 
 
          switch (p->state) {
             case STATE_INSTALL:
@@ -103,13 +103,13 @@ proceed_action(Lhd *lh) {
                   case STATE_INSTALL:
                   case STATE_UPDATE:
                      p->state = STATE_INSTALLED;
-                     ditr = p->lhbdep->head;
+                     ditr = p->lbdep->head;
                      while (ditr != NULL) {
                         if (((Port *)ditr->item)->state != STATE_INSTALLED) 
                            ((Port *)ditr->item)->state = STATE_INSTALLED;
                         ditr = ditr->next;
                      }
-                     ditr = p->lhrdep->head;
+                     ditr = p->lrdep->head;
                      while (ditr != NULL) {
                         if (((Port *)ditr->item)->state != STATE_INSTALLED) 
                            ((Port *)ditr->item)->state = STATE_INSTALLED;

@@ -40,11 +40,11 @@ typedef struct port_t {
    char *maintainer; /* name & email of maintainer */
    char *url; /* homepage of port */
    short state; /* see STATE_* in consts.h for detail */
-   struct lhd_t *lhcats; /* list of category pointers */
-   struct lhd_t *lhopts; /* list of port options */
-   struct lhd_t *lhbdep; /* list of runtime deps */
-   struct lhd_t *lhrdep; /* list of build deps */
-   struct lhd_t *lhdep; /* list of ports, which have this port
+   struct list_t *lcats; /* list of category pointers */
+   struct list_t *lopts; /* list of port options */
+   struct list_t *lbdep; /* list of runtime deps */
+   struct list_t *lrdep; /* list of build deps */
+   struct list_t *listep; /* list of ports, which have this port
                            ad dependency */
 } Port;
 
@@ -57,7 +57,7 @@ typedef struct category_t {
    int num_of_inst_ports;
    int num_of_marked_ports;
    int num_of_deinst_ports;
-   struct lhd_t *lhprts;
+   struct list_t *lprts;
 } Category;
 
 /* type for ports compile options */

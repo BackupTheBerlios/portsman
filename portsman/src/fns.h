@@ -39,41 +39,39 @@ cmp_str(const void *item1, const void *item2);
 void
 free_tree(TNode *t); 
 void
-create_inorder_list(Lhd *lh, TNode *t); 
+create_inorder_list(List *l, TNode *t); 
 TNode *
 add_tree_item(TNode *t, void *item,
       int (*comp)(const void *, const void *));
 
 /* list.c */
 void
-free_list(Lhd *lh);
+free_list(List *l);
 Node *
-add_list_item_after(Lhd *lh, Node *n, void *item); 
-Node *
-add_list_item(Lhd *lh, void *item);
+add_list_item(List *l, void *item);
 void
-create_array_from_list(Lhd *lh, void *items[]);
+create_array_from_list(List *l, void *items[]);
 
 /* parse.c */
 int
 parse_index();
 Category *
-add_category(char *name, Lhd *lhpdir); 
-Lhd *
+add_category(char *name, List *lpdir); 
+List *
 parse_tokenlist(char *toklist, char *delim);
 TNode *
 parse_dir(char *path); 
-Lhd *
+List *
 parse_options(char *mkfile); 
 int
 parse_rc_file(char *filepath); 
-Lhd *
+List *
 parse_plist(Port *p, char *plistfile); 
-Lhd *
+List *
 parse_file(char *filepath); 
  
 /* manage.c */
-Lhd *
+List *
 get_online_help();
 void
 free_port(Port *p); 
@@ -84,9 +82,9 @@ create_line(char *name);
 void
 free_line(Line *l); 
 void
-mark_ports(Lhd *lh, int state); 
+mark_ports(List *l, int state); 
 Category *
-create_filter_category(Lhd *lhfilter, char *name,
+create_filter_category(List *lfilter, char *name,
       int type, void *item); 
 Category *
 create_proceed_category(); 
@@ -131,11 +129,11 @@ debug(char *s);
 
 /* browse.c */
 int
-browse_list(Lhd *lh, void *parent, bool proceed, bool artificia); 
+browse_list(List *l, void *parent, bool proceed, bool artificia); 
 
 /* system.c */
 void
-proceed_action(Lhd *lh); 
+proceed_action(List *l); 
 
 /* main.c */
 int

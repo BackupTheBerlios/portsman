@@ -30,33 +30,32 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "res.h" /* help file */
 
 /* returns list of online help */
-Lhd *
+List *
 get_online_help() {
-   Lhd *lh;
-   Line *l;
-   Node *n = NULL;
+   List *l;
    int i;
 
    /* init */
-   lh = (Lhd *)malloc(sizeof(Lhd));
-   lh->head = NULL;
-   lh->num_of_items = 0;
+   l = (List *)malloc(sizeof(List));
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
 
    for (i = 0; i < (sizeof(online_help)/sizeof(online_help[0])); i++)
-      n = add_list_item_after(lh, n, create_line((char *)online_help[i]));
+      add_list_item(l, create_line((char *)online_help[i]));
 
-   return lh;
+   return l;
 }
 
 /* frees a port */
 void
 free_port(Port *p) {
 
-   free_list(p->lhcats);
-   if (p->lhopts != NULL)
-      free_list(p->lhopts);
-   free_list(p->lhbdep);
-   free_list(p->lhrdep);
+   free_list(p->lcats);
+   if (p->lopts != NULL)
+      free_list(p->lopts);
+   free_list(p->lbdep);
+   free_list(p->lrdep);
    free(p->name);
    free(p);
 }
@@ -126,23 +125,23 @@ create_port(char *name, TNode *t) {
 
    /* init */
    p->type = PORT;
-   p->lhcats = (Lhd *)malloc(sizeof(Lhd));
-   p->lhcats->head = NULL;
-   p->lhcats->tail = NULL;
-   p->lhcats->num_of_items = 0;
-   p->lhopts = NULL;
-   p->lhbdep = (Lhd *)malloc(sizeof(Lhd));
-   p->lhbdep->head = NULL;
-   p->lhbdep->tail = NULL;
-   p->lhbdep->num_of_items = 0;
-   p->lhrdep = (Lhd *)malloc(sizeof(Lhd));
-   p->lhrdep->head = NULL;
-   p->lhrdep->tail = NULL;
-   p->lhrdep->num_of_items = 0;
-   p->lhdep = (Lhd *)malloc(sizeof(Lhd));
-   p->lhdep->head = NULL;
-   p->lhdep->tail = NULL;
-   p->lhdep->num_of_items = 0;
+   p->lcats = (List *)malloc(sizeof(List));
+   p->lcats->head = NULL;
+   p->lcats->tail = NULL;
+   p->lcats->num_of_items = 0;
+   p->lopts = NULL;
+   p->lbdep = (List *)malloc(sizeof(List));
+   p->lbdep->head = NULL;
+   p->lbdep->tail = NULL;
+   p->lbdep->num_of_items = 0;
+   p->lrdep = (List *)malloc(sizeof(List));
+   p->lrdep->head = NULL;
+   p->lrdep->tail = NULL;
+   p->lrdep->num_of_items = 0;
+   p->listep = (List *)malloc(sizeof(List));
+   p->listep->head = NULL;
+   p->listep->tail = NULL;
+   p->listep->num_of_items = 0;
    p->name = strdup(name);
    p->state = get_state(p->name, t);
 
@@ -163,10 +162,10 @@ free_line(Line *l) {
    free(l);
 }
 
-/* marks all ports of list of lh with specific state, if possible */
+/* marks all ports of list of l with specific state, if possible */
 void
-mark_ports(Lhd *lh, int state) {
-   Iter itr = lh->head;
+mark_ports(List *l, int state) {
+   Iter itr = l->head;
    Port *p;
 
    while (itr != NULL) {
@@ -208,17 +207,17 @@ mark_ports(Lhd *lh, int state) {
 /* creates fake category for filter browsing, type means state or
    string, item contains state or search string */
 Category *
-create_filter_category(Lhd *lhfilter, char *name,
+create_filter_category(List *lfilter, char *name,
       int type, void *item) {
-   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   List *l = (List *)malloc(sizeof(List));
    Category *cat = (Category *)malloc(sizeof(Category));
-   Iter itr = lhfilter->head;
-   Node *n = NULL;
+   Iter itr = lfilter->head;
    Port *p;
 
    /* init */
-   lh->head = NULL;
-   lh->num_of_items = 0;
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
    cat->num_of_ports = 0;
    cat->num_of_marked_ports = 0;
    cat->num_of_inst_ports = 0;
@@ -229,7 +228,7 @@ create_filter_category(Lhd *lhfilter, char *name,
       while (itr != NULL) {
          p = (Port *)itr->item;
          if (p->state == state) {
-           n = add_list_item_after(lh, n, p);
+           add_list_item(l, p);
 
            switch (p->state) {
               case STATE_INSTALL:
@@ -256,7 +255,7 @@ create_filter_category(Lhd *lhfilter, char *name,
          p = (Port *)itr->item;
          if ((str_str(p->name, s) != NULL) ||
                (str_str(p->descr, s) != NULL)) {
-            n = add_list_item_after(lh, n, p);
+            add_list_item(l, p);
 
             switch (p->state) {
                case STATE_INSTALL:
@@ -282,8 +281,8 @@ create_filter_category(Lhd *lhfilter, char *name,
    cat->type = CATEGORY;
    cat->name = strdup(name); 
    cat->meta = TRUE;
-   cat->num_of_ports = lh->num_of_items;
-   cat->lhprts = lh;
+   cat->num_of_ports = l->num_of_items;
+   cat->lprts = l;
       
    return cat;
 }
@@ -292,30 +291,31 @@ create_filter_category(Lhd *lhfilter, char *name,
 Category *
 create_proceed_category() {
 
-   extern Lhd *lhprts;
-   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   extern List *lprts;
+   List *l = (List *)malloc(sizeof(List));
    Category *cat = (Category *)malloc(sizeof(Category));
-   Iter pitr = lhprts->head;
+   Iter pitr = lprts->head;
    Iter oitr = NULL;
    Node *n = NULL;
    Port *p;
    int num_of_deinst_ports = 0;
    int num_of_marked_ports = 0;
    
-   lh->head = NULL;
-   lh->num_of_items = 0;
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
    while (pitr != NULL) {
       p = (Port *)pitr->item;
       if ((p->state == STATE_INSTALL) ||
             (p->state == STATE_UPDATE) || 
             (p->state == STATE_DEINSTALL))  {
-         n = add_list_item_after(lh, n, p);
+         add_list_item(l, p);
          if (p->state != STATE_DEINSTALL) {
-            if (p->lhopts == NULL) create_options(p);
-            oitr = p->lhopts->head;
+            if (p->lopts == NULL) create_options(p);
+            oitr = p->lopts->head;
             /* add also all options to the list */
             while (oitr != NULL) {
-               n = add_list_item_after(lh, n, (Option *)oitr->item);
+               add_list_item(l, (Option *)oitr->item);
                oitr = oitr->next;
             }
             num_of_marked_ports++;
@@ -331,11 +331,11 @@ create_proceed_category() {
    cat->type = CATEGORY;
    cat->name = "(de)installation/upgrade"; 
    cat->meta = TRUE;
-   cat->num_of_ports = lh->num_of_items;
+   cat->num_of_ports = l->num_of_items;
    cat->num_of_inst_ports = 0;
    cat->num_of_marked_ports = num_of_marked_ports;
    cat->num_of_deinst_ports = num_of_deinst_ports;
-   cat->lhprts = lh;
+   cat->lprts = l;
       
    return cat;
 }
@@ -344,18 +344,18 @@ create_proceed_category() {
 void
 create_options(Port *p) {
    extern Config config;
-   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
-   Lhd *lhopts = NULL;
+   List *l = (List *)malloc(sizeof(List));
+   List *lopts = NULL;
    Option *opt;
    Iter itr;
-   Node *n = NULL;
    char mkfile[MAX_PATH];
 
    /* init */
-   lh->head = NULL;
-   lh->num_of_items = 0;
+   l->head = NULL;
+   l->tail = NULL;
+   l->num_of_items = 0;
    sprintf(mkfile, "%s/Makefile", p->path);
-   lhopts = parse_options(mkfile);
+   lopts = parse_options(mkfile);
    
    /* first of all, add standard option and make targets */
    opt = (Option *)malloc(sizeof(Option));
@@ -363,61 +363,61 @@ create_options(Port *p) {
    opt->name = "ignore all errors while compilation of port";
    opt->arg = config.make_option_arg[MK_OPTION_FORCE];
    opt->state = config.make_option[MK_OPTION_FORCE];
-   n = add_list_item_after(lh, n, opt);
+   add_list_item(l, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "generate a package of the port after install/update";
    opt->arg = config.make_option_arg[MK_OPTION_PKG];
    opt->state = config.make_option[MK_OPTION_PKG];
-   n = add_list_item_after(lh, n, opt);
+   add_list_item(l, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "clean after install/update";
    opt->arg = config.make_option_arg[MK_OPTION_CLEAN];
    opt->state = config.make_option[MK_OPTION_CLEAN];
-   n = add_list_item_after(lh, n, opt);
+   add_list_item(l, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "NO_CHECKSUM (don't verify checksum of source)";
    opt->arg = config.make_option_arg[MK_OPTION_NOCHKSUM];
    opt->state = config.make_option[MK_OPTION_NOCHKSUM];
-   n = add_list_item_after(lh, n, opt);
+   add_list_item(l, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "NO_DEPENDS (don't verify build dependencies)";
    opt->arg = config.make_option_arg[MK_OPTION_NODEPS];
    opt->state = config.make_option[MK_OPTION_NODEPS];
-   n = add_list_item_after(lh, n, opt);
+   add_list_item(l, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "FORCE_PKG_REGISTER (register port, also if it still exists)";
    opt->arg = config.make_option_arg[MK_OPTION_FORCEPKGREG];
    opt->state = config.make_option[MK_OPTION_FORCEPKGREG];
-   n = add_list_item_after(lh, n, opt);
+   add_list_item(l, opt);
 
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
    opt->name = "NO_PKG_REGISTER (don't register port, after compilation)";
    opt->arg = config.make_option_arg[MK_OPTION_NOPKGREG];
    opt->state = config.make_option[MK_OPTION_NOPKGREG];
-   n = add_list_item_after(lh, n, opt);
+   add_list_item(l, opt);
 
    /* additional port specific options */
-   if (lhopts != NULL) {
-      itr = lhopts->head;
+   if (lopts != NULL) {
+      itr = lopts->head;
       while (itr != NULL) {
-         n = add_list_item_after(lh, n, (Option *)itr->item);
+         add_list_item(l, (Option *)itr->item);
          itr = itr->next;
       }
-      free_list(lhopts);
+      free_list(lopts);
    }
 
-   p->lhopts = lh;
+   p->lopts = l;
 }
 
 /* searches in an array for next item with strcmp method,
@@ -494,8 +494,8 @@ search(void *items[], int num_of_items, char *s, int start, int direction) {
    ports */
 void
 unmark_all_dependencies() {
-   extern Lhd *lhprts;
-   Iter itr = lhprts->head;
+   extern List *lprts;
+   Iter itr = lprts->head;
 
    /* this algorithm uses a fast trick: unmark all dependency ports,
       then mark dependencies of all selected ports O(2n)*/
@@ -507,7 +507,7 @@ unmark_all_dependencies() {
    }
    /* now mark all selected ports again, selected ports are ones
       with state install or update */
-   itr = lhprts->head;
+   itr = lprts->head;
    while (itr != NULL) {
       if ((((Port *)itr->item)->state == STATE_INSTALL) ||
             (((Port *)itr->item)->state == STATE_UPDATE))
@@ -525,7 +525,7 @@ refresh_cat_state(Category *cat) {
    int num_of_marked_ports;
    Port *p;
 
-   pitr = cat->lhprts->head;
+   pitr = cat->lprts->head;
    num_of_deinst_ports = 0;
    num_of_inst_ports = 0;
    num_of_marked_ports = 0;
@@ -560,8 +560,8 @@ refresh_cat_state(Category *cat) {
 /* refreshes state of all categories (numbers of marked/inst/deinst ports */
 void
 refresh_cat_states() {
-   extern Lhd *lhcats;
-   Iter citr = lhcats->head;
+   extern List *lcats;
+   Iter citr = lcats->head;
 
    while (citr != NULL) {
       refresh_cat_state((Category *)citr->item);
@@ -573,11 +573,11 @@ refresh_cat_states() {
    items of its dedicated categories */
 void
 mark_port(Port *p, int st, int incrementor) {
-   extern Lhd *lhcats;
-   Category *metacat = (Category *)lhcats->head->item;
-   Iter itr = p->lhcats->head;
+   extern List *lcats;
+   Category *metacat = (Category *)lcats->head->item;
+   Iter itr = p->lcats->head;
 
-   /* lhcats is modified here, because the ports doesn't "know",
+   /* lcats is modified here, because the ports doesn't "know",
       that they're also dedicated to meta category "All" */
    if (st == STATE_DEINSTALL) {
       metacat->num_of_deinst_ports += incrementor;
@@ -601,8 +601,8 @@ mark_port(Port *p, int st, int incrementor) {
    (i)nstall or (u)pdate or (p)ower delete */
 void
 mark_dependencies(Port *p) {
-   Iter bitr = p->lhbdep->head;
-   Iter ritr = p->lhrdep->head;
+   Iter bitr = p->lbdep->head;
+   Iter ritr = p->lrdep->head;
 	Port *prt;
 
    /* mark run dependencies */
