@@ -28,7 +28,11 @@ POSSIBILITY OF SUCH DAMAGE.
 */
 #include "includes.h"
 
+/* On Sat Jul 26 12:20:00 CEST 2003 added OpenBSD support by garbeam */
+
 /* values for number of pipes in INDEX file */
+#if defined(__FreeBSD__)
+
 #define PORT_NAME_VERSION 0
 #define PORT_PATH 1
 #define PORT_INSTALL_PREFIX 2
@@ -39,6 +43,26 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PORT_BUILD_DEPENDENCY 7
 #define PORT_RUN_DEPENDENCY 8
 #define PORT_URL 9
+
+#elif defined(__OpenBSD__)
+/* values for number of pipes in INDEX file */
+#define PORT_NAME_VERSION 0
+#define PORT_PATH 1
+#define PORT_UNKNOWN 2
+#define PORT_DESCR 3
+#define PORT_PKGDESCR 4
+#define PORT_MAINTAINER 5
+#define PORT_CATEGORY 6
+#define PORT_LIB_DEPENDENCY 7
+#define PORT_BUILD_DEPENDENCY 8
+#define PORT_RUN_DEPENDENCY 9
+#define PORT_PLATFORM 10
+#define PORT_FLAG_1 11			/* unknown yet */
+#define PORT_FLAG_2 12			/* unknown yet */
+#define PORT_FLAG_3 13			/* unknown yet */
+#define PORT_FLAG_4 14			/* unknown yet */
+
+#endif
 
 /* local global */
 TNode *tcat;
@@ -303,9 +327,11 @@ parse_index()
             case PORT_PATH:
                p->path = strdup(tok);
                break;
+#if defined(__FreeBSD__)
             case PORT_INSTALL_PREFIX:
                p->instpfx = strdup(tok);
                break;
+#endif
             case PORT_DESCR:
                p->descr = strdup(tok);
                break;
@@ -315,10 +341,12 @@ parse_index()
             case PORT_MAINTAINER:
                p->maintainer = strdup(tok);
                break;
+#if defined(__FreeBSD__)
             case PORT_URL:
                p->url = strdup(tok);
                pipes = -1;
                break;
+#endif
          }
          readyToken = i = 0; /* token processed, not ready token anymore */
          pipes++;

@@ -27,8 +27,8 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef _TREE_H
-#define _TREE_H
+#ifndef _PORTSMAN_TREE_H
+#define _PORTSMAN_TREE_H
 
 /* generic binary tree package */
 /* type for entries */

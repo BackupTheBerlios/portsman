@@ -1,2 +1,2 @@
 pmanrcdir = $(prefix)/etc
-dist_pmanrc_DATA = portsmanrc.sample
+#dist_pmanrc_DATA = portsmanrc.sample
