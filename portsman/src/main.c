@@ -38,7 +38,6 @@ int
 main(int argc, char * argv[]) {
    extern Lhd *lhcats;
    extern Lhd *lhprts;
-   extern State state;
    extern Config config;
    extern bool redraw_dimensions;
    extern char *optarg;
@@ -122,8 +121,13 @@ main(int argc, char * argv[]) {
 
    /* parse rc config file */
    if (config_file != NULL) {
-      if (parse_rc_file(config_file) == ERROR_CORRUPT_RC_FILE) {
-         fprintf(stderr, "error: portsmanrc configuration file corrupted\n");
+      if ((result = parse_rc_file(config_file)) != 0) {
+         if (result == ERROR_NO_RC_FILE)
+            fprintf(stderr, "error: Can't open %s configuration file\n",
+                  config_file);
+         else
+            fprintf(stderr, "error: portsmanrc configuration file corrupted"
+               " in line %d\n", result);
       }
    }
  
@@ -137,11 +141,6 @@ main(int argc, char * argv[]) {
    lhprts = (Lhd *)malloc(sizeof(Lhd));
    lhprts->head = NULL;
    lhprts->num_of_items = 0;
-	state.num_of_inst_ports = 0;
-   state.num_of_ports = 0;
-   state.num_of_cats = 0;
-   state.num_of_marked_ports = 0;
-   state.num_of_deinst_ports = 0;
    redraw_dimensions = FALSE;
 
 	fprintf(stdout, "Please stand by while portsman is coming up...\n");
@@ -184,7 +183,7 @@ main(int argc, char * argv[]) {
    init_windows();
 
    /* open browser */
-   browse_list(lhcats, NULL, FALSE);
+   browse_list(lhcats, lhcats->head->item, FALSE);
 
    /* clean up all windows */
    clean_up_windows();

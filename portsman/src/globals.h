@@ -14,7 +14,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /* global variables */
 Lhd *lhcats;
 Lhd *lhprts;
-State state;
 Config config;
 WINDOW *wtop;
 WINDOW *wbottom;

@@ -39,8 +39,8 @@ set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
    sprintf(buf, " [%s]", cat->name);
    wprint_titlebar(buf);
    if (!proceed)
-      sprintf(buf, " (%5d-%5d) port(s)          -%3d/ +%3d/%5d/%5d port(s)",
-            top, bottom,
+      sprintf(buf, " (%5d-%5d /%5d) port(s)   -%3d/ +%3d/%5d/%5d port(s)",
+            top, bottom, cat->num_of_ports,
             cat->num_of_deinst_ports, cat->num_of_marked_ports,
             cat->num_of_inst_ports, cat->num_of_ports);
    else
@@ -53,14 +53,13 @@ set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
 }
 
 void
-set_cat_titlestatus(int top, int bottom) {
-   extern State state;
+set_cat_titlestatus(Category *cat, int top, int bottom, int num_of_cats) {
    char buf[MAX_COLS];
    wprint_titlebar(" [categories]");
    sprintf(buf, " (%3d-%3d/%3d) categories       -%3d/ +%3d/%5d/%5d ports",
-         top, bottom, state.num_of_cats, state.num_of_deinst_ports,
-         state.num_of_marked_ports, state.num_of_inst_ports,
-         state.num_of_ports);
+         top, bottom, num_of_cats, cat->num_of_deinst_ports,
+         cat->num_of_marked_ports, cat->num_of_inst_ports,
+         cat->num_of_ports);
    wprint_statusbar(buf);
    doupdate();
 }
@@ -220,11 +219,10 @@ browse_port_summary(Port *p) {
    }
 }
 
-/* generic list browser, prev means parent item, if exists */
+/* generic list browser, parent item */
 int
 browse_list(Lhd *lh, void *parent, bool proceed) {
    extern WINDOW *wbrowse;
-   extern State state;
    extern Lhd *lhprts;
    extern bool redraw_dimensions;
    void *items[lh->num_of_items];
@@ -289,7 +287,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
 
       /* set title status */
       if (type == CATEGORY) {
-         set_cat_titlestatus(topidx, topidx + maxy);
+         set_cat_titlestatus((Category *)parent, topidx, topidx + maxy,
+               lh->num_of_items);
       } else if (type == PORT) {
          /* here parent is needed */
          set_ports_titlestatus((Category *)parent, topidx,
@@ -309,7 +308,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                if ((curridx == i) && (type != LINE))
                   mvwchgat(wbrowse, curridx, 0, -1,
                         COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
-               else if (search_highlight) 
+               else if ((search_highlight == TRUE)  && (type == LINE))
                   mvwchgat(wbrowse, curridx, pt.x, strlen(expstr),
                         COLOR_PAIR(CLR_BROWSE + 1) | A_REVERSE, 0, NULL);
             }
@@ -506,8 +505,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          switch(press) {
             case 'p': /* proceed action */
                if (!proceed) {
-                  if ((state.num_of_marked_ports > 0) ||
-                        (state.num_of_deinst_ports > 0)) {
+                  if ((((Category *)parent)->num_of_marked_ports > 0) ||
+                        (((Category *)parent)->num_of_deinst_ports > 0)) {
                      browse_proceed();
                      redraw = REFRESH_WINDOW;
                   } else {

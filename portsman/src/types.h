@@ -56,15 +56,6 @@ typedef struct line_t {
    char *name;
 } Line;
 
-/* portsman state type */
-typedef struct state_t {
-   int num_of_deinst_ports;
-   int num_of_inst_ports;
-   int num_of_ports;
-   int num_of_cats;
-   int num_of_marked_ports;
-} State;
-
 /* plist state type */
 typedef struct plist_t {
    char *name;

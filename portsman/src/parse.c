@@ -40,8 +40,7 @@ add_port_to_category(Category *cat, Port *p) {
 
 /* creates all categories through the given ports list */
 void
-create_categories() {
-   extern State state;
+create_categories(int num_of_inst_ports) {
    extern Lhd *lhprts;
    extern Lhd *lhcats;
    Iter pitr = lhprts->head;
@@ -62,10 +61,10 @@ create_categories() {
    /* this trick speeds up this parser about four times */
    newcat->type = CATEGORY;
    newcat->name = "All"; 
-   newcat->num_of_ports = state.num_of_ports;
-   newcat->num_of_inst_ports = state.num_of_inst_ports;
-   newcat->num_of_marked_ports = state.num_of_marked_ports;
-   newcat->num_of_deinst_ports = state.num_of_deinst_ports;
+   newcat->num_of_ports = lhprts->num_of_items;
+   newcat->num_of_inst_ports = num_of_inst_ports;
+   newcat->num_of_marked_ports = 0;
+   newcat->num_of_deinst_ports = 0;
    newcat->lhprts = lhprts;
 
    /* linking everything together */
@@ -178,7 +177,6 @@ parse_index()
    int c, i, readyToken;
    int pipes = 0;
    char tok[MAX_TOKEN];
-   extern State state;
    extern Config config;
    extern Lhd *lhprts;
    extern Lhd *lhcats;
@@ -187,6 +185,7 @@ parse_index()
    TNode *tdirs;
    TNode *tprt = NULL;
    Port *p, *dprt;
+   int num_of_inst_ports = 0;
 
    /* init */
    p = NULL;
@@ -246,7 +245,7 @@ parse_index()
                   dprt = (Port *)((TNode *)exists)->item;
                } else {
                   if (dprt->state >= STATE_INSTALLED)
-                     state.num_of_inst_ports++;
+                     num_of_inst_ports++;
                }
                if (pipes == PORT_BUILD_DEPENDENCY)
                   add_list_item(p->lhbdep, dprt);
@@ -272,7 +271,7 @@ parse_index()
                   p = (Port *)((TNode *)exists)->item;
                } else {
                   if (p->state >= STATE_INSTALLED)
-                     state.num_of_inst_ports++;
+                     num_of_inst_ports++;
                }
                break;
             case PORT_PATH:
@@ -292,7 +291,6 @@ parse_index()
                break;
             case PORT_URL:
                p->url = strdup(tok);
-               state.num_of_ports++;
                pipes = -1;
                break;
          }
@@ -302,14 +300,11 @@ parse_index()
    }
    fclose(fd); /* close INDEX file */
 
-   /* important to set state before, because create_categories
-      needs it */
    create_inorder_list(lhcats, tcat);
    create_inorder_list(lhprts, tprt);
-   create_categories();
+   create_categories(num_of_inst_ports);
    free_tree(tdirs);
 
-   state.num_of_cats = lhcats->num_of_items;
    /* finished */
    return (0);
 }
@@ -512,7 +507,11 @@ str_to_state(char *boolstr) {
       return ERROR_CORRUPT_RC_FILE;
 }
 
-/* parses portsmanrc file and resets config if needed */
+/* parses portsmanrc file and resets config if needed,
+   returns 0 if everything was ok, ERROR_NO_RC_FILE if
+   file could not be opened or a positive int of the
+   line number where ERROR_CORRUPT_RC_FILE succeeded or
+   an unknown keyword exist */
 int
 parse_rc_file(char *filepath) {
    FILE *fd;
@@ -524,7 +523,7 @@ parse_rc_file(char *filepath) {
    char arg[MAX_TOKEN];
    char *key;
    char *val;
-   int i = 0, c = 0;
+   int i = 0, c = 0, line = 0;
    short sh = 0;
    
    if ((fd = fopen(filepath, "r")) == NULL)
@@ -542,6 +541,7 @@ parse_rc_file(char *filepath) {
                readyValue = TRUE;
             break;
          case '\n': /* eol */
+            line++;
             comment = FALSE;
             /* ready value */
             if (i > 0)  /* ready value */
@@ -568,70 +568,70 @@ parse_rc_file(char *filepath) {
          if (strcmp(key, "titlebar.fcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.fcolors[CLR_TITLE] = sh;
             }
          } else if (strcmp(key, "titlebar.bcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.bcolors[CLR_TITLE] = sh;
             }
          } else if (strcmp(key, "browser.fcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.fcolors[CLR_BROWSE] = sh;
             }
          } else if (strcmp(key, "browser.bcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.bcolors[CLR_BROWSE] = sh;
             }
          } else if (strcmp(key, "statusbar.fcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.fcolors[CLR_STATUS] = sh;
             }
          } else if (strcmp(key, "statusbar.bcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.bcolors[CLR_STATUS] = sh;
             }
          } else if (strcmp(key, "cmdbar.fcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.fcolors[CLR_CMD] = sh;
             }
          } else if (strcmp(key, "cmdbar.bcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.bcolors[CLR_CMD] = sh;
             }
          } else if (strcmp(key, "selector.fcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.fcolors[CLR_SELECTOR] = sh;
             }
          } else if (strcmp(key, "selector.bcolor") == 0) {
             sh = str_to_color(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.bcolors[CLR_SELECTOR] = sh;
             }
@@ -650,49 +650,49 @@ parse_rc_file(char *filepath) {
          } else if (strcmp(key, "make.option.force") == 0) {
             sh = str_to_state(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.make_option[MK_OPTION_FORCE] = sh;
             }
          } else if (strcmp(key, "make.option.pkg") == 0) {
             sh = str_to_state(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.make_option[MK_OPTION_PKG] = sh;
             }
          } else if (strcmp(key, "make.option.clean") == 0) {
             sh = str_to_state(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.make_option[MK_OPTION_CLEAN] = sh;
             }
          } else if (strcmp(key, "make.option.nochksum") == 0) {
             sh = str_to_state(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.make_option[MK_OPTION_NOCHKSUM] = sh;
             }
          } else if (strcmp(key, "make.option.nodeps") == 0) {
             sh = str_to_state(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.make_option[MK_OPTION_NODEPS] = sh;
             }
          } else if (strcmp(key, "make.option.forcepkgreg") == 0) {
             sh = str_to_state(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.make_option[MK_OPTION_FORCEPKGREG] = sh;
             }
          } else if (strcmp(key, "make.option.nopkgreg") == 0) {
             sh = str_to_state(val);
             if (sh == ERROR_CORRUPT_RC_FILE) {
-               return (ERROR_CORRUPT_RC_FILE); /* error */
+               return (line); /* error */
             } else {
                config.make_option[MK_OPTION_NOPKGREG] = sh;
             }
@@ -717,6 +717,8 @@ parse_rc_file(char *filepath) {
          } else if (strcmp(key, "make.option.nopkgreg.arg") == 0) {
             sprintf(arg, "%s=yes", val);
             config.make_option_arg[MK_OPTION_NOPKGREG] = strdup(arg);
+         } else {
+            return line; /* also error: unknown key */
          }
             
          free(key);

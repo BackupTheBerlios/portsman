@@ -419,7 +419,6 @@ unmark_all_dependencies() {
 /* refreshes state of all categories (numbers of marked/inst/deinst ports */
 void
 refresh_cat_states() {
-   extern State state;
    extern Lhd *lhcats;
    Iter pitr;
    Iter citr = lhcats->head;
@@ -457,11 +456,6 @@ refresh_cat_states() {
       ((Category *)citr->item)->num_of_inst_ports = num_of_inst_ports;
       ((Category *)citr->item)->num_of_marked_ports = num_of_marked_ports;
 
-      if (citr == lhcats->head) {/* state , maybe depricated */
-         state.num_of_deinst_ports = num_of_deinst_ports;
-         state.num_of_inst_ports = num_of_inst_ports;
-         state.num_of_marked_ports = num_of_marked_ports;
-      }
       citr = citr->next;
    }
 }
@@ -470,7 +464,6 @@ refresh_cat_states() {
    items of its dedicated categories */
 void
 mark_port(Port *p, int st, int incrementor) {
-   extern State state;
    extern Lhd *lhcats;
    Category *metacat = (Category *)lhcats->head->item;
    Iter itr = p->lhcats->head;
@@ -478,7 +471,6 @@ mark_port(Port *p, int st, int incrementor) {
    /* lhcats is modified here, because the ports doesn't "know",
       that they're also dedicated to meta category "All" */
    if (st == STATE_DEINSTALL) {
-      state.num_of_deinst_ports += incrementor;
       metacat->num_of_deinst_ports += incrementor;
       p->state = st;
       while (itr != NULL) {
@@ -486,7 +478,6 @@ mark_port(Port *p, int st, int incrementor) {
          itr = itr->next;
       }
    } else {
-      state.num_of_marked_ports += incrementor;
       metacat->num_of_marked_ports += incrementor;
       p->state = st;
       while (itr != NULL) {

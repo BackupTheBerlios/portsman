@@ -110,13 +110,6 @@ void
 debug(char *s);
 
 /* browse.c */
-void
-set_file_titlebar(char *name); 
-void
-set_cat_titlestatus(int top, int bottom); 
-void
-set_ports_titlestatus(Category *cat, int top, int bottom,
-      bool proceed); 
 int
 browse_list(Lhd *lh, void *parent, bool proceed); 
 
