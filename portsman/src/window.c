@@ -58,7 +58,7 @@ wprint_titlebar(char *s, bool help) {
    mvwprintw(wtop, 0, 0, s);
    wclrtoeol(wtop);
    if (help) {
-      mvwprintw(wtop, 0, (wtop->_maxx - 10), "(h)elp");
+      mvwprintw(wtop, 0, (wtop->_maxx - 6), "(h)elp");
       wclrtoeol(wtop);
    }
    mvwchgat(wtop, 0, 0, -1, COLOR_PAIR(CLR_TITLE + 1), 0, NULL);
@@ -82,9 +82,7 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
          
    if (((Category *)item)->type == CATEGORY) { /* print category */
       Category *cat = (Category *)item;
-      len = (w->_maxx / 3) - 6;
-      sprintf(itemstr, " [ ] %-*.*s -%3d/ +%3d/%5d/%5d port(s)",
-            len, len,
+      sprintf(itemstr, " [ ] %-30.30s -%3d/ +%3d/%5d/%5d port(s)",
             cat->name, cat->num_of_deinst_ports,
             cat->num_of_marked_ports,
             cat->num_of_inst_ports,
@@ -99,8 +97,8 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
 
    } else if (((Port *)item)->type == PORT) { /* print port */
       Port *p = (Port *)item;
-      len = (w->_maxx / 3) - 5;
-      sprintf(itemstr, " [ ] %-*.*s% -.*s", len, len, p->name, (2 * len), p->descr);
+      len = w->_maxx - 36;
+      sprintf(itemstr, " [ ] %-30.30s %-*.*s", p->name, len, len, p->descr);
       switch (p->state) {
          case STATE_INSTALL:
             itemstr[2] = 'i'; /* install */

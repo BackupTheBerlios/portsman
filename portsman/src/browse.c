@@ -36,18 +36,17 @@ set_option_titlestatus(Port *p, int top, int bottom) {
 void
 set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
    extern WINDOW *wbottom;
-   char buf[wbottom->_maxx];
-   int len = (wbottom->_maxx / 3) - 23;
+   char buf[MAX_COLS];
    sprintf(buf, " [%s]", cat->name);
    wprint_titlebar(buf, TRUE);
    if (!proceed)
-      sprintf(buf, " (%5d-%5d /%5d) %-*.*s -%3d/ +%3d/%5d/%5d port(s)",
-            top, bottom, cat->num_of_ports, len, len, "port(s)",
+      sprintf(buf, " (%5d-%5d /%5d) port(s)       -%3d/ +%3d/%5d/%5d port(s)",
+            top, bottom, cat->num_of_ports,
             cat->num_of_deinst_ports, cat->num_of_marked_ports,
             cat->num_of_inst_ports, cat->num_of_ports);
    else
-      sprintf(buf, " (%5d-%5d)        %-*.*s -%3d/ +%3d/%5d/%5d item(s)",
-            top, bottom, len, len, "item(s)",
+      sprintf(buf, " (%5d-%5d) item(s)              -%3d/ +%3d/%5d/%5d item(s)",
+            top, bottom, 
             cat->num_of_deinst_ports, cat->num_of_marked_ports,
             cat->num_of_inst_ports, cat->num_of_ports);
    wprint_statusbar(buf);
@@ -56,12 +55,10 @@ set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
 
 void
 set_cat_titlestatus(Category *cat, int top, int bottom, int num_of_cats) {
-   extern WINDOW *wbottom;
-   char buf[wbottom->_maxx];
-   int len = (wbottom->_maxx / 3) - 16;
+   char buf[MAX_COLS];
    wprint_titlebar(" [categories]", TRUE);
-   sprintf(buf, " (%3d-%3d/%3d) %-*.*s -%3d/ +%3d/%5d/%5d ports",
-         top, bottom, num_of_cats, len, len, "categories",
+   sprintf(buf, " (%3d-%3d/%3d) categories           -%3d/ +%3d/%5d/%5d ports",
+         top, bottom, num_of_cats,
          cat->num_of_deinst_ports, cat->num_of_marked_ports,
          cat->num_of_inst_ports, cat->num_of_ports);
    wprint_statusbar(buf);
