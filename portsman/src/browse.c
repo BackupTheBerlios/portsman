@@ -404,14 +404,22 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             break; 
          case KEY_F(1):
          case 'h': /* help */
-            lhitems = parse_file(HELP_FILE);
-            if (browse_list(lhitems, HELP_FILE, FALSE) > 0)
-               redraw_dimensions = TRUE;
-            /* all lines will be freed by browse_list at the end,
-               but the lhitems list still exist, so free it */
-            free_list(lhitems);
-            redraw = REFRESH_WINDOW;
-            search_highlight = FALSE;
+            /* allow only one instance of help file */
+            i = 0;
+            if (type == LINE) 
+               if (strcmp((char *)parent, HELP_FILE) == 0)
+                  /* still an instance of help file */
+                  i = -1;
+            if (i == 0) {
+               lhitems = parse_file(HELP_FILE);
+               if (browse_list(lhitems, HELP_FILE, FALSE) > 0)
+                  redraw_dimensions = TRUE;
+               /* all lines will be freed by browse_list at the end,
+                  but the lhitems list still exist, so free it */
+               free_list(lhitems);
+               redraw = REFRESH_WINDOW;
+               search_highlight = FALSE;
+            }
             break;   
          case '/': /* fw search */
             expstr = wprint_inputoutput_str(" forward search key: ");
