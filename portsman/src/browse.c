@@ -1,15 +1,15 @@
 /*
-Copyright (c) 2002, 2003, Anselm R. Garbe
-All rights reserved.
+   Copyright (c) 2002, 2003, Anselm R. Garbe
+   All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+   Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-* Neither the name of the portsman developers nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of the portsman developers nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 #include "includes.h"
 
 void
@@ -38,14 +38,14 @@ set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
    char buf[MAX_COLS];
    sprintf(buf, " [%s]", cat->name);
    wprint_titlebar(buf);
-	if (!proceed)
-		sprintf(buf, " (%5d-%5d) port(s)          -%3d/ +%3d/%5d/%5d port(s)",
-				top, bottom,
+   if (!proceed)
+      sprintf(buf, " (%5d-%5d) port(s)          -%3d/ +%3d/%5d/%5d port(s)",
+            top, bottom,
             cat->num_of_deinst_ports, cat->num_of_marked_ports,
             cat->num_of_inst_ports, cat->num_of_ports);
-	else
-		sprintf(buf, " (%5d-%5d) item(s)          -%3d/ +%3d/%5d/%5d item(s)",
-				top, bottom,
+   else
+      sprintf(buf, " (%5d-%5d) item(s)          -%3d/ +%3d/%5d/%5d item(s)",
+            top, bottom,
             cat->num_of_deinst_ports, cat->num_of_marked_ports,
             cat->num_of_inst_ports, cat->num_of_ports);
    wprint_statusbar(buf);
@@ -103,10 +103,10 @@ bw_search(int num_of_items, int nextidx, int maxy,
       }
 
    } else {
-     wprint_cmdinfo(" search wrapped at top ");
-     doupdate();
+      wprint_cmdinfo(" search wrapped at top ");
+      doupdate();
 
-     if ((nextidx - *curridx + maxy) < num_of_items) {
+      if ((nextidx - *curridx + maxy) < num_of_items) {
          *topidx = nextidx - *curridx;
       } else {
          *topidx = num_of_items - maxy; 
@@ -123,14 +123,14 @@ browse_proceed() {
    Category *cat;
    int input;
 
-	wprint_cmdinfo(" Please wait while scanning all compile options...");
-	doupdate();
-   
+   wprint_cmdinfo(" Please wait while scanning all compile options...");
+   doupdate();
+
    cat = create_proceed_category();
-      
+
    if (browse_list(cat->lhprts, cat, TRUE) > 0)
       redraw_dimensions = TRUE;
-   
+
    input = wprint_inputoutput_ch("Proceed with (de)installation/upgrade of above ports? [y/n] ");
    if (input == 'y') {
       proceed_action(cat->lhprts);
@@ -240,9 +240,10 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
    Lhd *lhitems;
    Category *cat = NULL;
    Point pt;
+   bool search_highlight = FALSE;
 
    if (lh->num_of_items < 1) /* return immediately, if there aren't
-                                  any items */
+                                any items */
       return (-1); 
 
    /* initialization */
@@ -278,14 +279,14 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          redraw_dimensions = FALSE;
          redraw = REFRESH_WINDOW;
       }
- 
+
       /* set title status */
       if (((Category *)items[0])->type == CATEGORY) {
          set_cat_titlestatus(topidx, topidx + maxy);
       } else if (((Port *)items[0])->type == PORT) {
          /* here parent is needed */
          set_ports_titlestatus((Category *)parent, topidx,
-					topidx + maxy, proceed);
+               topidx + maxy, proceed);
       } else if (((Option *)items[0])->type == OPTION) {
          set_option_titlestatus((Port *)parent, topidx, topidx + maxy);
       } else if (((Line *)items[0])->type == LINE) {
@@ -295,17 +296,17 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
 
       /* begin of redraw part */
       switch (redraw) {
-        case REFRESH_WINDOW:
+         case REFRESH_WINDOW:
             for (i = 0; i < maxy; i++) {
                wprint_item(wbrowse, i, 0, items[topidx + i]);
                if ((curridx == i) && (((Line *)items[0])->type != LINE))
                   mvwchgat(wbrowse, curridx, 0, -1,
                         COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
-               else if (expstr != NULL) 
+               else if (search_highlight) 
                   mvwchgat(wbrowse, curridx, pt.x, strlen(expstr),
                         COLOR_PAIR(CLR_BROWSE + 1) | A_REVERSE, 0, NULL);
             }
-         break;
+            break;
          case REFRESH_ENTRY:
             if (((Line *)items[0])->type != LINE) {
                /* only highlight if it's no line */
@@ -316,7 +317,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                mvwchgat(wbrowse, curridx, 0, -1,
                      COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
             }
-         break;
+            break;
       }
       /* end of redraw */
 
@@ -326,33 +327,37 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
       switch (press) {
          case 'j':
          case KEY_DOWN:
-               if ((curridx < maxy - 1) && (((Line *)items[0])->type != LINE)) {
-                  curridx++;
-                  redraw = REFRESH_ENTRY;
-               } else if ((topidx + maxy) < lh->num_of_items) {
-                  topidx++;
-                  redraw = REFRESH_WINDOW;
-               }
-         break;
+            if ((curridx < maxy - 1) && (((Line *)items[0])->type != LINE)) {
+               curridx++;
+               redraw = REFRESH_ENTRY;
+            } else if ((topidx + maxy) < lh->num_of_items) {
+               topidx++;
+               redraw = REFRESH_WINDOW;
+            }
+            search_highlight = FALSE;
+            break;
          case 'k':
          case KEY_UP:
-               if ((curridx > 0) && (((Line *)items[0])->type != LINE)) {
-                  curridx--;
-                  redraw = REFRESH_ENTRY;
-               } else if (topidx > 0) {
-                  topidx--;
-                  redraw = REFRESH_WINDOW;
-               }
-         break;
+            if ((curridx > 0) && (((Line *)items[0])->type != LINE)) {
+               curridx--;
+               redraw = REFRESH_ENTRY;
+            } else if (topidx > 0) {
+               topidx--;
+               redraw = REFRESH_WINDOW;
+            }
+            search_highlight = FALSE;
+            break;
          case 'g': /* top */
             topidx = curridx = 0;
             redraw = REFRESH_WINDOW;
-         break;
+            search_highlight = FALSE;
+            break;
          case 'G': /* bottom */
             topidx = lh->num_of_items - maxy; 
             curridx = maxy - 1;   
             redraw = REFRESH_WINDOW;
-         break;
+            search_highlight = FALSE;
+            break;
          case KEY_NPAGE: /* pg_down */
             if ((topidx + (2 * maxy)) < lh->num_of_items)
                topidx += maxy;  
@@ -361,20 +366,22 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                curridx = maxy - 1;
             }
             redraw = REFRESH_WINDOW;
-         break;   
+            search_highlight = FALSE;
+            break;   
          case KEY_PPAGE: /* pg_up */
             if ((topidx - maxy) > 0)
                topidx -= maxy;
             else 
                topidx = curridx = 0;
             redraw = REFRESH_WINDOW;
-         break;
+            search_highlight = FALSE;
+            break;
          case 'l':
          case KEY_RIGHT:
          case '\n': /* ENTER */
             if (((Category *)items[topidx + curridx])->type == CATEGORY) {
                if (browse_list(((Category *)items[topidx + curridx])->lhprts,
-                           items[topidx + curridx], FALSE) > 0)
+                        items[topidx + curridx], FALSE) > 0)
                   redraw_dimensions = TRUE;
                else
                   redraw = REFRESH_WINDOW;
@@ -388,7 +395,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                free_list(lhitems);
                redraw = REFRESH_WINDOW;
             }
-         break; 
+            break; 
          case KEY_F(1):
          case 'h': /* help */
             lhitems = parse_file(HELP_FILE);
@@ -398,7 +405,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                but the lhitems list still exist, so free it */
             free_list(lhitems);
             redraw = REFRESH_WINDOW;
-         break;   
+            search_highlight = FALSE;
+            break;   
          case '/': /* fw search */
             expstr = wprint_inputoutput_str(" forward search key: ");
             pt = search(items, lh->num_of_items, expstr, topidx + curridx, 1);
@@ -406,11 +414,12 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             if (nextidx != -1) { /* found */
                fw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
                redraw = REFRESH_WINDOW;
+               search_highlight = TRUE;
             } else {
                wprint_cmdinfo(" no (more) items found in bottom direction");
                doupdate();
             }
-         break;
+            break;
          case 'n': /* fw search next */
             if (expstr != NULL) {
                wprint_cmdinfo("");
@@ -429,12 +438,13 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   fw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
                   lastidx = nextidx;
                   redraw = REFRESH_WINDOW;
+                  search_highlight = TRUE;
                } else {
                   wprint_cmdinfo(" no (more) items found in bottom direction");
                   doupdate();
                }
             }
-         break;
+            break;
          case '?': /* bw search */
             expstr = wprint_inputoutput_str(" backward search key: ");
             pt = search(items, lh->num_of_items, expstr, topidx + curridx, -1);
@@ -442,11 +452,12 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             if (nextidx != -1) { /* found */
                bw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
                redraw = REFRESH_WINDOW;
+               search_highlight = TRUE;
             } else {
                wprint_cmdinfo(" no (more) items found in top direction");
                doupdate();
             }
-         break;
+            break;
          case 'N': /* bw search next */
             if (expstr != NULL) {
                wprint_cmdinfo("");
@@ -464,12 +475,13 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   bw_search(lh->num_of_items, nextidx, maxy, &topidx, &curridx);
                   lastidx = nextidx;
                   redraw = REFRESH_WINDOW;
+                  search_highlight = TRUE;
                } else {
                   wprint_cmdinfo(" no (more) items found in top direction");
                   doupdate();
                }
             }
-         break;
+            break;
       }
 
       /* special key handling, if not lines browsing */
@@ -583,25 +595,25 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             case KEY_BACKSPACE:
             case KEY_LEFT:
                press = 'q';
-            break;   
+               break;   
             case 's': /* show summary */
                browse_port_summary(p);
                redraw = REFRESH_WINDOW;
-            break;   
+               break;   
             case 'i': /* install */
                if (p->state == STATE_NOT_SELECTED) {
                   mark_port(p, STATE_INSTALL, 1);
                   mark_dependencies(p);
                   redraw = REFRESH_WINDOW;
                }
-            break;
+               break;
             case 'u': /* update */
                if (p->state >= STATE_INSTALLED) {
                   mark_port(p, STATE_UPDATE, 1);
                   mark_dependencies(p);
                   redraw = REFRESH_WINDOW;
                }
-            break; 
+               break; 
             case 'd': /* delete */
                if (p->state >= STATE_INSTALLED) {
                   mark_port(p, STATE_DEINSTALL, 1);
@@ -609,7 +621,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                                                 dependencies */
                   redraw = REFRESH_WINDOW;
                } 
-            break; 
+               break; 
             case ' ': /* deselect */
                if ((p->state == STATE_INSTALL) || (p->state == STATE_UPDATE)) {
                   mark_port(p, STATE_NOT_SELECTED, -1);
@@ -621,7 +633,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   mark_dependencies(p);
                   redraw = REFRESH_WINDOW;
                }
-            break;   
+               break;   
             case 'o': /* port compile options */
                if (!proceed) {
                   if ((p->state == STATE_INSTALL) || (p->state == STATE_UPDATE)) {
@@ -633,38 +645,38 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                         redraw = REFRESH_WINDOW;
                   }
                }
-					break;
-				case 'm': /* marker */
-					i = 0;
-					expch = wprint_inputoutput_ch(" Mark all ports (if possible) with state [i/u/d/SPACE]: ");
-					switch (expch) {
-						case 'i':
-							mark_ports(lh, STATE_INSTALL);
-							redraw = REFRESH_WINDOW;
-							break;
-						case 'u':
-							mark_ports(lh, STATE_UPDATE);
-							redraw = REFRESH_WINDOW;
-							break;
-						case 'd':
-							mark_ports(lh, STATE_DEINSTALL);
-							redraw = REFRESH_WINDOW;
-							break;
-						case ' ':
-							mark_ports(lh, STATE_NOT_SELECTED);
-							redraw = REFRESH_WINDOW;
-							break;	
-						default:
-							i = -1;
-							break;
-					}
-					if (i != 0)
-						wprint_cmdinfo(" No valid mark");
-					else
-						wprint_cmdinfo("");
-					doupdate();
-				break;   
-			}
+               break;
+            case 'm': /* marker */
+               i = 0;
+               expch = wprint_inputoutput_ch(" Mark all ports (if possible) with state [i/u/d/SPACE]: ");
+               switch (expch) {
+                  case 'i':
+                     mark_ports(lh, STATE_INSTALL);
+                     redraw = REFRESH_WINDOW;
+                     break;
+                  case 'u':
+                     mark_ports(lh, STATE_UPDATE);
+                     redraw = REFRESH_WINDOW;
+                     break;
+                  case 'd':
+                     mark_ports(lh, STATE_DEINSTALL);
+                     redraw = REFRESH_WINDOW;
+                     break;
+                  case ' ':
+                     mark_ports(lh, STATE_NOT_SELECTED);
+                     redraw = REFRESH_WINDOW;
+                     break;	
+                  default:
+                     i = -1;
+                     break;
+               }
+               if (i != 0)
+                  wprint_cmdinfo(" No valid mark");
+               else
+                  wprint_cmdinfo("");
+               doupdate();
+               break;   
+         }
       } else if (((Option *)items[topidx + curridx])->type == OPTION) {
          Option *opt = (Option *)items[topidx + curridx];
          switch (press) {
@@ -672,14 +684,14 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                opt->state = (opt->state == STATE_NOT_SELECTED) ?
                   STATE_SELECTED : STATE_NOT_SELECTED;
                redraw = REFRESH_ENTRY;
-            break;
+               break;
             case KEY_BACKSPACE:
             case KEY_LEFT:
                press = 'q';
-            break;
+               break;
          }
       }
- 
+
       /* end of key press handling */
    } while (press != 'q'); /* (q)uit browser */
 
@@ -688,7 +700,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
       for (i = 0; i < lh->num_of_items; i++) 
          free_line((Line *)items[i]);
    }
-   
+
    wclear(wbrowse);
    return (result);
 }
