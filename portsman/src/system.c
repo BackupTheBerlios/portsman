@@ -102,14 +102,21 @@ is_index_uptodate(char *path, bool top) {
          sprintf(pth, "%s/%s", path, dp->d_name);
          stat(pth, &sb);
          if (S_ISDIR(sb.st_mode)) { /* found subdir */
+            /* check the MK_FILE instead of dir timestamp, because
+               dir timestamps become modified after make something
+               in them */
+            sprintf(pth, "%s/%s", pth, MK_FILE); 
+            if (access(path, F_OK) == 0) {
+               stat(pth, &sb);
 #if defined(__linux__)
-            if (difftime(sb.st_mtime, tidx) > 0) {
+               if (difftime(sb.st_mtime, tidx) > 0) {
 #else
-            if (difftime(sb.st_mtimespec.tv_sec, tidx) > 0) {
+               if (difftime(sb.st_mtimespec.tv_sec, tidx) > 0) {
 #endif
                /* found newer directory */ 
-               closedir(dfd);
-               return FALSE;
+                  closedir(dfd);
+                  return FALSE;
+               }
             }
          }
       }
