@@ -183,11 +183,12 @@ main(int argc, char * argv[]) {
 	fprintf(stdout, "Please stand by while portsman is coming up...\n");
    /* create data structure */
    result = parse_index();
+//   result = parse_mk(config.ports_dir, NULL, TRUE);
+//   exit(0);
    if (result == ERROR_OPEN_INDEX) {
       fprintf(stderr, "error: Can't open INDEX file: %s\n", config.index_file);
       exit(1);
    }
-
    /* resize signal handler */
    signal(SIGWINCH, resizeHandler);
 
@@ -223,7 +224,7 @@ main(int argc, char * argv[]) {
       else
          result = browse_list(lphycats, lphycats->head->item, FALSE, FALSE);
    } while (result == CATS_TOGGLED);
-   
+
    /* clean up all windows */
    clean_up_windows();
 
