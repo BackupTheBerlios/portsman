@@ -1,2 +1,6 @@
+merge add_list_item_after to add_lits_item, since Lhd has a tail now again,
+  this speeds everything hugly up :)
+
+
 There are many things which are to do, most urgent ones:
    * i18n -> gettext usage implementation
