@@ -129,7 +129,7 @@ create_filter_category(Lhd *lhfilter, char *name,
    cat->type = CATEGORY;
    cat->name = strdup(name); 
    cat->num_of_ports = lh->num_of_items;
-   cat->lhports = lh;
+   cat->lhprts = lh;
       
    return cat;
 }
@@ -138,14 +138,15 @@ create_filter_category(Lhd *lhfilter, char *name,
 Category *
 create_proceed_category() {
 
-   extern Lhd *lhports;
+   extern Lhd *lhprts;
    Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
    Category *cat = (Category *)malloc(sizeof(Category));
-   Iter pitr = lhports->head;
+   Iter pitr = lhprts->head;
    Iter oitr = NULL;
    Node *n = NULL;
    Port *p;
    int num_of_deinst_ports = 0;
+   int num_of_marked_ports = 0;
    
    lh->head = NULL;
    lh->num_of_items = 0;
@@ -163,6 +164,7 @@ create_proceed_category() {
                n = add_list_item_after(lh, n, (Option *)oitr->item);
                oitr = oitr->next;
             }
+            num_of_marked_ports++;
          } else {
             num_of_deinst_ports++;
          }
@@ -176,9 +178,9 @@ create_proceed_category() {
    cat->name = "(de)installation/upgrade"; 
    cat->num_of_ports = lh->num_of_items;
    cat->num_of_inst_ports = 0;
-   cat->num_of_marked_ports = lh->num_of_items;
+   cat->num_of_marked_ports = num_of_marked_ports;
    cat->num_of_deinst_ports = num_of_deinst_ports;
-   cat->lhports = lh;
+   cat->lhprts = lh;
       
    return cat;
 }
@@ -317,8 +319,8 @@ search(void *items[], int num_of_items, char *s, int start, int direction) {
    ports */
 void
 unmark_all_dependencies() {
-   extern Lhd *lhports;
-   Iter itr = lhports->head;
+   extern Lhd *lhprts;
+   Iter itr = lhprts->head;
 
    /* this algorithm uses a fast trick: unmark all dependency ports,
       then mark dependencies of all selected ports O(2n)*/
@@ -330,7 +332,7 @@ unmark_all_dependencies() {
    }
    /* now mark all selected ports again, selected ports are ones
       with state install or update */
-   itr = lhports->head;
+   itr = lhprts->head;
    while (itr != NULL) {
       if ((((Port *)itr->item)->state == STATE_INSTALL) ||
             (((Port *)itr->item)->state == STATE_UPDATE))

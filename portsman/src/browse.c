@@ -118,17 +118,17 @@ browse_proceed() {
    
    cat = create_proceed_category();
       
-   if (browse_list(cat->lhports, cat, TRUE) > 0)
+   if (browse_list(cat->lhprts, cat, TRUE) > 0)
       redraw_dimensions = TRUE;
    
    input = wprint_inputoutput_ch("Proceed with (de)installation/upgrade of above ports? [y/n] ");
    if (input == 'y') {
-      proceed_action(cat->lhports);
+      proceed_action(cat->lhprts);
    }
    wprint_cmdinfo("");
    doupdate();
 
-   free_list(cat->lhports);
+   free_list(cat->lhprts);
    free(cat);
 }
 
@@ -269,7 +269,7 @@ int
 browse_list(Lhd *lh, void *parent, bool proceed) {
    extern WINDOW *wbrowse;
    extern State state;
-   extern Lhd *lhports;
+   extern Lhd *lhprts;
    extern bool redraw_dimensions;
    void *items[lh->num_of_items];
    int press;
@@ -409,7 +409,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          case KEY_RIGHT:
          case '\n': /* ENTER */
             if (((Category *)items[topidx + curridx])->type == CATEGORY) {
-               if (browse_list(((Category *)items[topidx + curridx])->lhports,
+               if (browse_list(((Category *)items[topidx + curridx])->lhprts,
                            items[topidx + curridx], FALSE) > 0)
                   redraw_dimensions = TRUE;
                else
@@ -513,7 +513,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
             if (((Port *)items[0])->type == PORT) 
                lhfilter = lh;
             else
-               lhfilter = lhports;
+               lhfilter = lhprts;
             if (expch == 's') {
                int state;
                expch = wprint_inputoutput_ch(" Which state? [</>/=/B/R/i/u/d] ");
@@ -573,7 +573,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                wprint_cmdinfo(" No valid filter");
                doupdate();
             } else { /* everything valid */
-               i = browse_list(cat->lhports, cat, FALSE);
+               i = browse_list(cat->lhprts, cat, FALSE);
                if (i < 0) 
                   wprint_cmdinfo(" There aren't any matching ports");
                else if (i > 0)
@@ -583,7 +583,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                doupdate();
 
                free(cat->name);
-               free_list(cat->lhports);
+               free_list(cat->lhprts);
                free(cat);
                redraw = REFRESH_WINDOW;
             }

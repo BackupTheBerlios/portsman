@@ -38,7 +38,7 @@ typedef struct category_t {
    int num_of_inst_ports;
    int num_of_marked_ports;
    int num_of_deinst_ports;
-   struct lhd_t *lhports;
+   struct lhd_t *lhprts;
 } Category;
 
 /* type for ports compile options */

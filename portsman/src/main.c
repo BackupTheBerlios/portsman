@@ -37,7 +37,7 @@ usage() {
 int
 main(int argc, char * argv[]) {
    extern Lhd *lhcats;
-   extern Lhd *lhports;
+   extern Lhd *lhprts;
    extern State state;
    extern Config config;
    extern bool redraw_dimensions;
@@ -107,9 +107,9 @@ main(int argc, char * argv[]) {
    lhcats = (Lhd *)malloc(sizeof(Lhd));
    lhcats->head = NULL;
    lhcats->num_of_items = 0;
-   lhports = (Lhd *)malloc(sizeof(Lhd));
-   lhports->head = NULL;
-   lhports->num_of_items = 0;
+   lhprts = (Lhd *)malloc(sizeof(Lhd));
+   lhprts->head = NULL;
+   lhprts->num_of_items = 0;
 	state.num_of_inst_ports = 0;
    state.num_of_ports = 0;
    state.num_of_cats = 0;

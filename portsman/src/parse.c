@@ -35,16 +35,16 @@ add_port_to_category(Category *cat, Port *p) {
       (p->state == STATE_INSTALLED_OLDER) ||
       (p->state == STATE_INSTALLED_NEWER))
       (cat->num_of_inst_ports)++;
-   add_list_item(cat->lhports, p);
+   add_list_item(cat->lhprts, p);
 }
 
 /* creates all categories through the given ports list */
 void
 create_categories() {
    extern State state;
-   extern Lhd *lhports;
+   extern Lhd *lhprts;
    extern Lhd *lhcats;
-   Iter pitr = lhports->head;
+   Iter pitr = lhprts->head;
    Iter citr = lhcats->head;
    Node *n;
    Category *newcat = (Category *)malloc(sizeof(Category));
@@ -66,7 +66,7 @@ create_categories() {
    newcat->num_of_inst_ports = state.num_of_inst_ports;
    newcat->num_of_marked_ports = state.num_of_marked_ports;
    newcat->num_of_deinst_ports = state.num_of_deinst_ports;
-   newcat->lhports = lhports;
+   newcat->lhprts = lhprts;
 
    /* linking everything together */
    n = (Node *)malloc(sizeof(Node));
@@ -105,9 +105,9 @@ add_category(char *name) {
       newcat->num_of_marked_ports = 0;
       newcat->num_of_inst_ports = 0;
       newcat->num_of_deinst_ports = 0;
-      newcat->lhports = (Lhd *)malloc(sizeof(Lhd));
-      newcat->lhports->num_of_items = 0;
-      newcat->lhports->head = NULL;
+      newcat->lhprts = (Lhd *)malloc(sizeof(Lhd));
+      newcat->lhprts->num_of_items = 0;
+      newcat->lhprts->head = NULL;
    }
 
    return newcat;
@@ -219,7 +219,7 @@ parse_index()
    char tok[MAX_TOKEN];
    extern State state;
    extern Config config;
-   extern Lhd *lhports;
+   extern Lhd *lhprts;
    extern Lhd *lhcats;
    extern void *exists;
    extern TNode *tcat;
@@ -344,7 +344,7 @@ parse_index()
    /* important to set state before, because create_categories
       needs it */
    create_inorder_list(lhcats, tcat);
-   create_inorder_list(lhports, tprt);
+   create_inorder_list(lhprts, tprt);
    create_categories();
    free_tree(tdirs);
 

@@ -13,7 +13,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 /* global variables */
 Lhd *lhcats;
-Lhd *lhports;
+Lhd *lhprts;
 State state;
 Config config;
 WINDOW *wtop;
