@@ -31,7 +31,8 @@ POSSIBILITY OF SUCH DAMAGE.
 /* prints version to stdout */
 void
 version() {
-   fprintf(stdout, "This is %s,\n\t(C)opyright 2002, 2003 by Anselm R. Garbe\n", _VERSION);
+   fprintf(stdout, "This is %s,\n\t(C)opyright 2002, 2003 by"
+        " Anselm R. Garbe\n", _VERSION);
 }
 
 /* prints usage of portsman to stderr */
@@ -88,12 +89,12 @@ main(int argc, char * argv[]) {
    int c = 0;
    int result;
  
-   /* first of all check root permissions, only under FreeBSD */
+   /* first of all check root permissions */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
-      if (getuid() != 0) {
-         fprintf(stderr, "error: This utility should only be run as root.\n");
-         exit(1);
-      }
+   if (getuid() != 0) {
+      fprintf(stderr, "error: This utility should only be run as root.\n");
+      exit(1);
+   }
 #endif
 
 	/* pre init */
@@ -105,6 +106,7 @@ main(int argc, char * argv[]) {
       sprintf(path, "%s/%s", getenv("HOME"), CONFIG_FILE);
       config_file = path;
    }
+
    index_file = INDEX_FILE;
    inst_pkg_dir = INSTALLED_PKG_DIR;
    ports_dir = PORTS_DIR;
@@ -138,6 +140,7 @@ main(int argc, char * argv[]) {
    config.make_option_arg[MK_OPTION_FORCEPKGREG] = "FORCE_PKG_REGISTER=yes";
    config.make_option_arg[MK_OPTION_NOPKGREG] = "NO_PKG_REGISTER=yes";
    init_rsynchosts();
+   config.rsync_cmd = "rsync";
 
    /* command line args */
    while ((c = getopt(argc, argv, "vPr:d:i:p:c:")) != -1)
@@ -191,7 +194,7 @@ main(int argc, char * argv[]) {
       fflush(stdin);
       c = getc(stdin);
       if (c == 's')
-         ;
+         sync_index();
       else if (c == 'm')
          make_index();
    }

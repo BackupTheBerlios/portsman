@@ -136,6 +136,8 @@ browse_list(List *l, void *parent, bool proceed, bool artificia);
 
 /* system.c */
 void
+sync_index(); 
+void
 make_index(); 
 bool
 is_index_uptodate(char *path, bool top); 

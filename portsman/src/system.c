@@ -33,15 +33,24 @@ void
 sync_index() {
    extern Config config;
    char wdir[MAX_PATH];
+   char execstr[1000];
    int result = 0;
+   Iter itr = config.lrsynchosts->head;
 
    fprintf(stdout,
-         "\nGoing to (re)make your INDEX, this could take up to 30 minutes...\n");
+         "\nGoing to synchronize your INDEX...\n");
    getcwd(wdir, MAX_PATH);
    chdir(config.ports_dir);
-   result = system("make index");
-   if (result != 0)
-      fprintf(stderr, "\nerror: Something goes wrong while making INDEX.\n");
+   while (itr != NULL) {
+      sprintf(execstr, "%s rsync://%s/INDEX .",
+            config.rsync_cmd, (char *)itr->item);
+      fprintf(stdout, "Trying %s...\n", execstr);
+      result = system(execstr);
+      if (result != 0)
+         fprintf(stderr, "\nerror: INDEX could not be synchronized through using"
+               " rsync://%s\nTrying next...\n", (char *)itr->item);
+      itr = itr->next;
+   }
    chdir(wdir);
 }
 
