@@ -12,7 +12,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 #include <curses.h>
 #include <stdio.h>
-#ifdef __LINUX__
+#if defined(__linux__)
 #include <stdio_ext.h>
 #endif
 #include <stdlib.h>

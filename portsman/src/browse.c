@@ -512,7 +512,11 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
             /* leaving curses ... */
             def_prog_mode(); /* save current tty modes */
             endwin();        /* restore original tty modes */
+#if defined(__linux__)
+            __fpurge(stdin);
+#else
             fpurge(stdin);
+#endif
             getchar();
             /* ... coming back to curses */
             refresh();

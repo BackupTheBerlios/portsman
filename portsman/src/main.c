@@ -50,7 +50,7 @@ main(int argc, char * argv[]) {
    int result;
  
    /* first of all check root permissions, only under FreeBSD */
-#if defined(__FREEBSD__)
+#if defined(__FreeBSD__)
       if (getuid() != 0) {
          fprintf(stderr, "error: This utility should only be run as root.\n");
          exit(1);
