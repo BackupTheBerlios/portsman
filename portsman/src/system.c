@@ -49,6 +49,8 @@ sync_index() {
       if (result != 0)
          fprintf(stderr, "\nerror: INDEX could not be synchronized through using"
                " rsync://%s\nTrying next...\n", (char *)itr->item);
+      else
+         break;
       itr = itr->next;
    }
    chdir(wdir);
