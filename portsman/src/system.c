@@ -97,15 +97,6 @@ is_index_uptodate(char *path, bool top) {
 #endif
    }
 
-   if (stat(config.ports_dir, &sb) == 0) {
-#if defined(__linux__)
-      if (difftime(sb.st_mtime, tidx) > 0) 
-#else
-      if (difftime(sb.st_mtimespec.tv_sec, tidx) > 0) 
-#endif
-      return FALSE; /* ports dir is newer than INDEX */
-   }
-   
    while ((dp = readdir(dfd)) != NULL) {
       if ((dp->d_name)[0] != '.') { /* ignore "." and ".." */
          sprintf(pth, "%s/%s", path, dp->d_name);
