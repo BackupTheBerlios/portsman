@@ -90,7 +90,11 @@ is_index_uptodate(char *path, bool top) {
                                                       ignore */
    if (top) { /* top instance of recursions */
       if (stat(config.index_file, &sb) == 0)
+#if defined(__linux__)
+         tidx = sb.st_mtime;
+#else
          tidx = sb.st_mtimespec.tv_sec;
+#endif
    }
    
    /* while there're entries in the directory */
@@ -104,7 +108,11 @@ is_index_uptodate(char *path, bool top) {
                return FALSE; /* index is not up to date */
             }
          } else if (strcmp(dp->d_name, MK_FILE) == 0) {
+#if defined(__linux__)
+            if (difftime(sb.st_mtime, tidx) > 0) {
+#else
             if (difftime(sb.st_mtimespec.tv_sec, tidx) > 0) {
+#endif
                /* found newer Makefile */ 
                closedir(dfd);
                return FALSE;
