@@ -78,7 +78,7 @@ proceed_action(Lhd *lh) {
                error("execution of shell failed");
                return;
                break;
-            case 0: /* everything ok */
+            case 0: /* build/installation/deinstallation successful */
                switch (p->state) {
                   case STATE_INSTALL:
                   case STATE_UPDATE:
