@@ -59,7 +59,7 @@ wprint_titlebar(char *s) {
    wclrtoeol(wtop);
    mvwprintw(wtop, 0, (wtop->_maxx - 10), "(h)elp");
    wclrtoeol(wtop);
-   mvwchgat(wtop, 0, 0, -1, COLOR_PAIR(CLR_TITLE + 1), 0, NULL);
+   mvwchgat(wtop, 0, 0, -1, COLOR_PAIR(CLR_TITLE + 1) | A_BOLD, 0, NULL);
    wnoutrefresh(wtop);
 }
 
@@ -68,7 +68,7 @@ wprint_statusbar(char *s) {
    extern WINDOW *wbottom;
    mvwprintw(wbottom, 0, 0, s);
    wclrtoeol(wbottom);
-   mvwchgat(wbottom, 0, 0, -1, COLOR_PAIR(CLR_STATUS + 1), 0, NULL);
+   mvwchgat(wbottom, 0, 0, -1, COLOR_PAIR(CLR_STATUS + 1) | A_BOLD, 0, NULL);
    wnoutrefresh(wbottom);
 }
 
