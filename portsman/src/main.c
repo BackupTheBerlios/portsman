@@ -42,6 +42,7 @@ main(int argc, char * argv[]) {
    extern Config config;
    extern bool redraw_dimensions;
    extern char *optarg;
+   char *home_dir;
    char *index_file;
    char *inst_pkg_dir;
    char *config_file;
@@ -58,8 +59,14 @@ main(int argc, char * argv[]) {
 #endif
 
 	/* pre init */
-   sprintf(path, "%s/%s", getenv("HOME"), CONFIG_FILE);
-   config_file = path;
+   home_dir = getenv("HOME");
+   if (home_dir == NULL) {
+      fprintf(stderr, "error: Can't determine your $HOME directory.\n");
+      config_file = NULL;
+   } else {
+      sprintf(path, "%s/%s", getenv("HOME"), CONFIG_FILE);
+      config_file = path;
+   }
    index_file = INDEX_FILE;
    inst_pkg_dir = INSTALLED_PKG_DIR;
    config.fcolors[CLR_TITLE] = COLOR_BLACK;
@@ -96,8 +103,10 @@ main(int argc, char * argv[]) {
       }
 
    /* parse rc config file */
-   if (parse_rc_file(config_file) == ERROR_CORRUPT_RC_FILE) {
-      fprintf(stderr, "error: portsmanrc configuration file corrupted\n");
+   if (config_file != NULL) {
+      if (parse_rc_file(config_file) == ERROR_CORRUPT_RC_FILE) {
+         fprintf(stderr, "error: portsmanrc configuration file corrupted\n");
+      }
    }
  
    config.index_file = index_file;
