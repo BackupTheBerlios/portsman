@@ -38,14 +38,16 @@ version() {
 /* prints usage of portsman to stderr */
 void
 usage() {
-   fprintf(stderr, "usage: portsman [-c <portsmanrc file>] [-h] [-v] [-P]\n" 
+   fprintf(stderr, "usage: portsman [-c <portsmanrc file>] [-h] [-v] [-P] [-s]\n" 
           "                [-r <rsync hostname>] [-d <ports dir> |\n"
           "                 -i <INDEX file>] [-p <PKG dir>]\n\n" 
           "       -c      path to user defined configfile\n"
           "       -h      prints this help\n" 
           "       -v      prints out the version of portsman\n"
-          "       -P      uses only physical existing categories, no\n"
+          "       -P      uses only physically existing categories, no\n"
           "               meta categories (except \"All\" and \"Installed\")\n"
+          "       -s      defines, that portsman automatically synchronizes\n"
+          "               your INDEX file to current state (using rsync)\n"
           "       -r      defines additional rsync hostname which is used to\n"
           "               synchronize your used INDEX file\n" 
 #if defined(__FreeBSD__) || defined(__OpenBSD__)
@@ -88,6 +90,7 @@ main(int argc, char * argv[]) {
    char path[MAX_PATH];
    int c = 0;
    int result;
+   bool autosync = FALSE;
  
    /* first of all check root permissions */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
@@ -143,7 +146,7 @@ main(int argc, char * argv[]) {
    config.rsync_cmd = "rsync -uvz";
 
    /* command line args */
-   while ((c = getopt(argc, argv, "vPr:d:i:p:c:")) != -1)
+   while ((c = getopt(argc, argv, "vhPsr:d:i:p:c:")) != -1)
       switch(c) {
          case 'v':
             version();
@@ -151,6 +154,9 @@ main(int argc, char * argv[]) {
             break;
          case 'P':
             config.use_metacats = FALSE;
+            break;
+         case 's':
+            autosync = TRUE;
             break;
          case 'r':
             add_list_item(config.lrsynchosts, strdup(optarg));
@@ -168,6 +174,7 @@ main(int argc, char * argv[]) {
             config_file = strdup(optarg);
             break;
          case '?': /* not known */
+         case 'h':
             usage();
             exit(1);
             break;
@@ -191,9 +198,14 @@ main(int argc, char * argv[]) {
       /* download, start user interaction etc. */
       fprintf(stdout, "%s is not as up to date as your ports collection:\n",
             config.index_file);
-      fprintf(stdout, "Choose (s)ynchronize, (m)ake index or (i)gnore: "); 
-      fflush(stdin);
-      c = getc(stdin);
+      if (autosync) {
+         fprintf(stdout, "Auto synchronizing %s...\n", config.index_file);
+         c = 's';
+      } else {
+         fprintf(stdout, "Choose (s)ynchronize, (m)ake index or (i)gnore: "); 
+         fflush(stdin);
+         c = getc(stdin);
+      }
       if (c == 's')
          sync_index();
       else if (c == 'm')

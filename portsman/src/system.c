@@ -74,7 +74,6 @@ make_index() {
 /* checks if there're newer Makefiles, than the used index,
    returns TRUE, if INDEX is cutting edge to the cvsupped
    ports collection, FALSE otherwise */
-
 bool
 is_index_uptodate(char *path, bool top) {
    extern Config config;

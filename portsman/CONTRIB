@@ -5,4 +5,5 @@ John Bleichert <syborg@stny.rr.com>
 Simon L. Nielsen <simon@nitro.dk>
 Pav Lucistnik <pav@oook.cz>
 Steffen Kremsler <frost@uni.de>
-Oliver Rendgen <oli@hypeo.de> (Currently provides INDEX diff generation, to stay up to date with portsman)
+Oliver Rendgen <oli@hypeo.de> (Currently provides INDEX rsync server)
+Stefan "Streng" Kuttler <deleuze@gmx.net>
