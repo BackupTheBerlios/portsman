@@ -53,16 +53,19 @@ defines path to index file (default is /usr/ports/INDEX)
 \fBpkgdir\fR
 defines path to the package db directory (default is /var/db/pkg)
 .TP 
+\fBportsdir\fR
+defines path to the dir of the ports collection
+.TP 
 \fBmake.cmd\fR
 defines the make command (whitspaces aren't allowed)(default: make)
 .TP 
-\fBmake.target.inst\fR
+\fBmake.ta rget.inst\fR
 defines install target of make cmd (default: install)
 .TP 
-\fBmake.target.deinst\fR
+\fBmake.ta rget.deinst\fR
 defines deinstall target of make (default: deinstall)
 .TP 
-\fBmake.target.update\fR
+\fBmake.ta rget.update\fR
 defines update target of make (default: reinstall)
 .TP 
 \fBmake.option.force\fR
