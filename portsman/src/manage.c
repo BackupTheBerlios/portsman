@@ -12,6 +12,45 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 #include "includes.h"
 
+/* frees a port */
+void
+free_port(Port *p) {
+
+   free_list(p->lhcats);
+   if (p->lhopts != NULL)
+      free_list(p->lhopts);
+   free_list(p->lhbdep);
+   free_list(p->lhrdep);
+   free(p->name);
+   free(p);
+}
+
+/* returns a new allocated port with all standard
+   initialization */
+Port *
+create_port(char *name, TNode *t) {
+
+   /* alloc mem for new port */
+   Port *p = (Port *)malloc(sizeof(Port));
+
+   /* init */
+   p->type = PORT;
+   p->lhcats = (Lhd *)malloc(sizeof(Lhd));
+   p->lhcats->head = NULL;
+   p->lhcats->num_of_items = 0;
+   p->lhopts = NULL;
+   p->lhbdep = (Lhd *)malloc(sizeof(Lhd));
+   p->lhbdep->head = NULL;
+   p->lhbdep->num_of_items = 0;
+   p->lhrdep = (Lhd *)malloc(sizeof(Lhd));
+   p->lhrdep->head = NULL;
+   p->lhrdep->num_of_items = 0;
+   p->name = strdup(name);
+   p->state = get_state(p->name, t);
+
+   return p;
+}
+
 Line *
 create_line(char *name) {
    Line *l = (Line *)malloc(sizeof(Line));

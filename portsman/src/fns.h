@@ -57,6 +57,10 @@ Lhd *
 parse_file(char *filepath); 
  
 /* manage.c */
+void
+free_port(Port *p); 
+Port *
+create_port(char *name, TNode *t); 
 Line *
 create_line(char *name); 
 void

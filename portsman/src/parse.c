@@ -167,45 +167,6 @@ get_state(char *portname, TNode *t) {
    return STATE_NOT_SELECTED;
 }
 
-/* frees a port */
-void
-free_port(Port *p) {
-
-   free_list(p->lhcats);
-   if (p->lhopts != NULL)
-      free_list(p->lhopts);
-   free_list(p->lhbdep);
-   free_list(p->lhrdep);
-   free(p->name);
-   free(p);
-}
-
-/* returns a new allocated port with all standard
-   initialization */
-Port *
-create_port(char *name, TNode *t) {
-
-   /* alloc mem for new port */
-   Port *p = (Port *)malloc(sizeof(Port));
-
-   /* init */
-   p->type = PORT;
-   p->lhcats = (Lhd *)malloc(sizeof(Lhd));
-   p->lhcats->head = NULL;
-   p->lhcats->num_of_items = 0;
-   p->lhopts = NULL;
-   p->lhbdep = (Lhd *)malloc(sizeof(Lhd));
-   p->lhbdep->head = NULL;
-   p->lhbdep->num_of_items = 0;
-   p->lhrdep = (Lhd *)malloc(sizeof(Lhd));
-   p->lhrdep->head = NULL;
-   p->lhrdep->num_of_items = 0;
-   p->name = strdup(name);
-   p->state = get_state(p->name, t);
-
-   return p;
-}
-
 /* parses the FreeBSD ports INDEX file and creates a
    list of categories with dedicated ports, it also creates
    a meta-category "all", all lists and categories are
@@ -418,12 +379,8 @@ parse_file(char *filepath) {
    lh->head = NULL;
    lh->num_of_items = 0;
 
-   while (fgets(line, MAX_COLS, fd) != NULL) {
-      l = (Line *)malloc(sizeof(Line));
-      l->type = LINE;
-      l->name = strdup(line);
-      n = add_list_item_after(lh, n, l);
-   }
+   while (fgets(line, MAX_COLS, fd) != NULL) 
+      n = add_list_item_after(lh, n, create_line(line));
 
    fclose(fd);
  
