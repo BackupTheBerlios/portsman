@@ -9,4 +9,4 @@ portsmanrc.5 :
 	$(NROFF) portsmanrc.man > portsmanrc.5
 
 clean-local:
-	rm -rf *.1 *.5
+	rm -f *.1 *.5

@@ -54,8 +54,6 @@ create_array_from_list(List *l, void *items[]);
 
 /* parse.c */
 int
-parse_mk(char *path, TNode *tdirs, bool top); 
-int
 parse_index();
 Category *
 add_category(char *name, List *lpdir); 

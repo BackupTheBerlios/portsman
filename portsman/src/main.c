@@ -182,9 +182,7 @@ main(int argc, char * argv[]) {
 
 	fprintf(stdout, "Please stand by while portsman is coming up...\n");
    /* create data structure */
-//   result = parse_index();
-   result = parse_mk(config.ports_dir, NULL, TRUE);
-   exit(0);
+   result = parse_index();
    if (result == ERROR_OPEN_INDEX) {
       fprintf(stderr, "error: Can't open INDEX file: %s\n", config.index_file);
       exit(1);

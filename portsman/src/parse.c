@@ -40,18 +40,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #define PORT_RUN_DEPENDENCY 8
 #define PORT_URL 9
 
-#define MK_SUBDIR "SUBDIR"
-#define MK_PORTNAME "PORTNAME"
-#define MK_VERSION "PORTVERSION"
-#define MK_CATEGORIES "CATEGORIES"
-#define MK_SITES "MASTER_SITES"
-#define MK_SITES_SUB "MASTER_SITES_SUBDIR"
-#define MK_DISTNAME "DISTNAME"
-#define MK_MAINTAINER "MAINTAINER"
-#define MK_BDEPS "LIB_DEPENDS"
-#define MK_RDEPS "RUN_DEPENDS"
-#define MK_ISINTERACTIVE "IS_INTERACTIVE"
-
 /* local global */
 TNode *tcat;
 
@@ -189,116 +177,6 @@ add_category(char *name, List *lpdir) {
    }
 
    return newcat;
-}
-
-/* Note: new and future parse function which parses the
-   FreeBSD ports-dir Makefiles to build up an equivalent data
-   structure to INDEX parser. It seeks first of all for SUBDIR
-   statements, if found one, it processes immediatly this
-   SUBDIR recursivly and so on. It only creates a list of
-   ports with all information we already know */
-int
-parse_mk(char *path, TNode *tdirs, bool top) {
-   FILE *fd;
-   bool readyKey = FALSE;
-   bool validKey = FALSE;
-   bool readyValue = FALSE;
-   bool comment = FALSE;
-   char tok[MAX_TOKEN];
-   char mkfile[MAX_PATH];
-   char newpath[MAX_PATH];
-   char pname[MAX_TOKEN];
-   char *key = NULL;
-   char *val = NULL;
-   extern Config config;
-   extern List *lprts;
-   int i = 0, c = 0, line = 0;
-   Port *p = NULL;
-   
-   /* init */
-   sprintf(mkfile, "%s/Makefile", path);
-   printf("%s\n", mkfile);
-   /* parse installed pkgs, if top instance */
-   if (top) tdirs = parse_dir(config.inst_pkg_dir);
-   
-   if ((fd = fopen(mkfile, "r")) == NULL)
-      return ERROR_NO_RC_FILE; /* not present */
-
-   while (feof(fd) == 0) {
-      c = fgetc(fd); /* get next char */
-      switch (c) {
-         case '\t': 
-         case ' ': /* ignore all white spaces & tabs & +'es */
-            break;
-         case '#':
-            comment = TRUE; /* until eol */
-            if (validKey && (i > 0)) /* ready value */
-               readyValue = TRUE;
-            break;
-         case '\n': /* eol */
-            line++;
-            comment = FALSE;
-            /* ready value */
-            if (validKey && (i > 0))  /* ready value */
-               readyValue = TRUE;
-            else
-               validKey = FALSE;
-            break;
-         case '=':
-            if (i > 0)
-               readyKey = TRUE;
-            break;
-         default: /* else it's a alphanum char */
-            if (!comment) {
-               if ((c != '+') || ((c == '+') && validKey)) {
-                  /* + is only valid in values, e.g. "gshar+gunshar" */
-                  tok[i++] = (char)c;
-               }
-            }
-            break;
-      }
-
-      if (readyKey) {
-         tok[i] = '\0'; /* terminate key token */
-         key = strdup(tok);
-         i = 0;
-         validKey = TRUE;
-         readyKey = FALSE;
-         val = tok;
-      } else if (readyValue) {
-         if (validKey && (i > 0)) {
-            tok[i] = '\0'; /* terminate value token */
-            val = tok;
-
-            if (strcmp(key, MK_SUBDIR) == 0) { /* found subdir processing */
-               sprintf(newpath, "%s/%s", path, val);
-               if (parse_mk(newpath, tdirs, FALSE) != 0) {
-                  return -1; /* TODO: return line and
-                                file where the error occured */
-               }
-            } else if (strcmp(key, MK_PORTNAME) == 0) { 
-               sprintf(pname, "%s-", val);
-            } else if (strcmp(key, MK_VERSION) == 0) {
-               /* so create new port */
-               strcat(pname, val);
-               printf("%s\n", pname);
-               p = create_port(pname, tdirs);
-               add_list_item(lprts, p);
-            }
-            free(key);
-         }
-         i = 0;
-         validKey = FALSE;
-         readyValue = FALSE;
-      }
-   }
-   fclose(fd);
-
-   if (top) {
-      free_tree(tdirs);
-   }
- 
-   return (0);
 }
 
 /* parses the FreeBSD ports INDEX file and creates a
