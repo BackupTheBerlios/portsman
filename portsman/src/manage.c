@@ -653,20 +653,23 @@ refresh_cat_states() {
 void
 mark_port(Port *p, int st, int incrementor) {
    extern List *lcats;
-   Category *metacat = (Category *)lcats->head->item;
+   Category *metacatall = (Category *)lcats->head->item;
+   Category *metacatinst = (Category *)lcats->head->next->item;
    Iter itr = p->lcats->head;
 
    /* lcats is modified here, because the ports doesn't "know",
       that they're also dedicated to meta category "All" */
    if (st == STATE_DEINSTALL) {
-      metacat->num_of_deinst_ports += incrementor;
+      metacatall->num_of_deinst_ports += incrementor;
+      metacatinst->num_of_deinst_ports += incrementor;
       p->state = st;
       while (itr != NULL) {
          ((Category *)itr->item)->num_of_deinst_ports += incrementor;
          itr = itr->next;
       }
    } else {
-      metacat->num_of_marked_ports += incrementor;
+      metacatall->num_of_marked_ports += incrementor;
+      metacatinst->num_of_marked_ports += incrementor;
       p->state = st;
       while (itr != NULL) {
          ((Category *)itr->item)->num_of_marked_ports += incrementor;
