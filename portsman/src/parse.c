@@ -112,60 +112,6 @@ add_category(char *name) {
    return newcat;
 }
 
-/* returns state of the port with portname, t has to be
-   root of tree with dir names (char *) */
-short
-get_state(char *portname, TNode *t) {
-   TIter titr = t;
-   char *p, *pv, *d, *dv;
-   int cmp;
-
-   /* first of all, check, if this port is equal to an installed port */
-   while (titr != NULL) {
-      cmp = strcmp((char *)titr->item, portname);
-      if (cmp == 0)
-         return STATE_INSTALLED; /* found equal */
-      else if (cmp > 0) /* use left child */
-         titr = titr->left;
-      else
-         titr = titr->right;
-   }
- 
-   /* now we're sure, that this port is not installed or newer/older than
-      the installed version, so check this */
-   titr = t;
-   while (titr != NULL) {
-      p = portname;
-      d = (char *)titr->item;
-      pv = strchr(portname, '.'); 
-      if (pv == NULL)
-         pv = strrchr(portname, '-');
-      dv = strchr(d, '.'); 
-      if (dv == NULL)
-         dv = strrchr(d, '-');
-
-      for(; *p == *d; p++, d++)
-         if ((p == pv) || (d == dv)) /* like strcmp of first chars until pv/dv */
-            break;
-
-      if ((p == pv) && (d == dv)) { /* seems to be older or newer */
-         if (strcmp(pv, dv) > 0)
-            return STATE_INSTALLED_NEWER;
-         else
-            return STATE_INSTALLED_OLDER;
-
-      } else {
-
-         if (strcmp((char *)titr->item, portname) > 0) /* use left child */
-            titr = titr->left;
-         else
-            titr = titr->right;
-      }
-   }
-
-   return STATE_NOT_SELECTED;
-}
-
 /* parses the FreeBSD ports INDEX file and creates a
    list of categories with dedicated ports, it also creates
    a meta-category "all", all lists and categories are
@@ -196,8 +142,6 @@ parse_index()
 
    /* parse installed pkgs */
    tdirs = parse_dir(config.inst_pkg_dir);
-   if (tdirs == NULL) /* error */
-      return ERROR_OPEN_PDB_DIR;
 
    i = 0;
    readyToken = 0; /* token not ready */

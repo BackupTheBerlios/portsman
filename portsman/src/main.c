@@ -50,7 +50,7 @@ main(int argc, char * argv[]) {
    int result;
  
    /* first of all check root permissions, only under FreeBSD */
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
       if (getuid() != 0) {
          fprintf(stderr, "error: This utility should only be run as root.\n");
          exit(1);
@@ -145,9 +145,6 @@ main(int argc, char * argv[]) {
    result = parse_index();
    if (result == ERROR_OPEN_INDEX) {
       fprintf(stderr, "error: Can't open INDEX file: %s\n", config.index_file);
-      exit(1);
-   } else if (result == ERROR_OPEN_PDB_DIR) {
-      fprintf(stderr, "error: Can't open pkg database dir: %s\n", config.inst_pkg_dir);
       exit(1);
    }
 
