@@ -12,8 +12,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 
 /* global variables */
-List *lcats;
-List *lports;
+Lhd *lhcats;
+Lhd *lhports;
 State state;
 Config config;
 WINDOW *wtop;

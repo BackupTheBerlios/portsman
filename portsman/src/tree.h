@@ -20,3 +20,6 @@ typedef struct tnode_t {
    struct tnode_t *left;
    struct tnode_t *right;
 } TNode;
+
+/* iterator to make source more understandable */
+typedef TNode* TIter;

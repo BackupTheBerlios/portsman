@@ -120,9 +120,9 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
          itemstr[2] = '-';
 
    } else if (((Port *)item)->type == PORT) { /* print port */
-      Port *port = (Port *)item;
-      sprintf(itemstr, " [ ] %-20.20s\t%-.47s", port->name, port->descr);
-      switch (port->state) {
+      Port *p = (Port *)item;
+      sprintf(itemstr, " [ ] %-20.20s\t%-.47s", p->name, p->descr);
+      switch (p->state) {
          case STATE_INSTALL:
             itemstr[2] = 'i'; /* install */
             break;

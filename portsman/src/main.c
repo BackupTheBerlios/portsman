@@ -36,8 +36,8 @@ usage() {
 /* main function of portsman */
 int
 main(int argc, char * argv[]) {
-   extern List *lcats;
-   extern List *lports;
+   extern Lhd *lhcats;
+   extern Lhd *lhports;
    extern State state;
    extern Config config;
    extern bool redraw_dimensions;
@@ -104,12 +104,12 @@ main(int argc, char * argv[]) {
    config.inst_pkg_dir = inst_pkg_dir;
 
    /* init */
-   lcats = (List *)malloc(sizeof(List));
-   lcats->head = NULL;
-   lcats->num_of_items = 0;
-   lports = (List *)malloc(sizeof(List));
-   lports->head = NULL;
-   lports->num_of_items = 0;
+   lhcats = (Lhd *)malloc(sizeof(Lhd));
+   lhcats->head = NULL;
+   lhcats->num_of_items = 0;
+   lhports = (Lhd *)malloc(sizeof(Lhd));
+   lhports->head = NULL;
+   lhports->num_of_items = 0;
 	state.num_of_inst_ports = 0;
    state.num_of_ports = 0;
    state.num_of_cats = 0;
@@ -157,7 +157,7 @@ main(int argc, char * argv[]) {
    init_windows();
 
    /* open browser */
-   browse_list(lcats, NULL, FALSE);
+   browse_list(lhcats, NULL, FALSE);
 
    /* clean up all windows */
    clean_up_windows();

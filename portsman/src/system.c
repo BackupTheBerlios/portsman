@@ -19,12 +19,12 @@ error(char *s) {
 }
 
 void
-proceed_action(List *l) {
-   extern List *lcats;
+proceed_action(Lhd *lh) {
+   extern Lhd *lhcats;
    extern State state;
-   Node *n = l->head;
-   Node *cnode;
-   Node *optnode = NULL;
+   Iter itr = lh->head;
+   Iter citr;
+   Iter oitr; 
    Port *p;
    char execstr[1000];
    char option[MAX_TOKEN];
@@ -37,11 +37,11 @@ proceed_action(List *l) {
 
    getcwd(wdir, MAX_PATH);
    /* action loop */
-   while (n != NULL) {
-      if (((Port *)n->item)->type == PORT) {
-         p = (Port *)n->item;
-         if (p->lopts != NULL)
-            optnode = p->lopts->head; 
+   while (itr != NULL) {
+      if (((Port *)itr->item)->type == PORT) {
+         p = (Port *)itr->item;
+         if (p->lhopts != NULL)
+            oitr = p->lhopts->head; 
 
          switch (p->state) {
             case STATE_INSTALL:
@@ -56,13 +56,13 @@ proceed_action(List *l) {
          }
 
          /* cat compile options */
-         while (optnode != NULL) {
-            Option *opt = (Option *)optnode->item;
+         while (oitr != NULL) {
+            Option *opt = (Option *)oitr->item;
             if (opt->state == STATE_SELECTED) {
                sprintf(option, " %s", opt->cmd);
                strcat(execstr, option);
             }
-            optnode = optnode->next;
+            oitr = oitr->next;
          }
 
          /* fire up make */
@@ -84,33 +84,33 @@ proceed_action(List *l) {
                      p->state = STATE_INSTALLED;
                      state.num_of_marked_ports--;
                      state.num_of_inst_ports++;
-                     (((Category *)lcats->head->item)->num_of_marked_ports)--;
-                     (((Category *)lcats->head->item)->num_of_inst_ports)++;
-                     cnode = p->lcats->head;
-                     while (cnode != NULL) {
-                        (((Category *)cnode->item)->num_of_marked_ports)--;
-                        (((Category *)cnode->item)->num_of_inst_ports)++;
-                        cnode = cnode->next;
+                     (((Category *)lhcats->head->item)->num_of_marked_ports)--;
+                     (((Category *)lhcats->head->item)->num_of_inst_ports)++;
+                     citr = p->lhcats->head;
+                     while (citr != NULL) {
+                        (((Category *)citr->item)->num_of_marked_ports)--;
+                        (((Category *)citr->item)->num_of_inst_ports)++;
+                        citr = citr->next;
                      }
                      break;
                   case STATE_DEINSTALL:
                      p->state = STATE_NOT_SELECTED;
                      state.num_of_inst_ports--;
                      state.num_of_deinst_ports--;
-                     (((Category *)lcats->head->item)->num_of_inst_ports)--;
-                     (((Category *)lcats->head->item)->num_of_deinst_ports)--;
-                     cnode = p->lcats->head;
-                     while (cnode != NULL) {
-                        (((Category *)cnode->item)->num_of_inst_ports)--;
-                        (((Category *)cnode->item)->num_of_deinst_ports)--;
-                        cnode = cnode->next;
+                     (((Category *)lhcats->head->item)->num_of_inst_ports)--;
+                     (((Category *)lhcats->head->item)->num_of_deinst_ports)--;
+                     citr = p->lhcats->head;
+                     while (citr != NULL) {
+                        (((Category *)citr->item)->num_of_inst_ports)--;
+                        (((Category *)citr->item)->num_of_deinst_ports)--;
+                        citr = citr->next;
                      }
                      break;
                }
                break;
          }
       }
-      n = n->next;
+      itr = itr->next;
    }
    chdir(wdir);
 

@@ -21,57 +21,57 @@ cmp_str(const void *item1, const void *item2);
  
 /* tree.c */
 void
-free_tree(TNode *troot); 
+free_tree(TNode *t); 
 void
-create_inorder_list(List *l, TNode *t); 
+create_inorder_list(Lhd *lh, TNode *t); 
 TNode *
-add_tree_item(TNode *troot, void *item,
+add_tree_item(TNode *t, void *item,
       int (*comp)(const void *, const void *));
 
 /* list.c */
 void
-free_list(List *l);
+free_list(Lhd *lh);
 Node *
-add_list_item_after(List *l, Node *prev, void *item); 
+add_list_item_after(Lhd *lh, Node *n, void *item); 
 Node *
-add_list_item(List *head, void *item);
+add_list_item(Lhd *lh, void *item);
 void
-create_array_from_list(List *l, void *items[]);
+create_array_from_list(Lhd *lh, void *items[]);
 
 /* parse.c */
 int
 parse_index();
 Category *
 add_category(char *name); 
-List *
+Lhd *
 parse_tokenlist(char *toklist, char *delim);
 TNode *
 parse_dir(char *path); 
-List *
+Lhd *
 parse_options(char *mkfile); 
 int
 parse_rc_file(char *filepath); 
-List *
-parse_plist(Port *port, char *plistfile); 
+Lhd *
+parse_plist(Port *p, char *plistfile); 
  
 /* manage.c */
 void
-mark_ports(List *l, int state); 
+mark_ports(Lhd *lh, int state); 
 Category *
-create_filter_category(List *lfilter, char *name,
+create_filter_category(Lhd *lhfilter, char *name,
       int type, void *item); 
 Category *
 create_proceed_category(); 
 void
-create_options(Port *port); 
+create_options(Port *p); 
 int
 search(void *items[], int num_of_items, char *s, int start, int direction); 
 void
 unmark_all_dependencies(); 
 void
-mark_dependencies(Port *port); 
+mark_dependencies(Port *p); 
 void
-mark_port(Port *port, int state, int incrementor); 
+mark_port(Port *p, int state, int incrementor); 
 
 /* window.c */
 void
@@ -108,15 +108,15 @@ void
 set_ports_titlestatus(Category *cat, int top, int bottom,
       bool proceed); 
 void
-browse_port_summary(Port *port); 
+browse_port_summary(Port *p); 
 int
 browse_file(char *path);
 int
-browse_list(List *l, void *parent, bool proceed); 
+browse_list(Lhd *lh, void *parent, bool proceed); 
 
 /* system.c */
 void
-proceed_action(List *l); 
+proceed_action(Lhd *lh); 
 
 /* main.c */
 int

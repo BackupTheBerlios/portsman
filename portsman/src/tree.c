@@ -14,8 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "includes.h"
 
 /* frees a (sub)tree */
-void free_tree(TNode *troot) {
-   TNode *t = troot;
+void free_tree(TNode *t) {
 
    if (t == NULL) return;
    free_tree(t->left);
@@ -23,27 +22,26 @@ void free_tree(TNode *troot) {
    free(t);
 }
 
-/* creates inorder list l of (sub)tree t,
-   Note: List l has to be allocated and initialized */
-void create_inorder_list(List *l, TNode *t) {
-   static Node *prev;
+/* creates inorder list of lh of (sub)tree t,
+   Note: Lhd lh has to be allocated and initialized */
+void create_inorder_list(Lhd *lh, TNode *t) {
+   static Node *n;
 
    if (t == NULL) return;
    /* left child */
-   create_inorder_list(l, t->left);
+   create_inorder_list(lh, t->left);
    /* new list item */
-   prev = add_list_item_after(l, prev, t->item);
+   n = add_list_item_after(lh, n, t->item);
    /* right child */
-   create_inorder_list(l, t->right);
+   create_inorder_list(lh, t->right);
    /* clean up */
    free(t);
 }
 
-/* adds an item to the tree associated by troot, returns troot item,
-   Note: If you're going to create a new tree, troot has to be NULL */
-TNode *add_tree_item(TNode *troot, void *item,
+/* adds an item to the tree associated by t, returns t item,
+   Note: If you're going to create a new tree, t has to be NULL */
+TNode *add_tree_item(TNode *t, void *item,
       int (*comp)(const void *, const void *)) {
-   TNode *t = troot;
    int cmp = 1;
    extern void *exists;
 

@@ -19,9 +19,12 @@ typedef struct node_t {
    struct node_t *next;
 } Node;
 
-/* list type for head and tail pointer, contains also
+/* iterator to make source code more understandable */
+typedef Node* Iter;
+
+/* list head type for lists, contains also
    information about number of items of the list */
-typedef struct list_t {
+typedef struct lhd_t {
    int num_of_items;
 	struct node_t *head;
-} List;
+} Lhd;

@@ -25,36 +25,37 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define PORT_URL 9
 
 /* local global */
-TNode *trootcat;
+TNode *tcat;
 
 /* adds a port pointer to a category */
 void
-add_port_to_category(Category *cat, Port *port) {
+add_port_to_category(Category *cat, Port *p) {
    (cat->num_of_ports)++;
-   if ((port->state == STATE_INSTALLED) ||
-      (port->state == STATE_INSTALLED_OLDER) ||
-      (port->state == STATE_INSTALLED_NEWER))
+   if ((p->state == STATE_INSTALLED) ||
+      (p->state == STATE_INSTALLED_OLDER) ||
+      (p->state == STATE_INSTALLED_NEWER))
       (cat->num_of_inst_ports)++;
-   add_list_item(cat->lports, port);
+   add_list_item(cat->lhports, p);
 }
 
 /* creates all categories through the given ports list */
 void
 create_categories() {
    extern State state;
-   extern List *lports;
-   extern List *lcats;
-   Node *np = lports->head;
-   Node *nc = lcats->head;
+   extern Lhd *lhports;
+   extern Lhd *lhcats;
+   Iter pitr = lhports->head;
+   Iter citr = lhcats->head;
+   Node *n;
    Category *newcat = (Category *)malloc(sizeof(Category));
 
-   while (np != NULL) {
-      nc = ((Port *)np->item)->lcats->head;
-      while (nc != NULL) {
-         add_port_to_category((Category *)nc->item, (Port *)np->item);
-         nc = nc->next;
+   while (pitr != NULL) {
+      citr = ((Port *)pitr->item)->lhcats->head;
+      while (citr != NULL) {
+         add_port_to_category((Category *)citr->item, (Port *)pitr->item);
+         citr = citr->next;
       }
-      np = np->next;
+      pitr = pitr->next;
    }
 
    /* last but not least we add meta category */
@@ -65,14 +66,14 @@ create_categories() {
    newcat->num_of_inst_ports = state.num_of_inst_ports;
    newcat->num_of_marked_ports = state.num_of_marked_ports;
    newcat->num_of_deinst_ports = state.num_of_deinst_ports;
-   newcat->lports = lports;
+   newcat->lhports = lhports;
 
    /* linking everything together */
-   np = (Node *)malloc(sizeof(Node));
-   np->item = newcat;
-   np->next = lcats->head;
-   lcats->head = np;
-   lcats->num_of_items++;
+   n = (Node *)malloc(sizeof(Node));
+   n->item = newcat;
+   n->next = lhcats->head;
+   lhcats->head = n;
+   lhcats->num_of_items++;
 }
 
 
@@ -81,8 +82,8 @@ create_categories() {
    "name" */
 Category *
 add_category(char *name) {
-   extern TNode *trootcat;
-   extern List *lcats;
+   extern TNode *tcat;
+   extern Lhd *lhcats;
    extern void *exists;
    Category *newcat = NULL;
 
@@ -91,7 +92,7 @@ add_category(char *name) {
    newcat->name = strdup(name); 
 
    exists = NULL;
-   trootcat = add_tree_item(trootcat, newcat, cmp_name);
+   tcat = add_tree_item(tcat, newcat, cmp_name);
    if (exists != NULL) { /* category does exist */
       /* clean up */
       free(newcat->name);
@@ -104,38 +105,39 @@ add_category(char *name) {
       newcat->num_of_marked_ports = 0;
       newcat->num_of_inst_ports = 0;
       newcat->num_of_deinst_ports = 0;
-      newcat->lports = (List *)malloc(sizeof(List));
-      newcat->lports->num_of_items = 0;
-      newcat->lports->head = NULL;
+      newcat->lhports = (Lhd *)malloc(sizeof(Lhd));
+      newcat->lhports->num_of_items = 0;
+      newcat->lhports->head = NULL;
    }
 
    return newcat;
 }
 
-/* returns state of the port with portname */
+/* returns state of the port with portname, t has to be
+   root of tree with dir names (char *) */
 short
-get_state(char *portname, TNode *trootdirs) {
-   TNode *t = trootdirs;
+get_state(char *portname, TNode *t) {
+   TIter titr = t;
    char *p, *pv, *d, *dv;
    int cmp;
 
    /* first of all, check, if this port is equal to an installed port */
-   while (t != NULL) {
-      cmp = strcmp((char *)t->item, portname);
+   while (titr != NULL) {
+      cmp = strcmp((char *)titr->item, portname);
       if (cmp == 0)
          return STATE_INSTALLED; /* found equal */
       else if (cmp > 0) /* use left child */
-         t = t->left;
+         titr = titr->left;
       else
-         t = t->right;
+         titr = titr->right;
    }
  
    /* now we're sure, that this port is not installed or newer/older than
       the installed version, so check this */
-   t = trootdirs;
-   while (t != NULL) {
+   titr = t;
+   while (titr != NULL) {
       p = portname;
-      d = (char *)t->item;
+      d = (char *)titr->item;
       pv = strchr(portname, '.'); 
       if (pv == NULL)
          pv = strrchr(portname, '-');
@@ -155,10 +157,10 @@ get_state(char *portname, TNode *trootdirs) {
 
       } else {
 
-         if (strcmp((char *)t->item, portname) > 0) /* use left child */
-            t = t->left;
+         if (strcmp((char *)titr->item, portname) > 0) /* use left child */
+            titr = titr->left;
          else
-            t = t->right;
+            titr = titr->right;
       }
    }
 
@@ -167,41 +169,41 @@ get_state(char *portname, TNode *trootdirs) {
 
 /* frees a port */
 void
-free_port(Port *port) {
+free_port(Port *p) {
 
-   free_list(port->lcats);
-   if (port->lopts != NULL)
-      free_list(port->lopts);
-   free_list(port->lbdep);
-   free_list(port->lrdep);
-   free(port->name);
-   free(port);
+   free_list(p->lhcats);
+   if (p->lhopts != NULL)
+      free_list(p->lhopts);
+   free_list(p->lhbdep);
+   free_list(p->lhrdep);
+   free(p->name);
+   free(p);
 }
 
 /* returns a new allocated port with all standard
    initialization */
 Port *
-create_port(char *name, TNode *trootdirs) {
+create_port(char *name, TNode *t) {
 
    /* alloc mem for new port */
-   Port *port = (Port *)malloc(sizeof(Port));
+   Port *p = (Port *)malloc(sizeof(Port));
 
    /* init */
-   port->type = PORT;
-   port->lcats = (List *)malloc(sizeof(List));
-   port->lcats->head = NULL;
-   port->lcats->num_of_items = 0;
-   port->lopts = NULL;
-   port->lbdep = (List *)malloc(sizeof(List));
-   port->lbdep->head = NULL;
-   port->lbdep->num_of_items = 0;
-   port->lrdep = (List *)malloc(sizeof(List));
-   port->lrdep->head = NULL;
-   port->lrdep->num_of_items = 0;
-   port->name = strdup(name);
-   port->state = get_state(port->name, trootdirs);
+   p->type = PORT;
+   p->lhcats = (Lhd *)malloc(sizeof(Lhd));
+   p->lhcats->head = NULL;
+   p->lhcats->num_of_items = 0;
+   p->lhopts = NULL;
+   p->lhbdep = (Lhd *)malloc(sizeof(Lhd));
+   p->lhbdep->head = NULL;
+   p->lhbdep->num_of_items = 0;
+   p->lhrdep = (Lhd *)malloc(sizeof(Lhd));
+   p->lhrdep->head = NULL;
+   p->lhrdep->num_of_items = 0;
+   p->name = strdup(name);
+   p->state = get_state(p->name, t);
 
-   return port;
+   return p;
 }
 
 /* parses the FreeBSD ports INDEX file and creates a
@@ -217,24 +219,24 @@ parse_index()
    char tok[MAX_TOKEN];
    extern State state;
    extern Config config;
-   extern List *lports;
-   extern List *lcats;
+   extern Lhd *lhports;
+   extern Lhd *lhcats;
    extern void *exists;
-   extern TNode *trootcat;
-   TNode *trootdirs;
-   TNode *trootport = NULL;
-   Port *port, *depport;
+   extern TNode *tcat;
+   TNode *tdirs;
+   TNode *tprt = NULL;
+   Port *p, *dprt;
 
    /* init */
-   port = NULL;
-   trootcat = NULL;
+   p = NULL;
+   tcat = NULL;
 
    if ((fd = fopen(config.index_file, "r")) == NULL)
       return ERROR_OPEN_INDEX; /* error */
 
    /* parse installed pkgs */
-   trootdirs = parse_dir(config.inst_pkg_dir);
-   if (trootdirs == NULL) /* error */
+   tdirs = parse_dir(config.inst_pkg_dir);
+   if (tdirs == NULL) /* error */
       return ERROR_OPEN_PDB_DIR;
 
    i = 0;
@@ -264,7 +266,7 @@ parse_index()
          if ((c == ' ') || (c == '|')) {
             if (i > 0) { /* maybe there're ports without a category */
                tok[i] = '\0'; /* terminate current cat token */
-               add_list_item(port->lcats, add_category(tok));
+               add_list_item(p->lhcats, add_category(tok));
                i = 0; /* reset i */
             }
          } else { /* inside a token */
@@ -275,20 +277,20 @@ parse_index()
          if ((c == ' ') || (c == '|')) {
             if (i > 0) { /* maybe there're ports without a build dep */
                tok[i] = '\0';
-               depport = create_port(tok, trootdirs);
+               dprt = create_port(tok, tdirs);
                exists = NULL;
-               trootport = add_tree_item(trootport, depport, cmp_name);
+               tprt = add_tree_item(tprt, dprt, cmp_name);
                if (exists != NULL) {
-                  free_port(depport);
-                  depport = (Port *)((TNode *)exists)->item;
+                  free_port(dprt);
+                  dprt = (Port *)((TNode *)exists)->item;
                } else {
-                  if (depport->state >= STATE_INSTALLED)
+                  if (dprt->state >= STATE_INSTALLED)
                      state.num_of_inst_ports++;
                }
                if (pipes == PORT_BUILD_DEPENDENCY)
-                  add_list_item(port->lbdep, depport);
+                  add_list_item(p->lhbdep, dprt);
                else if (pipes == PORT_RUN_DEPENDENCY)
-                  add_list_item(port->lrdep, depport);
+                  add_list_item(p->lhrdep, dprt);
                i = 0; /* reset i */
             }
          } else { /* inside a token */
@@ -300,35 +302,35 @@ parse_index()
          tok[i] = '\0'; /* terminate current token */
          switch (pipes) {
             case PORT_NAME_VERSION:
-               port = create_port(tok, trootdirs);
+               p = create_port(tok, tdirs);
                /* add the port */
                exists = NULL;
-               trootport = add_tree_item(trootport, port, cmp_name);
+               tprt = add_tree_item(tprt, p, cmp_name);
                if (exists != NULL) {
-                  free_port(port);
-                  port = (Port *)((TNode *)exists)->item;
+                  free_port(p);
+                  p = (Port *)((TNode *)exists)->item;
                } else {
-                  if (port->state >= STATE_INSTALLED)
+                  if (p->state >= STATE_INSTALLED)
                      state.num_of_inst_ports++;
                }
                break;
             case PORT_PATH:
-               port->path = strdup(tok);
+               p->path = strdup(tok);
                break;
             case PORT_INSTALL_PREFIX:
-               port->instpfx = strdup(tok);
+               p->instpfx = strdup(tok);
                break;
             case PORT_DESCR:
-               port->descr = strdup(tok);
+               p->descr = strdup(tok);
                break;
             case PORT_PKGDESCR:
-               port->pathpkgdesc = strdup(tok);
+               p->pathpkgdesc = strdup(tok);
                break;
             case PORT_MAINTAINER:
-               port->maintainer = strdup(tok);
+               p->maintainer = strdup(tok);
                break;
             case PORT_URL:
-               port->url = strdup(tok);
+               p->url = strdup(tok);
                state.num_of_ports++;
                pipes = -1;
                break;
@@ -341,12 +343,12 @@ parse_index()
 
    /* important to set state before, because create_categories
       needs it */
-   create_inorder_list(lcats, trootcat);
-   create_inorder_list(lports, trootport);
+   create_inorder_list(lhcats, tcat);
+   create_inorder_list(lhports, tprt);
    create_categories();
-   free_tree(trootdirs);
+   free_tree(tdirs);
 
-   state.num_of_cats = lcats->num_of_items;
+   state.num_of_cats = lhcats->num_of_items;
    /* finished */
    return (0);
 }
@@ -357,7 +359,7 @@ TNode *
 parse_dir(char *path) {
    struct dirent *dp;
    DIR *dfd;
-   TNode *troot = NULL;
+   TNode *t = NULL;
  
    /* if the directory doesn't exist or there is another reason,
       it returns NULL */
@@ -367,53 +369,53 @@ parse_dir(char *path) {
    while ((dp = readdir(dfd)) != NULL) {
       /* exlude hidden files or "." and ".." */
       if ((dp->d_name)[0] != '.') {
-         troot = add_tree_item(troot, strdup(dp->d_name), cmp_str);
+         t = add_tree_item(t, strdup(dp->d_name), cmp_str);
       }
    }
    closedir(dfd);
    /* finished */
 
    /* number of entries */
-   return troot;
+   return t;
 }
 
 /* parses tokens, returns list pointer of token list */ 
-List *
+Lhd *
 parse_tokenlist(char *toklist, char *delim) {
    char *tok;
    char *tlist = strdup(toklist);
-   List *l = (List *)malloc(sizeof(List));
-   Node *prevtok = NULL;
+   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   Node *n = NULL;
 
    /* init */
-   l->head = NULL;
-   l->num_of_items = 0;
+   lh->head = NULL;
+   lh->num_of_items = 0;
 
    tok = strtok(tlist, delim);
    while (tok != NULL) {
-      prevtok = add_list_item_after(l, prevtok, strdup(tok));
+      n = add_list_item_after(lh, n, strdup(tok));
       tok = strtok(NULL, delim);
    }
    free(tlist);
 
-   return l;
+   return lh;
 }
 
 /* parses a plist file and returns a list of all files */
-List *
-parse_plist(Port *port, char *plistfile) {
+Lhd *
+parse_plist(Port *p, char *plistfile) {
    FILE *fd;
    char line[MAX_TOKEN];
    char path[MAX_PATH];
-   List *l = (List *)malloc(sizeof(List));
+   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
    Node *n = NULL;
 
    if ((fd = fopen(plistfile, "r")) == NULL)
       return NULL; /* error */
 
    /* init */
-   l->head = NULL;
-   l->num_of_items = 0;
+   lh->head = NULL;
+   lh->num_of_items = 0;
 
    while (fgets(line, MAX_TOKEN, fd) != NULL) {
       if ((line[0] != '\0') && (line[0] != ' ')
@@ -421,28 +423,28 @@ parse_plist(Port *port, char *plistfile) {
          /* valid path */
          Plist *pl = (Plist *)malloc(sizeof(Plist));
          line[strlen(line) - 1] = '\0';
-         sprintf(path, "%s/%s", port->instpfx, line);
+         sprintf(path, "%s/%s", p->instpfx, line);
          pl->name = strdup(path);
          pl->exist = (access(path, F_OK) == 0) ? TRUE : FALSE; 
-         n = add_list_item_after(l, n, pl);
+         n = add_list_item_after(lh, n, pl);
       }
    }
    fclose(fd);
 
-   return l;
+   return lh;
 }
 
 /* parses compile options of a port through scan for all
    .if defined or .if !defined in port's Makefile */
-List *
+Lhd *
 parse_options(char *mkfile) {
    FILE *fd;
    char line[MAX_TOKEN];
    char option[MAX_PATH];
    char *start;
    char *end;
-   List *l = (List *)malloc(sizeof(List));
-   TNode *troot = NULL;
+   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   TNode *t = NULL;
    extern void *exists;
    int i;
 
@@ -450,8 +452,8 @@ parse_options(char *mkfile) {
       return NULL; /* error */
 
    /* init */
-   l->head = NULL;
-   l->num_of_items = 0;
+   lh->head = NULL;
+   lh->num_of_items = 0;
 
    while (fgets(line, MAX_TOKEN, fd) != NULL) {
       if ((strstr(line, ".if") != NULL) &&
@@ -471,7 +473,7 @@ parse_options(char *mkfile) {
          sprintf(line, "%s=yes", option);
          opt->cmd = strdup(line);
          exists = NULL;
-         troot = add_tree_item(troot, opt, cmp_name);
+         t = add_tree_item(t, opt, cmp_name);
          if (exists != NULL) { /* option does exist */
             /* clean up */
             free(opt->name);
@@ -482,8 +484,8 @@ parse_options(char *mkfile) {
    }
    fclose(fd);
 
-   create_inorder_list(l, troot);
-   return l;
+   create_inorder_list(lh, t);
+   return lh;
 }
 
 /* returns the color of an associated string,

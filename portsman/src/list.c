@@ -14,60 +14,60 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "includes.h"
 
 /* frees a list of items */
-void free_list(List *l) {
-   Node *n = l->head;
-   Node *p = NULL;
+void free_list(Lhd *lh) {
+   Iter itr = lh->head;
+   Node *n = NULL;
 
-   while (n != NULL) {
-      p = n;
-      n = n->next;
-      free(p);
+   while (itr != NULL) {
+      n = itr;
+      itr = itr->next;
+      free(n);
    }
 }
 
-/* creates items array from list l,
-   Note: l has to be allocated and initialized */
-void create_array_from_list(List *l, void *items[]) {
-   Node *n = l->head;
+/* creates items array from list of lh,
+   Note: lh has to be allocated and initialized */
+void create_array_from_list(Lhd *lh, void *items[]) {
+   Iter itr = lh->head;
    int i;
 
-   for (i = 0; i < l->num_of_items; i++) {
-      items[i] = n->item;
-      n = n->next;
+   for (i = 0; i < lh->num_of_items; i++) {
+      items[i] = itr->item;
+      itr = itr->next;
    }
 }
 
-/* adds an item to list l after prev node,
-   Note: l has to be allocated and initialized  */
-Node *add_list_item_after(List *l, Node *prev, void *item) {
+/* adds an item to list of lh after node n,
+   Note: lh has to be allocated and initialized  */
+Node *add_list_item_after(Lhd *lh, Node *n, void *item) {
    Node *new = (Node *)malloc(sizeof(Node));
    new->item = item;
    new->next = NULL;
-   (l->num_of_items)++; 
+   (lh->num_of_items)++; 
  
-   if ((l->head == NULL) || (prev == NULL)) { /* fresh list */
-      l->head = new;
+   if ((lh->head == NULL) || (n == NULL)) { /* fresh list */
+      lh->head = new;
    } else {
-     prev->next = new;
+      n->next = new;
    }
 
    return new;
 }
 
-/* adds an item to the double linked list of list pointers head node,
+/* adds an item to the list of lh,
    returns the new node, this function is more efficient than
    ordered_add_item, because it does not use comparisions */
-Node *add_list_item(List *l, void *item) {
+Node *add_list_item(Lhd *lh, void *item) {
+   Iter itr = NULL;
    Node *n = NULL;
-   Node *p = NULL;
 
    /* if l == NULL then it's a new list */
-   if (l->head != NULL) {
-      n = l->head;
+   if (lh->head != NULL) {
+      itr = lh->head;
    }
-   while (n != NULL) {
-      p = n;
-      n = n->next;
+   while (itr != NULL) {
+      n = itr;
+      itr = itr->next;
    }
-   return add_list_item_after(l, p, item);
+   return add_list_item_after(lh, n, item);
 }
