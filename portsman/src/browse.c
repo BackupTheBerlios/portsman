@@ -16,7 +16,7 @@ void
 set_line_titlestatus(char *title, int top, int bottom, int lines) {
    char buf[MAX_COLS];
    sprintf(buf, " [%-.60s]", title);
-   wprint_titlebar(buf);
+   wprint_titlebar(buf, (strcmp(title, HELP) != 0));
    sprintf(buf, " (%3d-%3d /%4d) line(s)", top, bottom, lines);
    wprint_statusbar(buf);
    doupdate();
@@ -26,7 +26,7 @@ void
 set_option_titlestatus(Port *p, int top, int bottom) {
    char buf[MAX_COLS];
    sprintf(buf, " [compile options of %-.40s]", p->name);
-   wprint_titlebar(buf);
+   wprint_titlebar(buf, TRUE);
    sprintf(buf, " (%3d-%3d /%3d) options", top, bottom,
          p->lhopts->num_of_items);
    wprint_statusbar(buf);
@@ -37,7 +37,7 @@ void
 set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
    char buf[MAX_COLS];
    sprintf(buf, " [%s]", cat->name);
-   wprint_titlebar(buf);
+   wprint_titlebar(buf, TRUE);
    if (!proceed)
       sprintf(buf, " (%5d-%5d /%5d) port(s)   -%3d/ +%3d/%5d/%5d port(s)",
             top, bottom, cat->num_of_ports,
@@ -55,7 +55,7 @@ set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
 void
 set_cat_titlestatus(Category *cat, int top, int bottom, int num_of_cats) {
    char buf[MAX_COLS];
-   wprint_titlebar(" [categories]");
+   wprint_titlebar(" [categories]", TRUE);
    sprintf(buf, " (%3d-%3d/%3d) categories       -%3d/ +%3d/%5d/%5d ports",
          top, bottom, num_of_cats, cat->num_of_deinst_ports,
          cat->num_of_marked_ports, cat->num_of_inst_ports,
@@ -419,14 +419,13 @@ browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
             /* allow only one instance of help file */
             i = 0;
             if (type == LINE) 
-               if (strcmp((char *)parent, HELP_FILE) == 0)
+               if (strcmp((char *)parent, HELP) == 0)
                   /* still an instance of help file */
                   i = -1;
             if (i == 0) {
-               if ((lhitems = parse_file(HELP_FILE)) != NULL) {
-                  if (browse_list(lhitems, HELP_FILE, FALSE, FALSE) > 0)
-                     redraw_dimensions = TRUE;
-               }
+               lhitems = get_online_help();
+               if (browse_list(lhitems, HELP, FALSE, FALSE) > 0)
+                  redraw_dimensions = TRUE;
                /* all lines will be freed by browse_list at the end,
                   but the lhitems list still exist, so free it */
                free_list(lhitems);

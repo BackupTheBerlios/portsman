@@ -57,6 +57,8 @@ Lhd *
 parse_file(char *filepath); 
  
 /* manage.c */
+Lhd *
+get_online_help();
 void
 free_port(Port *p); 
 Port *
@@ -101,7 +103,7 @@ wprint_item(WINDOW *w, int y, int x, void *item);
 void
 wprint_statusbar(char *s); 
 void
-wprint_titlebar(char *s);
+wprint_titlebar(char *s, bool help); 
 void
 init_windows();
 void
