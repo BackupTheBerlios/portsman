@@ -1,31 +1,31 @@
 /*
-Copyright (c) 2002, 2003, Anselm R. Garbe
-All rights reserved.
+   Copyright (c) 2002, 2003, Anselm R. Garbe
+   All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above copyright notice,
-  this list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-* Neither the name of the portsman developers nor the names of its
-  contributors may be used to endorse or promote products derived from this
-  software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
+ and/or other materials provided with the distribution.
+ * Neither the name of the portsman developers nor the names of its
+ contributors may be used to endorse or promote products derived from this
+ software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-*/
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+ */
 #include "includes.h"
 #include "res.h" /* help file */
 
@@ -78,7 +78,7 @@ get_state(char *portname, TNode *t) {
       else
          titr = titr->right;
    }
- 
+
    /* now we're sure, that this port is not installed or newer/older than
       the installed version, so check this */
    titr = t;
@@ -176,31 +176,31 @@ mark_ports(List *l, int state) {
                mark_port(p, STATE_INSTALL, 1);
                mark_dependencies(p);
             }
-         break;
+            break;
          case STATE_UPDATE:
             if ((p->state == STATE_INSTALLED) ||
                   (p->state == STATE_INSTALLED_OLDER)) {
                mark_port(p, STATE_UPDATE, 1);
                mark_dependencies(p);
             }
-         break;
+            break;
          case STATE_DEINSTALL:
             if (p->state >= STATE_INSTALLED) {
                mark_port(p, STATE_DEINSTALL, 1);
             }
-			case STATE_NOT_SELECTED:
-				if ((p->state == STATE_INSTALL) ||
-						(p->state == STATE_UPDATE)) {
-					mark_port(p, STATE_NOT_SELECTED, -1);
-				}
-         break;   
+         case STATE_NOT_SELECTED:
+            if ((p->state == STATE_INSTALL) ||
+                  (p->state == STATE_UPDATE)) {
+               mark_port(p, STATE_NOT_SELECTED, -1);
+            }
+            break;   
       }
       itr = itr->next;
    }
 
-	/* to speed up this algorithm */
-	if ((state == STATE_DEINSTALL) || (state == STATE_NOT_SELECTED))
-		unmark_all_dependencies();
+   /* to speed up this algorithm */
+   if ((state == STATE_DEINSTALL) || (state == STATE_NOT_SELECTED))
+      unmark_all_dependencies();
 
 }
 
@@ -222,30 +222,30 @@ create_filter_category(List *lfilter, char *name,
    cat->num_of_marked_ports = 0;
    cat->num_of_inst_ports = 0;
    cat->num_of_deinst_ports = 0;
- 
+
    if (type == STATE) { /* filter ports through state */
       int state = *(int *)item;
       while (itr != NULL) {
          p = (Port *)itr->item;
          if (p->state == state) {
-           add_list_item(l, p);
+            add_list_item(l, p);
 
-           switch (p->state) {
-              case STATE_INSTALL:
-              case STATE_UPDATE:
-                 (cat->num_of_marked_ports)++;
-                 break;
-              case STATE_DEINSTALL:
-                 (cat->num_of_deinst_ports)++;
-                 break;
-              case STATE_INSTALLED:
-              case STATE_INSTALLED_NEWER:
-              case STATE_INSTALLED_OLDER:
-              case STATE_BDEP:
-              case STATE_RDEP:
-                 (cat->num_of_inst_ports)++;
-                 break;
-           }
+            switch (p->state) {
+               case STATE_INSTALL:
+               case STATE_UPDATE:
+                  (cat->num_of_marked_ports)++;
+                  break;
+               case STATE_DEINSTALL:
+                  (cat->num_of_deinst_ports)++;
+                  break;
+               case STATE_INSTALLED:
+               case STATE_INSTALLED_NEWER:
+               case STATE_INSTALLED_OLDER:
+               case STATE_BDEP:
+               case STATE_RDEP:
+                  (cat->num_of_inst_ports)++;
+                  break;
+            }
          } 
          itr = itr->next;
       } 
@@ -362,7 +362,7 @@ create_filter_category(List *lfilter, char *name,
    cat->meta = TRUE;
    cat->num_of_ports = l->num_of_items;
    cat->lprts = l;
-      
+
    return cat;
 }
 
@@ -379,7 +379,7 @@ create_proceed_category() {
    Port *p;
    int num_of_deinst_ports = 0;
    int num_of_marked_ports = 0;
-   
+
    l->head = NULL;
    l->tail = NULL;
    l->num_of_items = 0;
@@ -415,7 +415,7 @@ create_proceed_category() {
    cat->num_of_marked_ports = num_of_marked_ports;
    cat->num_of_deinst_ports = num_of_deinst_ports;
    cat->lprts = l;
-      
+
    return cat;
 }
 
@@ -435,7 +435,7 @@ create_options(Port *p) {
    l->num_of_items = 0;
    sprintf(mkfile, "%s/Makefile", p->path);
    lopts = parse_options(mkfile);
-   
+
    /* first of all, add standard option and make targets */
    opt = (Option *)malloc(sizeof(Option));
    opt->type = OPTION;
@@ -682,25 +682,25 @@ void
 mark_dependencies(Port *p) {
    Iter bitr = p->lbdep->head;
    Iter ritr = p->lrdep->head;
-	Port *prt;
+   Port *prt;
 
    /* mark run dependencies */
    while (ritr != NULL) {
-		prt = (Port *)ritr->item;
-		if ((prt->state == STATE_NOT_SELECTED) ||
-				(prt->state == STATE_DEINSTALL)) {
-			mark_port(prt, STATE_RDEP, 1);
-		}
-		ritr = ritr->next;
-	}
-  
+      prt = (Port *)ritr->item;
+      if ((prt->state == STATE_NOT_SELECTED) ||
+            (prt->state == STATE_DEINSTALL)) {
+         mark_port(prt, STATE_RDEP, 1);
+      }
+      ritr = ritr->next;
+   }
+
    /* mark build dependencies */
    while (bitr != NULL) {
-		prt = (Port *)bitr->item;
-		if ((prt->state == STATE_NOT_SELECTED) ||
-				(prt->state == STATE_DEINSTALL)) { 
-			mark_port(prt, STATE_BDEP, 1);
-		}
-		bitr = bitr->next;
-	}
+      prt = (Port *)bitr->item;
+      if ((prt->state == STATE_NOT_SELECTED) ||
+            (prt->state == STATE_DEINSTALL)) { 
+         mark_port(prt, STATE_BDEP, 1);
+      }
+      bitr = bitr->next;
+   }
 }
