@@ -147,7 +147,7 @@ void
 browse_port_summary(Port *p) {
    extern bool redraw_dimensions;
    Iter itr = p->lhcats->head;
-   Lhd *flh;
+   Lhd *lhplist;
    Lhd *lhitems = (Lhd *)malloc(sizeof(Lhd));
    Port *prt;
    Node *n = NULL;
@@ -196,19 +196,21 @@ browse_port_summary(Port *p) {
 
       /* init plistfile */
       sprintf(plistfile, "%s/pkg-plist", p->path);
-      flh = parse_plist(p, plistfile);
-      itr = flh->head;
-      while (itr != NULL) {
-         Plist *pl = (Plist *)itr->item;
-         sprintf(msg, "file of port: %-40.40s (%-.20s)",
-               pl->name, (pl->exist == TRUE) ? "installed" : "not installed");
-         /* clean up */
-         free(pl->name);
-         free(pl);
-         n = add_list_item_after(lhitems, n, create_line(msg));
-         itr = itr->next;
+      lhplist = parse_plist(p, plistfile);
+      if (lhplist != NULL) {
+         itr = lhplist->head;
+         while (itr != NULL) {
+            Plist *pl = (Plist *)itr->item;
+            sprintf(msg, "file of port: %-40.40s (%-.20s)",
+                  pl->name, (pl->exist == TRUE) ? "installed" : "not installed");
+            /* clean up */
+            free(pl->name);
+            free(pl);
+            n = add_list_item_after(lhitems, n, create_line(msg));
+            itr = itr->next;
+         }
+         free_list(lhplist);
       }
-      free_list(flh);
 
       if (browse_list(lhitems, p->name, FALSE) > 0)
          redraw_dimensions = TRUE;

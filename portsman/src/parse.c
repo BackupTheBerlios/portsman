@@ -368,7 +368,7 @@ Lhd *
 parse_file(char *filepath) {
    FILE *fd;
    char line[MAX_COLS];
-   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   Lhd *lh;
    Line *l;
    Node *n = NULL;
 
@@ -376,6 +376,7 @@ parse_file(char *filepath) {
       return NULL; /* error */
 
    /* init */
+   lh = (Lhd *)malloc(sizeof(Lhd));
    lh->head = NULL;
    lh->num_of_items = 0;
 
@@ -393,13 +394,14 @@ parse_plist(Port *p, char *plistfile) {
    FILE *fd;
    char line[MAX_TOKEN];
    char path[MAX_PATH];
-   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   Lhd *lh;
    Node *n = NULL;
 
    if ((fd = fopen(plistfile, "r")) == NULL)
       return NULL; /* error */
 
    /* init */
+   lh = (Lhd *)malloc(sizeof(Lhd));
    lh->head = NULL;
    lh->num_of_items = 0;
 
@@ -429,7 +431,7 @@ parse_options(char *mkfile) {
    char option[MAX_PATH];
    char *start;
    char *end;
-   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   Lhd *lh;
    TNode *t = NULL;
    extern void *exists;
    int i;
@@ -438,6 +440,7 @@ parse_options(char *mkfile) {
       return NULL; /* error */
 
    /* init */
+   lh = (Lhd *)malloc(sizeof(Lhd));
    lh->head = NULL;
    lh->num_of_items = 0;
 
