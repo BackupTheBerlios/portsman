@@ -33,7 +33,9 @@ cmp_name(const void *item1, const void *item2) {
 		return strcmp(((Port *)item1)->name, ((Port *)item2)->name);
    else if(((Option *)item1)->type == OPTION)
 		return strcmp(((Option *)item1)->name, ((Option *)item2)->name);
-   else
+   else if(((Line *)item1)->type == LINE)
+		return strcmp(((Line *)item1)->name, ((Line *)item2)->name);
+  else
       return -1000;
 }
 

@@ -15,6 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define MAX_TOKEN 256
 #define MAX_PORTNAME 30
 #define MAX_CATNAME 30
+#define MAX_COLS 80
 #define INSTALLED_PKG_DIR "/var/db/pkg"
 #define INDEX_FILE "/usr/ports/INDEX"
 #define CONFIG_FILE ".portsmanrc"
@@ -43,6 +44,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #define PORT 0
 #define CATEGORY 1
 #define OPTION 2
+#define LINE 3
 #define CMD_INSTALL "make install"
 #define CMD_DEINSTALL "make deinstall"
 #define CMD_UPDATE "make reinstall"

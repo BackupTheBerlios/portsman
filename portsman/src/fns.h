@@ -53,8 +53,14 @@ int
 parse_rc_file(char *filepath); 
 Lhd *
 parse_plist(Port *p, char *plistfile); 
+Lhd *
+parse_file(char *filepath); 
  
 /* manage.c */
+Line *
+create_line(char *name); 
+void
+free_line(Line *l); 
 void
 mark_ports(Lhd *lh, int state); 
 Category *
@@ -82,8 +88,6 @@ char *
 wprint_inputoutput_str(char *output);
 void
 wprint_cmdinfo(char *msg); 
-int
-wprint_line(WINDOW *w, int *y, int x, char *s, bool quit); 
 void
 wprint_item(WINDOW *w, int y, int x, void *item); 
 void
@@ -107,10 +111,6 @@ set_cat_titlestatus(int top, int bottom);
 void
 set_ports_titlestatus(Category *cat, int top, int bottom,
       bool proceed); 
-void
-browse_port_summary(Port *p); 
-int
-browse_file(char *path);
 int
 browse_list(Lhd *lh, void *parent, bool proceed); 
 

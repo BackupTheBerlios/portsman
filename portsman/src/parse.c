@@ -401,6 +401,35 @@ parse_tokenlist(char *toklist, char *delim) {
    return lh;
 }
 
+/* parses a file and returns a list, where each item is
+   a line of the file */
+Lhd *
+parse_file(char *filepath) {
+   FILE *fd;
+   char line[MAX_COLS];
+   Lhd *lh = (Lhd *)malloc(sizeof(Lhd));
+   Line *l;
+   Node *n = NULL;
+
+   if ((fd = fopen(filepath, "r")) == NULL)
+      return NULL; /* error */
+
+   /* init */
+   lh->head = NULL;
+   lh->num_of_items = 0;
+
+   while (fgets(line, MAX_COLS, fd) != NULL) {
+      l = (Line *)malloc(sizeof(Line));
+      l->type = LINE;
+      l->name = strdup(line);
+      n = add_list_item_after(lh, n, l);
+   }
+
+   fclose(fd);
+ 
+   return lh;
+}
+
 /* parses a plist file and returns a list of all files */
 Lhd *
 parse_plist(Port *p, char *plistfile) {

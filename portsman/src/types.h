@@ -49,6 +49,13 @@ typedef struct option_t {
    short state;
 } Option;
 
+/* simple line type for list browser to supply
+   browsing summary, files, etc. VERY COOL TRICK */
+typedef struct line_t {
+   short type;
+   char *name;
+} Line;
+
 /* portsman state type */
 typedef struct state_t {
    int num_of_deinst_ports;

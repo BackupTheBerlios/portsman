@@ -12,6 +12,20 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 */
 #include "includes.h"
 
+Line *
+create_line(char *name) {
+   Line *l = (Line *)malloc(sizeof(Line));
+   l->type = LINE;
+   l->name = strdup(name);
+   return l;
+}
+
+void
+free_line(Line *l) {
+   free(l->name);
+   free(l);
+}
+
 /* marks all ports of list of lh with specific state, if possible */
 void
 mark_ports(Lhd *lh, int state) {
@@ -286,6 +300,10 @@ search(void *items[], int num_of_items, char *s, int start, int direction) {
             /* search through opt name */
             if (str_str(((Option *)items[i])->name, s) != NULL) 
                return i;
+         } else if (((Line *)items[i])->type == LINE) {
+            /* search through line name */
+            if (str_str(((Line *)items[i])->name, s) != NULL) 
+               return i;
          }
       }
 
@@ -304,6 +322,10 @@ search(void *items[], int num_of_items, char *s, int start, int direction) {
          } else if (((Option *)items[i])->type == OPTION) {
             /* search through opt name */
             if (str_str(((Option *)items[i])->name, s) != NULL) 
+               return i;
+         } else if (((Line *)items[i])->type == LINE) {
+            /* search through line name */
+            if (str_str(((Line *)items[i])->name, s) != NULL) 
                return i;
          }
       }

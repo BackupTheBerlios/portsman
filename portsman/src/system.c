@@ -77,7 +77,7 @@ proceed_action(Lhd *lh) {
                error("execution of shell failed");
                return;
                break;
-            default:
+            case 0: /* everything ok */
                switch (p->state) {
                   case STATE_INSTALL:
                   case STATE_UPDATE:

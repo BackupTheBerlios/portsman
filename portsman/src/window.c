@@ -72,37 +72,10 @@ wprint_statusbar(char *s) {
    wnoutrefresh(wbottom);
 }
 
-/* prints strings with maxy check, if y >= maxy it prints
-   key press message, clears and prints afterwards the string */
-int
-wprint_line(WINDOW *w, int *y, int x, char *s, bool quit) {
-   extern bool redraw_dimensions;
-
-   if (*y < w->_maxy) {
-      mvwprintw(w, *y, x, s);
-      (*y)++;
-   } else {
-      if (quit) {
-         wprint_statusbar(" press any key for next page or (q)uit to exit");
-         doupdate();
-         if ((wgetch(w) == 'q') || (redraw_dimensions))
-               return(-1); /* (q)uit */
-      } else {
-         wprint_statusbar(" press any key for next page");
-         wgetch(w);
-         doupdate();
-      }
-      wclear(w);
-      *y = 0;
-      mvwprintw(w, *y, x, s);
-   }
-	return(0);
-}
-
 /* prints items of list browser */
 void
 wprint_item(WINDOW *w, int y, int x, void *item) {
-   char itemstr[80];
+   char itemstr[MAX_COLS];
          
    if (((Category *)item)->type == CATEGORY) { /* print category */
       Category *cat = (Category *)item;
@@ -152,6 +125,8 @@ wprint_item(WINDOW *w, int y, int x, void *item) {
       Option *opt = (Option *)item;
       sprintf(itemstr, "  < > %-.70s", opt->name);
       if (opt->state == STATE_SELECTED) itemstr[3] = 'X';
+   } else if (((Line *)item)->type == LINE) { /* simple line */
+      sprintf(itemstr, "%-.79s", ((Line *)item)->name);
    }
 
    mvwprintw(w, y, x, itemstr);

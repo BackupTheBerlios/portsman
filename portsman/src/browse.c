@@ -13,8 +13,18 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "includes.h"
 
 void
+set_line_titlestatus(char *title, int top, int bottom, int lines) {
+   char buf[MAX_COLS];
+   sprintf(buf, " [%-.60s]", title);
+   wprint_titlebar(buf);
+   sprintf(buf, " (%3d-%3d /%4d) line(s)", top, bottom, lines);
+   wprint_statusbar(buf);
+   doupdate();
+}
+
+void
 set_option_titlestatus(Port *p, int top, int bottom) {
-   char buf[80];
+   char buf[MAX_COLS];
    sprintf(buf, " [compile options of %-.40s]", p->name);
    wprint_titlebar(buf);
    sprintf(buf, " (%3d-%3d /%3d) options", top, bottom,
@@ -25,7 +35,7 @@ set_option_titlestatus(Port *p, int top, int bottom) {
 
 void
 set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
-   char buf[80];
+   char buf[MAX_COLS];
    sprintf(buf, " [%s]", cat->name);
    wprint_titlebar(buf);
 	if (!proceed)
@@ -45,7 +55,7 @@ set_ports_titlestatus(Category *cat, int top, int bottom, bool proceed) {
 void
 set_cat_titlestatus(int top, int bottom) {
    extern State state;
-   char buf[80];
+   char buf[MAX_COLS];
    wprint_titlebar(" [categories]");
    sprintf(buf, " (%3d-%3d/%3d) categories       -%3d/ +%3d/%5d/%5d ports",
          top, bottom, state.num_of_cats, state.num_of_deinst_ports,
@@ -132,117 +142,57 @@ browse_proceed() {
    free(cat);
 }
 
-/* browses (through) file (path) content */
-/* Note: MAXX argument is used to determine the buffersize and
-   horizontal displaysize of the file content. */
-int
-browse_file(char *path) {
-   extern WINDOW *wbrowse;
-   extern bool redraw_dimensions;
-   FILE *fd;
-   char buf[wbrowse->_maxx];
-   register int i = 0;
-   int maxy, maxx;
-   int press;
-
-   wprint_cmdinfo("");
-   doupdate();
-   wclear(wbrowse);
-   getmaxyx(wbrowse, maxy, maxx);
-
-   /* return if file couldn't be opened */
-   if ((fd = fopen(path, "r")) == NULL) return (-1);
-   sprintf(buf, " [%-.60s]", path);
-   wprint_titlebar(buf);
-         
-   while (feof(fd) == 0) {
-      if (fgets(buf, maxx, fd) != NULL)
-         mvwprintw(wbrowse, i++, 0, buf);
-      else
-         break;
-      if (i == maxy) {
-         wprint_statusbar(" press any key for next page or (q)uit to exit");
-         doupdate();
-         press = wgetch(wbrowse);
-         if (redraw_dimensions) return (-1);
-         switch (press) {
-            case 'q':
-               return (-1);
-               break;
-            default:
-               i = 0;
-               wclear(wbrowse);
-               break;
-         } 
-      }
-   }
-   fclose(fd);
-
-   /* finally display everything */
-   wprint_statusbar(" press any key to proceed");
-   doupdate();
-   press = wgetch(wbrowse);
-   wclear(wbrowse);
-
-   return (0);
-}
-
 /* browses a port summary */
 void
 browse_port_summary(Port *p) {
-   extern WINDOW *wbrowse;
-   int y = 0;
+   extern bool redraw_dimensions;
    Iter itr = p->lhcats->head;
    Lhd *flh;
+   Lhd *lhitems = (Lhd *)malloc(sizeof(Lhd));
    Port *prt;
-   char msg[80];
+   Node *n = NULL;
+   char msg[MAX_COLS];
    char plistfile[MAX_PATH];
 
    /* init */
-   wprint_cmdinfo("");
-   doupdate();
+   lhitems->head = NULL;
+   lhitems->num_of_items = 0;
 
    if (p != NULL) {
-      sprintf(msg, " [%-.60s]", p->name);
-      wprint_titlebar(msg);
-      wprint_statusbar(" press any key to proceed");
-      doupdate();
-      wclear(wbrowse);
-
-      sprintf(msg, "Path to port       : %-.50s", p->path);
-      if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
-      sprintf(msg, "Installation prefix: %-.50s", p->instpfx);
-      if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return; 
-      sprintf(msg, "Description        : %-.50s", p->descr);
-      if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
-      sprintf(msg, "Maintainer         : %-.50s", p->maintainer);
-      if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+      sprintf(msg, "Path to port: %-.60s", p->path);
+      n = add_list_item_after(lhitems, n, create_line(msg));
+      sprintf(msg, "Inst. prefix: %-.60s", p->instpfx);
+      n = add_list_item_after(lhitems, n, create_line(msg));
+      sprintf(msg, "Description : %-.60s", p->descr);
+      n = add_list_item_after(lhitems, n, create_line(msg));
+      sprintf(msg, "Maintainer  : %-.60s", p->maintainer);
+      n = add_list_item_after(lhitems, n, create_line(msg));
       while (itr != NULL) {
-         sprintf(msg, "Category           : %-.50s",
+         sprintf(msg, "Category    : %-.50s",
                ((Category *)itr->item)->name);
-         if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+         n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
       }
       itr = p->lhbdep->head;
       while (itr != NULL) {
-			prt = (Port *)itr->item;
-         sprintf(msg, "Build dependency   : %-30.30s (%-.20s)",
-					prt->name, (prt->state >= STATE_INSTALLED) ? "installed":
-					"not installed");
-         if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+         prt = (Port *)itr->item;
+         sprintf(msg, "Build depend: %-40.40s (%-.20s)",
+               prt->name, (prt->state >= STATE_INSTALLED) ? "installed":
+               "not installed");
+         n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
       }
       itr = p->lhrdep->head;
       while (itr != NULL) {
-			prt = (Port *)itr->item;
-         sprintf(msg, "Run dependency     : %-30.30s (%-.20s)",
-					prt->name, (prt->state >= STATE_INSTALLED) ? "installed":
-					"not installed");
-         if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+         prt = (Port *)itr->item;
+         sprintf(msg, "Run depend  : %-40.40s (%-.20s)",
+               prt->name, (prt->state >= STATE_INSTALLED) ? "installed":
+               "not installed");
+         n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
       }
-      sprintf(msg, "Homepage           : %-.50s", p->url);
-      if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+      sprintf(msg, "Homepage    : %-.60s", p->url);
+      n = add_list_item_after(lhitems, n, create_line(msg));
 
       /* init plistfile */
       sprintf(plistfile, "%s/pkg-plist", p->path);
@@ -250,17 +200,21 @@ browse_port_summary(Port *p) {
       itr = flh->head;
       while (itr != NULL) {
          Plist *pl = (Plist *)itr->item;
-         sprintf(msg, "file of port       : %-30.30s (%-.20s)",
+         sprintf(msg, "file of port: %-40.40s (%-.20s)",
                pl->name, (pl->exist == TRUE) ? "installed" : "not installed");
          /* clean up */
          free(pl->name);
          free(pl);
-         if (wprint_line(wbrowse, &y, 0, msg, TRUE) < 0) return;
+         n = add_list_item_after(lhitems, n, create_line(msg));
          itr = itr->next;
       }
       free_list(flh);
-      wgetch(wbrowse);
-      wclear(wbrowse);
+
+      if (browse_list(lhitems, p->name, FALSE) > 0)
+         redraw_dimensions = TRUE;
+      /* all lines will be freed by browse_list at the end,
+         but the lhitems list still exist, so free it */
+      free_list(lhitems);
    }
 }
 
@@ -282,8 +236,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
    int expch = 0;
    int result = 0;
    char *expstr = NULL;
-   char msg[80];
-   Lhd *lhfilter;
+   char msg[MAX_COLS];
+   Lhd *lhitems;
    Category *cat = NULL;
 
    if (lh->num_of_items < 1) /* return immediately, if there aren't
@@ -333,6 +287,9 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
 					topidx + maxy, proceed);
       } else if (((Option *)items[0])->type == OPTION) {
          set_option_titlestatus((Port *)parent, topidx, topidx + maxy);
+      } else if (((Line *)items[0])->type == LINE) {
+         set_line_titlestatus((char *)parent, topidx, topidx + maxy,
+               lh->num_of_items);
       }
 
       /* begin of redraw part */
@@ -340,19 +297,22 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
         case REFRESH_WINDOW:
             for (i = 0; i < maxy; i++) {
                wprint_item(wbrowse, i, 0, items[topidx + i]);
-               if (curridx == i)
+               if ((curridx == i) && (((Line *)items[0])->type != LINE))
                   mvwchgat(wbrowse, curridx, 0, -1,
                         COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
             }
          break;
          case REFRESH_ENTRY:
-            wprint_item(wbrowse, previdx, 0, items[topidx + previdx]);
-            mvwchgat(wbrowse, previdx, 0, -1,
-                  COLOR_PAIR(CLR_BROWSE + 1), 0, NULL);
-            wprint_item(wbrowse, curridx, 0, items[topidx + curridx]);
-            mvwchgat(wbrowse, curridx, 0, -1,
-                  COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
-        break;
+            if (((Line *)items[0])->type != LINE) {
+               /* only highlight if it's no line */
+               wprint_item(wbrowse, previdx, 0, items[topidx + previdx]);
+               mvwchgat(wbrowse, previdx, 0, -1,
+                     COLOR_PAIR(CLR_BROWSE + 1), 0, NULL);
+               wprint_item(wbrowse, curridx, 0, items[topidx + curridx]);
+               mvwchgat(wbrowse, curridx, 0, -1,
+                     COLOR_PAIR(CLR_SELECTOR + 1), 0, NULL);
+            }
+         break;
       }
       /* end of redraw */
 
@@ -362,7 +322,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
       switch (press) {
          case 'j':
          case KEY_DOWN:
-               if (curridx < maxy - 1) {
+               if ((curridx < maxy - 1) && (((Line *)items[0])->type != LINE)) {
                   curridx++;
                   redraw = REFRESH_ENTRY;
                } else if ((topidx + maxy) < lh->num_of_items) {
@@ -372,7 +332,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          break;
          case 'k':
          case KEY_UP:
-               if (curridx > 0) {
+               if ((curridx > 0) && (((Line *)items[0])->type != LINE)) {
                   curridx--;
                   redraw = REFRESH_ENTRY;
                } else if (topidx > 0) {
@@ -415,13 +375,24 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                else
                   redraw = REFRESH_WINDOW;
             } else if (((Port *)items[topidx + curridx])->type == PORT) {
-               browse_file(((Port *)items[topidx + curridx])->pathpkgdesc);
+               Port *prt = (Port *)items[topidx + curridx];
+               lhitems = parse_file(prt->pathpkgdesc);
+               if (browse_list(lhitems, prt->pathpkgdesc, FALSE) > 0)
+                  redraw_dimensions = TRUE;
+               /* all lines will be freed by browse_list at the end,
+                  but the lhitems still exist, so free it */
+               free_list(lhitems);
                redraw = REFRESH_WINDOW;
             }
          break; 
          case KEY_F(1):
          case 'h': /* help */
-            browse_file(HELP_FILE);
+            lhitems = parse_file(HELP_FILE);
+            if (browse_list(lhitems, HELP_FILE, FALSE) > 0)
+               redraw_dimensions = TRUE;
+            /* all lines will be freed by browse_list at the end,
+               but the lhitems list still exist, so free it */
+            free_list(lhitems);
             redraw = REFRESH_WINDOW;
          break;   
          case '/': /* fw search */
@@ -493,103 +464,113 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                }
             }
          break;
-         case 'p': /* proceed action */
-            if (!proceed) {
-               if ((state.num_of_marked_ports > 0) ||
-                     (state.num_of_deinst_ports > 0)) {
-                  browse_proceed();
-                  redraw = REFRESH_WINDOW;
-               } else {
-                  wprint_cmdinfo(" You don't have selected any ports to (de)install or upgrade");
-                  doupdate();
-               }
-            } else
-               press = 'q';
-         break;
-         case 'f': /* filter */
-            i = 0;
-            expch =
-               wprint_inputoutput_ch(" Filter ports by (s)tate or (k)eyword? [s/k] ");
-            if (((Port *)items[0])->type == PORT) 
-               lhfilter = lh;
-            else
-               lhfilter = lhprts;
-            if (expch == 's') {
-               int state;
-               expch = wprint_inputoutput_ch(" Which state? [</>/=/B/R/i/u/d] ");
+      }
 
-               switch (expch) {
-                  case '<':
-                     state = STATE_INSTALLED_OLDER;
-                     cat = create_filter_category(lhfilter,
-                           "filter of older than installed port(s)", STATE, &state);
-                  break;   
-                  case '>':
-                     state = STATE_INSTALLED_NEWER;
-                     cat = create_filter_category(lhfilter,
-                           "filter of newer than installed port(s)", STATE, &state);
-                  break;
-                  case '=':
-                     state = STATE_INSTALLED;   
-                     cat = create_filter_category(lhfilter,
-                           "filter of installed port(s)", STATE, &state);
-                  break;
-                  case 'B':
-                     state = STATE_BDEP;   
-                     cat = create_filter_category(lhfilter,
-                           "filter of build dependencies", STATE, &state);
-                  break;
-                  case 'R':
-                     state = STATE_RDEP;   
-                     cat = create_filter_category(lhfilter,
-                           "filter of run dependencies", STATE, &state);
-                  break;
-                  case 'i':
-                     state = STATE_INSTALL;   
-                     cat = create_filter_category(lhfilter,
-                           "filter of marked ports for installation", STATE, &state);
-                  break;
-                  case 'u':
-                     state = STATE_UPDATE;   
-                     cat = create_filter_category(lhfilter,
-                           "filter of marked ports for update", STATE, &state);
-                  break;
-                  case 'd':
-                     state = STATE_DEINSTALL;   
-                     cat = create_filter_category(lhfilter,
-                           "filter of marked ports for deinstallation", STATE, &state);
-                  break;
-                  default: /* error, don't know */
-                     i = -1;
-                  break;
-               }
-            } else if (expch == 'k') {
-               expstr = wprint_inputoutput_str(" keyword: ");
-               sprintf(msg, "filter of ports with keyword '%-.20s'", expstr);
-               cat = create_filter_category(lhfilter, msg, STRING, expstr);
-            } else
-					i = -1;
-            if (i != 0) {
-               wprint_cmdinfo(" No valid filter");
-               doupdate();
-            } else { /* everything valid */
-               i = browse_list(cat->lhprts, cat, FALSE);
-               if (i < 0) 
-                  wprint_cmdinfo(" There aren't any matching ports");
-               else if (i > 0)
-                  redraw_dimensions = TRUE;
+      /* special key handling, if not lines browsing */
+      if (((Line *)items[0])->type != LINE) {
+         switch(press) {
+            case 'p': /* proceed action */
+               if (!proceed) {
+                  if ((state.num_of_marked_ports > 0) ||
+                        (state.num_of_deinst_ports > 0)) {
+                     browse_proceed();
+                     redraw = REFRESH_WINDOW;
+                  } else {
+                     wprint_cmdinfo(" You don't have selected any ports to (de)install or upgrade");
+                     doupdate();
+                  }
+               } else
+                  press = 'q';
+               break;
+            case 'f': /* filter */
+               i = 0;
+               expch =
+                  wprint_inputoutput_ch(" Filter ports by (s)tate or (k)eyword? [s/k] ");
+               if (((Port *)items[0])->type == PORT) 
+                  lhitems = lh;
                else
-                  wprint_cmdinfo("");
-               doupdate();
+                  lhitems = lhprts;
+               if (expch == 's') {
+                  int state;
+                  expch = wprint_inputoutput_ch(" Which state? [</>/=/B/R/i/u/d] ");
 
-               free(cat->name);
-               free_list(cat->lhprts);
-               free(cat);
-               redraw = REFRESH_WINDOW;
-            }
-         break;
-     }
-      /* special key press handling for ports brwosing */
+                  switch (expch) {
+                     case '<':
+                        state = STATE_INSTALLED_OLDER;
+                        cat = create_filter_category(lhitems,
+                              "filter of older than installed port(s)", STATE, &state);
+                        break;   
+                     case '>':
+                        state = STATE_INSTALLED_NEWER;
+                        cat = create_filter_category(lhitems,
+                              "filter of newer than installed port(s)", STATE, &state);
+                        break;
+                     case '=':
+                        state = STATE_INSTALLED;   
+                        cat = create_filter_category(lhitems,
+                              "filter of installed port(s)", STATE, &state);
+                        break;
+                     case 'B':
+                        state = STATE_BDEP;   
+                        cat = create_filter_category(lhitems,
+                              "filter of build dependencies", STATE, &state);
+                        break;
+                     case 'R':
+                        state = STATE_RDEP;   
+                        cat = create_filter_category(lhitems,
+                              "filter of run dependencies", STATE, &state);
+                        break;
+                     case 'i':
+                        state = STATE_INSTALL;   
+                        cat = create_filter_category(lhitems,
+                              "filter of marked ports for installation", STATE, &state);
+                        break;
+                     case 'u':
+                        state = STATE_UPDATE;   
+                        cat = create_filter_category(lhitems,
+                              "filter of marked ports for update", STATE, &state);
+                        break;
+                     case 'd':
+                        state = STATE_DEINSTALL;   
+                        cat = create_filter_category(lhitems,
+                              "filter of marked ports for deinstallation", STATE, &state);
+                        break;
+                     default: /* error, don't know */
+                        i = -1;
+                        break;
+                  }
+               } else if (expch == 'k') {
+                  expstr = wprint_inputoutput_str(" keyword: ");
+                  sprintf(msg, "filter of ports with keyword '%-.20s'", expstr);
+                  cat = create_filter_category(lhitems, msg, STRING, expstr);
+               } else
+                  i = -1;
+               if (i != 0) {
+                  wprint_cmdinfo(" No valid filter");
+                  doupdate();
+               } else { /* everything valid */
+                  i = browse_list(cat->lhprts, cat, FALSE);
+                  if (i < 0) 
+                     wprint_cmdinfo(" There aren't any matching ports");
+                  else if (i > 0)
+                     redraw_dimensions = TRUE;
+                  else
+                     wprint_cmdinfo("");
+                  doupdate();
+
+                  free(cat->name);
+                  free_list(cat->lhprts);
+                  free(cat);
+                  redraw = REFRESH_WINDOW;
+               }
+               break;
+         }
+      } else { /* line browsing */
+         if (press == KEY_LEFT)
+            press = 'q';
+      } 
+
+      /* special key press handling for ports browsing */
       if (((Port *)items[topidx + curridx])->type == PORT) {
          Port *p = (Port *)items[topidx + curridx];
          switch (press) {
@@ -695,6 +676,13 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
  
       /* end of key press handling */
    } while (press != 'q'); /* (q)uit browser */
+
+   if (((Line *)items[0])->type == LINE) {
+      /* free up lines */
+      for (i = 0; i < lh->num_of_items; i++) 
+         free_line((Line *)items[i]);
+   }
+   
    wclear(wbrowse);
    return (result);
 }
