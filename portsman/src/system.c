@@ -23,13 +23,14 @@ proceed_action(Lhd *lh) {
    extern Lhd *lhcats;
    extern State state;
    Iter itr = lh->head;
-   Iter citr;
-   Iter oitr; 
+   Iter citr; /* cat iterator */
+   Iter oitr; /* option iterator */
+   Iter ditr; /* dependency iterator */
    Port *p;
    char execstr[1000];
    char option[MAX_TOKEN];
    char wdir[MAX_PATH];
-   int result;
+   int result = 0;
 
    /* leaving curses ... */
    def_prog_mode(); /* save current tty modes */
@@ -37,7 +38,7 @@ proceed_action(Lhd *lh) {
 
    getcwd(wdir, MAX_PATH);
    /* action loop */
-   while (itr != NULL) {
+   while ((itr != NULL) && (result == 0)) {
       if (((Port *)itr->item)->type == PORT) {
          p = (Port *)itr->item;
          if (p->lhopts != NULL)
@@ -91,6 +92,12 @@ proceed_action(Lhd *lh) {
                         (((Category *)citr->item)->num_of_marked_ports)--;
                         (((Category *)citr->item)->num_of_inst_ports)++;
                         citr = citr->next;
+                     }
+                     /* mark also all build dependencies as installed */
+                     ditr = p->lhbdep->head;
+                     while (ditr != NULL) {
+                        ((Port *)ditr->item)->state = STATE_INSTALLED;
+                        ditr = ditr->next;
                      }
                      break;
                   case STATE_DEINSTALL:
