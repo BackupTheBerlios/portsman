@@ -87,7 +87,7 @@
 #cmdbar.bcolor                = BLACK
 #selector.fcolor              = WHITE
 #selector.bcolor              = RED
-#indexfile                    = /usr/ports/INDEX
+#indexfile                    = /usr/ports/INDEX.portsman
 #pkgdir                       = /var/db/pkg
 #portsdir                     = /usr/ports
 #make.cmd                     = make

@@ -51,7 +51,7 @@ defines the foreground color of the selector
 defines the background color of the selector
 .TP 
 \fBindexfile\fR
-defines path to index file (default is /usr/ports/INDEX)
+defines path to index file (default is /usr/ports/INDEX.portsman)
 .TP 
 \fBpkgdir\fR
 defines path to the package db directory (default is /var/db/pkg)

@@ -31,7 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define MAX_TOKEN 256
 #define MAX_COLS 80
 #define INSTALLED_PKG_DIR "/var/db/pkg"
-#define INDEX_FILE "/usr/ports/INDEX"
+#define INDEX_FILE "/usr/ports/INDEX.portsman"
 #define PORTS_DIR "/usr/ports"
 #define CONFIG_FILE ".portsmanrc"
 #define REFRESH_WINDOW 0
