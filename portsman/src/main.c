@@ -180,7 +180,7 @@ main(int argc, char * argv[]) {
    init_windows();
 
    /* open browser */
-   browse_list(lhcats, lhcats->head->item, FALSE);
+   browse_list(lhcats, lhcats->head->item, FALSE, FALSE);
 
    /* clean up all windows */
    clean_up_windows();

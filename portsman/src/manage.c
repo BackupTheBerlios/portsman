@@ -416,23 +416,21 @@ unmark_all_dependencies() {
    }
 }
 
-/* refreshes state of all categories (numbers of marked/inst/deinst ports */
+/* refreshes state of a specified category */
 void
-refresh_cat_states() {
-   extern Lhd *lhcats;
+refresh_cat_state(Category *cat) {
    Iter pitr;
-   Iter citr = lhcats->head;
    int num_of_deinst_ports;
    int num_of_inst_ports;
    int num_of_marked_ports;
    Port *p;
 
-   while (citr != NULL) {
-      pitr = ((Category *)citr->item)->lhprts->head;
-      num_of_deinst_ports = 0;
-      num_of_inst_ports = 0;
-      num_of_marked_ports = 0;
-      while (pitr != NULL) {
+   pitr = cat->lhprts->head;
+   num_of_deinst_ports = 0;
+   num_of_inst_ports = 0;
+   num_of_marked_ports = 0;
+   while (pitr != NULL) {
+      if (((Port *)pitr->item)->type == PORT) {
          p = (Port *)pitr->item;
          switch (p->state) {
             case STATE_INSTALLED:
@@ -450,12 +448,23 @@ refresh_cat_states() {
                num_of_deinst_ports++;
                break; 
          }
-         pitr = pitr->next;
       }
-      ((Category *)citr->item)->num_of_deinst_ports = num_of_deinst_ports;
-      ((Category *)citr->item)->num_of_inst_ports = num_of_inst_ports;
-      ((Category *)citr->item)->num_of_marked_ports = num_of_marked_ports;
+      pitr = pitr->next;
+   }
+   cat->num_of_deinst_ports = num_of_deinst_ports;
+   cat->num_of_inst_ports = num_of_inst_ports;
+   cat->num_of_marked_ports = num_of_marked_ports;
 
+}
+
+/* refreshes state of all categories (numbers of marked/inst/deinst ports */
+void
+refresh_cat_states() {
+   extern Lhd *lhcats;
+   Iter citr = lhcats->head;
+
+   while (citr != NULL) {
+      refresh_cat_state((Category *)citr->item);
       citr = citr->next;
    }
 }

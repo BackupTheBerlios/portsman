@@ -84,6 +84,8 @@ void
 mark_port(Port *p, int state, int incrementor); 
 void
 refresh_cat_states(); 
+void
+refresh_cat_state(Category *cat); 
  
 /* window.c */
 void
@@ -111,7 +113,7 @@ debug(char *s);
 
 /* browse.c */
 int
-browse_list(Lhd *lh, void *parent, bool proceed); 
+browse_list(Lhd *lh, void *parent, bool proceed, bool artificia); 
 
 /* system.c */
 void

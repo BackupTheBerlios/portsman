@@ -127,7 +127,7 @@ browse_proceed() {
 
    cat = create_proceed_category();
 
-   if (browse_list(cat->lhprts, cat, TRUE) > 0)
+   if (browse_list(cat->lhprts, cat, TRUE, TRUE) > 0)
       redraw_dimensions = TRUE;
 
    input = wprint_inputoutput_ch("Proceed with (de)installation/upgrade of above ports? [y/n] ");
@@ -211,7 +211,7 @@ browse_port_summary(Port *p) {
          free_list(lhplist);
       }
 
-      if (browse_list(lhitems, p->name, FALSE) > 0)
+      if (browse_list(lhitems, p->name, FALSE, FALSE) > 0)
          redraw_dimensions = TRUE;
       /* all lines will be freed by browse_list at the end,
          but the lhitems list still exist, so free it */
@@ -219,9 +219,12 @@ browse_port_summary(Port *p) {
    }
 }
 
-/* generic list browser, parent item */
+/* generic list browser, parent item for parent category, port,
+   if artificial is true, this means, that the current category
+   (artificial is only used by categories), is only an artificial 
+   one, which was created by proceed or filter! */
 int
-browse_list(Lhd *lh, void *parent, bool proceed) {
+browse_list(Lhd *lh, void *parent, bool proceed, bool artificial) {
    extern WINDOW *wbrowse;
    extern Lhd *lhprts;
    extern bool redraw_dimensions;
@@ -387,14 +390,14 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
          case '\n': /* ENTER */
             if (((Category *)items[topidx + curridx])->type == CATEGORY) {
                if (browse_list(((Category *)items[topidx + curridx])->lhprts,
-                        items[topidx + curridx], FALSE) > 0)
+                        items[topidx + curridx], FALSE, FALSE) > 0)
                   redraw_dimensions = TRUE;
                else
                   redraw = REFRESH_WINDOW;
             } else if (((Port *)items[topidx + curridx])->type == PORT) {
                Port *prt = (Port *)items[topidx + curridx];
                lhitems = parse_file(prt->pathpkgdesc);
-               if (browse_list(lhitems, prt->pathpkgdesc, FALSE) > 0)
+               if (browse_list(lhitems, prt->pathpkgdesc, FALSE, FALSE) > 0)
                   redraw_dimensions = TRUE;
                /* all lines will be freed by browse_list at the end,
                   but the lhitems still exist, so free it */
@@ -412,7 +415,7 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   i = -1;
             if (i == 0) {
                lhitems = parse_file(HELP_FILE);
-               if (browse_list(lhitems, HELP_FILE, FALSE) > 0)
+               if (browse_list(lhitems, HELP_FILE, FALSE, FALSE) > 0)
                   redraw_dimensions = TRUE;
                /* all lines will be freed by browse_list at the end,
                   but the lhitems list still exist, so free it */
@@ -516,6 +519,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   if ((((Category *)parent)->num_of_marked_ports > 0) ||
                         (((Category *)parent)->num_of_deinst_ports > 0)) {
                      browse_proceed();
+                     if (artificial == TRUE)
+                        refresh_cat_state((Category *)parent);
                      redraw = REFRESH_WINDOW;
                   } else {
                      wprint_cmdinfo(" You don't have selected any ports to (de)install or upgrade");
@@ -540,12 +545,12 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                      case '<':
                         state = STATE_INSTALLED_OLDER;
                         cat = create_filter_category(lhitems,
-                              "filter of older than installed port(s)", STATE, &state);
+                              "filter of older (possibly) installed port(s)", STATE, &state);
                         break;   
                      case '>':
                         state = STATE_INSTALLED_NEWER;
                         cat = create_filter_category(lhitems,
-                              "filter of newer than installed port(s)", STATE, &state);
+                              "filter of newer (possibly) installed port(s)", STATE, &state);
                         break;
                      case '=':
                         state = STATE_INSTALLED;   
@@ -591,7 +596,11 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   wprint_cmdinfo(" No valid filter");
                   doupdate();
                } else { /* everything valid */
-                  i = browse_list(cat->lhprts, cat, FALSE);
+                  i = browse_list(cat->lhprts, cat, FALSE, TRUE);
+                  free(cat->name);
+                  free_list(cat->lhprts);
+                  free(cat);
+ 
                   if (i < 0) 
                      wprint_cmdinfo(" There aren't any matching ports");
                   else if (i > 0)
@@ -600,9 +609,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                      wprint_cmdinfo("");
                   doupdate();
 
-                  free(cat->name);
-                  free_list(cat->lhprts);
-                  free(cat);
+                  if (artificial == TRUE)
+                     refresh_cat_state((Category *)parent);
                   redraw = REFRESH_WINDOW;
                }
                break;
@@ -628,6 +636,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                if (p->state == STATE_NOT_SELECTED) {
                   mark_port(p, STATE_INSTALL, 1);
                   mark_dependencies(p);
+                  if (artificial == TRUE)
+                     refresh_cat_state((Category *)parent);
                   redraw = REFRESH_WINDOW;
                }
                break;
@@ -635,6 +645,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                if (p->state >= STATE_INSTALLED) {
                   mark_port(p, STATE_UPDATE, 1);
                   mark_dependencies(p);
+                  if (artificial == TRUE)
+                     refresh_cat_state((Category *)parent);
                   redraw = REFRESH_WINDOW;
                }
                break; 
@@ -643,6 +655,8 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   mark_port(p, STATE_DEINSTALL, 1);
                   unmark_all_dependencies(); /* remarks all other
                                                 dependencies */
+                  if (artificial == TRUE)
+                     refresh_cat_state((Category *)parent);
                   redraw = REFRESH_WINDOW;
                } 
                break; 
@@ -650,11 +664,15 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                if ((p->state == STATE_INSTALL) || (p->state == STATE_UPDATE)) {
                   mark_port(p, STATE_NOT_SELECTED, -1);
                   unmark_all_dependencies();
+                  if (artificial == TRUE)
+                     refresh_cat_state((Category *)parent);
                   redraw = REFRESH_WINDOW;
                } else if (p->state == STATE_NOT_SELECTED) { /* select for
                                                                install */
                   mark_port(p, STATE_INSTALL, 1);
                   mark_dependencies(p);
+                  if (artificial == TRUE)
+                     refresh_cat_state((Category *)parent);
                   redraw = REFRESH_WINDOW;
                }
                break;   
@@ -663,10 +681,12 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                   if ((p->state == STATE_INSTALL) || (p->state == STATE_UPDATE)) {
                      if (p->lhopts == NULL)
                         create_options(p);
-                     if (browse_list(p->lhopts, p, FALSE) > 0)
+                     if (browse_list(p->lhopts, p, FALSE, FALSE) > 0)
                         redraw_dimensions = TRUE;
                      else
                         redraw = REFRESH_WINDOW;
+                     if (artificial == TRUE)
+                        refresh_cat_state((Category *)parent);
                   }
                }
                break;
@@ -676,19 +696,15 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                switch (expch) {
                   case 'i':
                      mark_ports(lh, STATE_INSTALL);
-                     redraw = REFRESH_WINDOW;
                      break;
                   case 'u':
                      mark_ports(lh, STATE_UPDATE);
-                     redraw = REFRESH_WINDOW;
                      break;
                   case 'd':
                      mark_ports(lh, STATE_DEINSTALL);
-                     redraw = REFRESH_WINDOW;
                      break;
                   case ' ':
                      mark_ports(lh, STATE_NOT_SELECTED);
-                     redraw = REFRESH_WINDOW;
                      break;	
                   default:
                      i = -1;
@@ -696,8 +712,12 @@ browse_list(Lhd *lh, void *parent, bool proceed) {
                }
                if (i != 0)
                   wprint_cmdinfo(" No valid mark");
-               else
+               else {
                   wprint_cmdinfo("");
+                  if (artificial == TRUE)
+                     refresh_cat_state((Category *)parent);
+                  redraw = REFRESH_WINDOW;
+               }
                doupdate();
                break;   
          }
