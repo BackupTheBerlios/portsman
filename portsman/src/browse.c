@@ -195,8 +195,7 @@ browse_port_summary(Port *p) {
 
       /* init plistfile */
       sprintf(plistfile, "%s/pkg-plist", p->path);
-      lhplist = parse_plist(p, plistfile);
-      if (lhplist != NULL) {
+      if ((lhplist = parse_plist(p, plistfile)) != NULL) {
          itr = lhplist->head;
          while (itr != NULL) {
             Plist *pl = (Plist *)itr->item;
